@@ -12,6 +12,7 @@
     "@vva/ui": "workspace:*",
     "babel-plugin-react-compiler": "^1.0.0",
     "dotenv": "catalog:",
+    "framer-motion": "^11.18.2",
     "lucide-react": "catalog:",
     "next": "^16.2.0",
     "next-themes": "catalog:",
