@@ -1,6 +1,10 @@
 import { Container } from "@/components/marketing/container";
 import { SectionHeading } from "@/components/marketing/section-heading";
+import { MotionLink } from "@/components/motion/motion-link";
+import { Reveal } from "@/components/motion/reveal";
+import { StaggerGroup, StaggerItem } from "@/components/motion/stagger";
 import { images } from "@/lib/images";
+import { siteConfig } from "@/lib/site-config";
 import { Button } from "@vva/ui/components/button";
 import Image from "next/image";
 import Link from "next/link";
@@ -10,7 +14,7 @@ const quickLinks = [
     href: "/about",
     label: "About Us",
     image: images.mountainValley,
-    caption: "Our story since 1987",
+    caption: `Our story since ${siteConfig.founded}`,
   },
   {
     href: "/academics",
@@ -36,7 +40,7 @@ export function WelcomeIntro() {
   return (
     <section className="py-20 sm:py-28">
       <Container className="flex flex-col gap-12">
-        <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-end">
+        <Reveal className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-end">
           <SectionHeading
             eyebrow="Welcome"
             title="Discover life at"
@@ -50,30 +54,34 @@ export function WelcomeIntro() {
           >
             Learn More
           </Button>
-        </div>
+        </Reveal>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StaggerGroup className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {quickLinks.map((item) => (
-            <Link
-              key={item.label}
-              href={item.href}
-              className="group relative aspect-[3/4] overflow-hidden rounded-3xl"
-            >
-              <Image
-                src={item.image.src}
-                alt={item.image.alt}
-                fill
-                sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
-                className="object-cover transition-transform duration-300 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/10 to-transparent" />
-              <div className="absolute inset-x-0 bottom-0 flex flex-col gap-0.5 p-4">
-                <span className="text-lg font-bold text-white">{item.label}</span>
-                <span className="text-xs text-white/80">{item.caption}</span>
-              </div>
-            </Link>
+            <StaggerItem key={item.label}>
+              <MotionLink
+                href={item.href}
+                whileHover={{ y: -4 }}
+                whileTap={{ scale: 0.97 }}
+                transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                className="group relative block aspect-[3/4] overflow-hidden rounded-3xl"
+              >
+                <Image
+                  src={item.image.src}
+                  alt={item.image.alt}
+                  fill
+                  sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/10 to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 flex flex-col gap-0.5 p-4">
+                  <span className="text-lg font-bold text-white">{item.label}</span>
+                  <span className="text-xs text-white/80">{item.caption}</span>
+                </div>
+              </MotionLink>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerGroup>
       </Container>
     </section>
   );

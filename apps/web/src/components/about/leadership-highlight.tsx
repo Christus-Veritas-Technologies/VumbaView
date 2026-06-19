@@ -1,5 +1,7 @@
 import { Container } from "@/components/marketing/container";
 import { SectionHeading } from "@/components/marketing/section-heading";
+import { Reveal } from "@/components/motion/reveal";
+import { StaggerGroup, StaggerItem } from "@/components/motion/stagger";
 import { images } from "@/lib/images";
 import Image from "next/image";
 
@@ -21,7 +23,7 @@ const leaders = [
   },
   {
     name: "Mr. Blessing Nyathi",
-    title: "Head of Boarding & Pastoral Care",
+    title: "Head of Pastoral Care",
     image: images.graduationGroup,
   },
 ] as const;
@@ -30,15 +32,17 @@ export function LeadershipHighlight() {
   return (
     <section className="bg-secondary/40 py-20 sm:py-28">
       <Container className="flex flex-col gap-12">
-        <SectionHeading
-          align="center"
-          eyebrow="Our Leadership"
-          title="The team behind"
-          accent="every VumbaView learner"
-        />
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <Reveal>
+          <SectionHeading
+            align="center"
+            eyebrow="Our Leadership"
+            title="The team behind"
+            accent="every VumbaView learner"
+          />
+        </Reveal>
+        <StaggerGroup className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {leaders.map((leader) => (
-            <div key={leader.name} className="flex flex-col items-center gap-3 text-center">
+            <StaggerItem key={leader.name} className="flex flex-col items-center gap-3 text-center">
               <div className="relative size-28 overflow-hidden rounded-full">
                 <Image
                   src={leader.image.src}
@@ -50,9 +54,9 @@ export function LeadershipHighlight() {
               </div>
               <h3 className="text-sm font-semibold text-foreground">{leader.name}</h3>
               <p className="text-xs text-muted-foreground">{leader.title}</p>
-            </div>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerGroup>
       </Container>
     </section>
   );

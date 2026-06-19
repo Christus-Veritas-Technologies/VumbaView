@@ -4,14 +4,14 @@ export const siteConfig = {
   motto: "Through the Mist, Into the Light",
   description:
     "VumbaView Academy is an ECD-to-A-Level day school on the slopes above Mutare, Zimbabwe, overlooking the Bvumba Mountains.",
-  founded: 1987,
+  founded: 2022,
   url: "https://www.vumbaview.ac.zw",
 } as const;
 
 export const schoolFacts = {
-  enrollment: "650+",
+  enrollment: "200+",
   staffToStudentRatio: "1:14",
-  founded: 1987,
+  founded: 2022,
   campusSize: "18 hectares",
   curriculum: "ZIMSEC, with Cambridge-aligned enrichment in the senior forms",
   headOfSchool: {
@@ -28,7 +28,7 @@ export const contactInfo = {
   admissionsEmail: "admissions@vumbaview.ac.zw",
   officeHours: "Monday – Friday, 7:30 – 16:00",
   mapEmbedSrc:
-    "https://www.google.com/maps?q=Mutare,Zimbabwe&output=embed",
+    "https://www.openstreetmap.org/export/embed.html?bbox=32.6209%2C-19.0007%2C32.7209%2C-18.9407&layer=mapnik&marker=-18.9707%2C32.6709",
 } as const;
 
 export type NavLink = {
