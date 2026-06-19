@@ -1,0 +1,27 @@
+{
+  "name": "vva",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "type": "module",
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "check-types": "turbo check-types",
+    "dev:web": "turbo -F web dev"
+  },
+  "dependencies": {
+    "@vva/env": "workspace:*",
+    "dotenv": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.14",
+    "@vva/config": "workspace:*",
+    "turbo": "^2.9.16",
+    "typescript": "catalog:"
+  },
+  "packageManager": "pnpm@11.4.0"
+}

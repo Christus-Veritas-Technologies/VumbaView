@@ -1,0 +1,3 @@
+{
+  "extends": "@vva/config/tsconfig.base.json"
+}
