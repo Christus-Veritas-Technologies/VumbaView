@@ -1,5 +1,7 @@
 import { Container } from "@/components/marketing/container";
 import { SectionHeading } from "@/components/marketing/section-heading";
+import { Reveal } from "@/components/motion/reveal";
+import { StaggerGroup, StaggerItem } from "@/components/motion/stagger";
 import { Compass, HeartHandshake, ShieldCheck, Target } from "lucide-react";
 
 const values = [
@@ -29,15 +31,17 @@ export function MissionVisionValues() {
   return (
     <section className="bg-secondary/40 py-20 sm:py-28">
       <Container className="flex flex-col gap-12">
-        <SectionHeading
-          align="center"
-          eyebrow="Mission, Vision & Values"
-          title="What we stand for,"
-          accent="in and out of the classroom"
-        />
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <Reveal>
+          <SectionHeading
+            align="center"
+            eyebrow="Mission, Vision & Values"
+            title="What we stand for,"
+            accent="in and out of the classroom"
+          />
+        </Reveal>
+        <StaggerGroup className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {values.map((value) => (
-            <div
+            <StaggerItem
               key={value.title}
               className="flex flex-col gap-3 rounded-3xl border border-border bg-card p-6"
             >
@@ -46,9 +50,9 @@ export function MissionVisionValues() {
               </span>
               <h3 className="text-base font-semibold text-foreground">{value.title}</h3>
               <p className="text-sm leading-relaxed text-muted-foreground">{value.body}</p>
-            </div>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerGroup>
       </Container>
     </section>
   );
