@@ -4,6 +4,7 @@ packages:
 allowBuilds:
   msw: true
   sharp: true
+  unrs-resolver: set this to true or false
 catalog:
   dotenv: ^17.2.2
   zod: ^4.1.13
