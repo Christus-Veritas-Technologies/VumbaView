@@ -2,6 +2,7 @@
 
 import { Container } from "@/components/marketing/container";
 import { SectionHeading } from "@/components/marketing/section-heading";
+import { Reveal } from "@/components/motion/reveal";
 import { academicLevels } from "@/lib/site-config";
 import { Button } from "@vva/ui/components/button";
 import { Input } from "@vva/ui/components/input";
@@ -70,18 +71,21 @@ export function InquiryForm() {
   return (
     <section className="bg-secondary/40 py-20 sm:py-28">
       <Container className="flex flex-col gap-12">
-        <SectionHeading
-          align="center"
-          eyebrow="Admissions Inquiry"
-          title="Start your child's"
-          accent="VumbaView journey"
-          description="Tell us a little about your child and we'll be in touch to guide you through the next steps."
-        />
+        <Reveal>
+          <SectionHeading
+            align="center"
+            eyebrow="Admissions Inquiry"
+            title="Start your child's"
+            accent="VumbaView journey"
+            description="Tell us a little about your child and we'll be in touch to guide you through the next steps."
+          />
+        </Reveal>
 
+        <Reveal delay={0.1} className="mx-auto w-full max-w-2xl">
         <form
           onSubmit={handleSubmit}
           noValidate
-          className="mx-auto flex w-full max-w-2xl flex-col gap-5 rounded-3xl border border-border bg-card p-8"
+          className="flex flex-col gap-5 rounded-3xl border border-border bg-card p-8"
         >
           <div className="grid gap-5 sm:grid-cols-2">
             <div className="flex flex-col gap-2">
@@ -176,6 +180,7 @@ export function InquiryForm() {
             {submitting ? "Sending…" : "Submit Inquiry"}
           </Button>
         </form>
+        </Reveal>
       </Container>
     </section>
   );

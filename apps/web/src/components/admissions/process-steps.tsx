@@ -1,5 +1,7 @@
 import { Container } from "@/components/marketing/container";
 import { SectionHeading } from "@/components/marketing/section-heading";
+import { Reveal } from "@/components/motion/reveal";
+import { StaggerGroup, StaggerItem } from "@/components/motion/stagger";
 import { FileText, MessagesSquare, Search, UserCheck } from "lucide-react";
 
 const steps = [
@@ -29,15 +31,17 @@ export function ProcessSteps() {
   return (
     <section className="py-20 sm:py-28">
       <Container className="flex flex-col gap-12">
-        <SectionHeading
-          align="center"
-          eyebrow="How It Works"
-          title="Four steps to"
-          accent="joining VumbaView"
-        />
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <Reveal>
+          <SectionHeading
+            align="center"
+            eyebrow="How It Works"
+            title="Four steps to"
+            accent="joining VumbaView"
+          />
+        </Reveal>
+        <StaggerGroup className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {steps.map((step) => (
-            <div
+            <StaggerItem
               key={step.title}
               className="flex flex-col gap-3 rounded-3xl border border-border bg-card p-6"
             >
@@ -46,9 +50,9 @@ export function ProcessSteps() {
               </span>
               <h3 className="text-base font-semibold text-foreground">{step.title}</h3>
               <p className="text-sm leading-relaxed text-muted-foreground">{step.body}</p>
-            </div>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerGroup>
       </Container>
     </section>
   );

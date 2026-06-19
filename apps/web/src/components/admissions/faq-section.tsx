@@ -1,5 +1,7 @@
 import { Container } from "@/components/marketing/container";
 import { SectionHeading } from "@/components/marketing/section-heading";
+import { Reveal } from "@/components/motion/reveal";
+import { StaggerGroup, StaggerItem } from "@/components/motion/stagger";
 
 const faqs = [
   {
@@ -28,15 +30,17 @@ export function FaqSection() {
   return (
     <section className="py-20 sm:py-28">
       <Container className="flex flex-col gap-12">
-        <SectionHeading align="center" eyebrow="FAQ" title="Common" accent="admissions questions" />
-        <div className="mx-auto flex max-w-3xl flex-col divide-y divide-border">
+        <Reveal>
+          <SectionHeading align="center" eyebrow="FAQ" title="Common" accent="admissions questions" />
+        </Reveal>
+        <StaggerGroup className="mx-auto flex max-w-3xl flex-col divide-y divide-border">
           {faqs.map((faq) => (
-            <div key={faq.question} className="flex flex-col gap-2 py-6">
+            <StaggerItem key={faq.question} className="flex flex-col gap-2 py-6">
               <h3 className="text-base font-semibold text-foreground">{faq.question}</h3>
               <p className="text-sm leading-relaxed text-muted-foreground">{faq.answer}</p>
-            </div>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerGroup>
       </Container>
     </section>
   );

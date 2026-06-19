@@ -1,5 +1,6 @@
 import { Container } from "@/components/marketing/container";
 import { SectionHeading } from "@/components/marketing/section-heading";
+import { Reveal } from "@/components/motion/reveal";
 import { CalendarDays, CheckCircle2 } from "lucide-react";
 
 const requirements = [
@@ -21,14 +22,16 @@ export function RequirementsDates() {
   return (
     <section className="bg-secondary/40 py-20 sm:py-28">
       <Container className="flex flex-col gap-12">
-        <SectionHeading
-          align="center"
-          eyebrow="Requirements & Key Dates"
-          title="What you'll need,"
-          accent="and when to apply"
-        />
+        <Reveal>
+          <SectionHeading
+            align="center"
+            eyebrow="Requirements & Key Dates"
+            title="What you'll need,"
+            accent="and when to apply"
+          />
+        </Reveal>
         <div className="grid gap-6 lg:grid-cols-2">
-          <div className="flex flex-col gap-4 rounded-3xl border border-border bg-card p-8">
+          <Reveal className="flex flex-col gap-4 rounded-3xl border border-border bg-card p-8">
             <h3 className="text-base font-semibold text-foreground">Required Documents</h3>
             <ul className="flex flex-col gap-3">
               {requirements.map((item) => (
@@ -38,8 +41,8 @@ export function RequirementsDates() {
                 </li>
               ))}
             </ul>
-          </div>
-          <div className="flex flex-col gap-4 rounded-3xl border border-border bg-card p-8">
+          </Reveal>
+          <Reveal delay={0.15} className="flex flex-col gap-4 rounded-3xl border border-border bg-card p-8">
             <h3 className="text-base font-semibold text-foreground">Key Dates</h3>
             <ul className="flex flex-col gap-3">
               {dates.map((item) => (
@@ -51,7 +54,7 @@ export function RequirementsDates() {
                 </li>
               ))}
             </ul>
-          </div>
+          </Reveal>
         </div>
       </Container>
     </section>
