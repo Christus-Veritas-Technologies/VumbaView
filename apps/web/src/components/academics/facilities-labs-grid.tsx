@@ -1,5 +1,7 @@
 import { Container } from "@/components/marketing/container";
 import { SectionHeading } from "@/components/marketing/section-heading";
+import { Reveal } from "@/components/motion/reveal";
+import { StaggerGroup, StaggerItem } from "@/components/motion/stagger";
 import { Atom, Dumbbell, Laptop, Library, Microscope, Palette } from "lucide-react";
 
 const facilities = [
@@ -15,15 +17,17 @@ export function FacilitiesLabsGrid() {
   return (
     <section className="py-20 sm:py-28">
       <Container className="flex flex-col gap-12">
-        <SectionHeading
-          align="center"
-          eyebrow="Facilities"
-          title="Spaces that support"
-          accent="every subject"
-        />
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <Reveal>
+          <SectionHeading
+            align="center"
+            eyebrow="Facilities"
+            title="Spaces that support"
+            accent="every subject"
+          />
+        </Reveal>
+        <StaggerGroup className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {facilities.map((facility) => (
-            <div
+            <StaggerItem
               key={facility.label}
               className="flex items-center gap-4 rounded-3xl border border-border bg-card p-6"
             >
@@ -31,9 +35,9 @@ export function FacilitiesLabsGrid() {
                 <facility.icon className="size-5" aria-hidden="true" />
               </span>
               <span className="text-sm font-semibold text-foreground">{facility.label}</span>
-            </div>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerGroup>
       </Container>
     </section>
   );

@@ -1,5 +1,6 @@
 import { Container } from "@/components/marketing/container";
 import { SectionHeading } from "@/components/marketing/section-heading";
+import { Reveal } from "@/components/motion/reveal";
 import { images } from "@/lib/images";
 import Image from "next/image";
 
@@ -22,7 +23,7 @@ export function CurriculumPillars() {
   return (
     <section className="bg-secondary/40 py-20 sm:py-28">
       <Container className="grid items-center gap-12 lg:grid-cols-2">
-        <div className="relative aspect-[4/3] overflow-hidden rounded-3xl">
+        <Reveal className="relative aspect-[4/3] overflow-hidden rounded-3xl">
           <Image
             src={images.teacherLecturing.src}
             alt={images.teacherLecturing.alt}
@@ -30,8 +31,8 @@ export function CurriculumPillars() {
             sizes="(min-width: 1024px) 50vw, 100vw"
             className="object-cover"
           />
-        </div>
-        <div className="flex flex-col gap-8">
+        </Reveal>
+        <Reveal delay={0.15} className="flex flex-col gap-8">
           <SectionHeading
             eyebrow="Curriculum Pillars"
             title="More than"
@@ -45,7 +46,7 @@ export function CurriculumPillars() {
               </div>
             ))}
           </div>
-        </div>
+        </Reveal>
       </Container>
     </section>
   );

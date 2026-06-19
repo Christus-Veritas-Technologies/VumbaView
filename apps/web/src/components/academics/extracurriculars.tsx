@@ -1,5 +1,7 @@
 import { Container } from "@/components/marketing/container";
 import { SectionHeading } from "@/components/marketing/section-heading";
+import { Reveal } from "@/components/motion/reveal";
+import { StaggerGroup, StaggerItem } from "@/components/motion/stagger";
 import { images } from "@/lib/images";
 import Image from "next/image";
 
@@ -14,15 +16,20 @@ export function Extracurriculars() {
   return (
     <section className="py-20 sm:py-28">
       <Container className="flex flex-col gap-12">
-        <SectionHeading
-          align="center"
-          eyebrow="Beyond the Classroom"
-          title="Activities that build"
-          accent="teamwork & confidence"
-        />
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Reveal>
+          <SectionHeading
+            align="center"
+            eyebrow="Beyond the Classroom"
+            title="Activities that build"
+            accent="teamwork & confidence"
+          />
+        </Reveal>
+        <StaggerGroup className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {activities.map((activity) => (
-            <div key={activity.label} className="group relative aspect-square overflow-hidden rounded-3xl">
+            <StaggerItem
+              key={activity.label}
+              className="group relative aspect-square overflow-hidden rounded-3xl"
+            >
               <Image
                 src={activity.image.src}
                 alt={activity.image.alt}
@@ -34,9 +41,9 @@ export function Extracurriculars() {
               <span className="absolute inset-x-0 bottom-0 p-4 text-sm font-semibold text-white">
                 {activity.label}
               </span>
-            </div>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerGroup>
       </Container>
     </section>
   );
