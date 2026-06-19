@@ -2,6 +2,7 @@
 
 import { Container } from "@/components/marketing/container";
 import { SectionHeading } from "@/components/marketing/section-heading";
+import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@vva/ui/components/button";
 import { Input } from "@vva/ui/components/input";
 import { Label } from "@vva/ui/components/label";
@@ -59,17 +60,20 @@ export function ContactForm() {
   return (
     <section className="py-20 sm:py-28">
       <Container className="flex flex-col gap-12">
-        <SectionHeading
-          align="center"
-          eyebrow="Get In Touch"
-          title="Send us a"
-          accent="message"
-        />
+        <Reveal>
+          <SectionHeading
+            align="center"
+            eyebrow="Get In Touch"
+            title="Send us a"
+            accent="message"
+          />
+        </Reveal>
 
+        <Reveal delay={0.1} className="mx-auto w-full max-w-2xl">
         <form
           onSubmit={handleSubmit}
           noValidate
-          className="mx-auto flex w-full max-w-2xl flex-col gap-5 rounded-3xl border border-border bg-card p-8"
+          className="flex flex-col gap-5 rounded-3xl border border-border bg-card p-8"
         >
           <div className="grid gap-5 sm:grid-cols-2">
             <div className="flex flex-col gap-2">
@@ -130,6 +134,7 @@ export function ContactForm() {
             {submitting ? "Sending…" : "Send Message"}
           </Button>
         </form>
+        </Reveal>
       </Container>
     </section>
   );
