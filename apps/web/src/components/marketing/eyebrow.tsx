@@ -8,7 +8,7 @@ export function Eyebrow({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-2 rounded-full bg-secondary px-4 py-1.5 text-xs font-semibold tracking-wide text-secondary-foreground uppercase",
+        "inline-flex w-fit items-center gap-2 rounded-full bg-secondary px-4 py-1.5 text-xs font-semibold tracking-wide text-secondary-foreground uppercase",
         className,
       )}
       {...props}
