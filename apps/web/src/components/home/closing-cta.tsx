@@ -1,4 +1,5 @@
 import { Container } from "@/components/marketing/container";
+import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@vva/ui/components/button";
 import Link from "next/link";
 
@@ -6,7 +7,7 @@ export function ClosingCta() {
   return (
     <section className="py-20 sm:py-28">
       <Container>
-        <div className="flex flex-col items-center gap-6 rounded-3xl bg-gradient-to-br from-primary to-primary/80 px-8 py-16 text-center text-primary-foreground sm:px-16">
+        <Reveal className="flex flex-col items-center gap-6 rounded-3xl bg-gradient-to-br from-primary to-primary/80 px-8 py-16 text-center text-primary-foreground sm:px-16">
           <h2 className="max-w-xl text-3xl font-bold tracking-tight sm:text-4xl">
             Ready to see VumbaView for yourself?
           </h2>
@@ -29,7 +30,7 @@ export function ClosingCta() {
               Contact Admissions
             </Button>
           </div>
-        </div>
+        </Reveal>
       </Container>
     </section>
   );

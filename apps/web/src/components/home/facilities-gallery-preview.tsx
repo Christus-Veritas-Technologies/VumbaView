@@ -1,5 +1,7 @@
 import { Container } from "@/components/marketing/container";
 import { SectionHeading } from "@/components/marketing/section-heading";
+import { Reveal } from "@/components/motion/reveal";
+import { StaggerGroup, StaggerItem } from "@/components/motion/stagger";
 import { images } from "@/lib/images";
 import Image from "next/image";
 
@@ -14,16 +16,21 @@ export function FacilitiesGalleryPreview() {
   return (
     <section className="py-20 sm:py-28">
       <Container className="flex flex-col gap-12">
-        <SectionHeading
-          align="center"
-          eyebrow="Our Campus"
-          title="Built for"
-          accent="focus, play & growth"
-          description="An 18-hectare campus on the road toward the Bvumba Mountains, with science and computer labs, a full library, and sports fields for every season."
-        />
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Reveal>
+          <SectionHeading
+            align="center"
+            eyebrow="Our Campus"
+            title="Built for"
+            accent="focus, play & growth"
+            description="An 18-hectare campus on the road toward the Bvumba Mountains, with science and computer labs, a full library, and sports fields for every season."
+          />
+        </Reveal>
+        <StaggerGroup className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {gallery.map((item) => (
-            <div key={item.label} className="group relative aspect-square overflow-hidden rounded-3xl">
+            <StaggerItem
+              key={item.label}
+              className="group relative aspect-square overflow-hidden rounded-3xl"
+            >
               <Image
                 src={item.image.src}
                 alt={item.image.alt}
@@ -35,9 +42,9 @@ export function FacilitiesGalleryPreview() {
               <span className="absolute inset-x-0 bottom-0 p-4 text-sm font-semibold text-white">
                 {item.label}
               </span>
-            </div>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerGroup>
       </Container>
     </section>
   );

@@ -1,4 +1,5 @@
 import { Container } from "@/components/marketing/container";
+import { Reveal } from "@/components/motion/reveal";
 import type { NavLink } from "@/lib/site-config";
 import { Button } from "@vva/ui/components/button";
 import Link from "next/link";
@@ -23,7 +24,7 @@ export function PageCta({
   return (
     <section className="py-20 sm:py-28">
       <Container>
-        <div className="flex flex-col items-center gap-6 rounded-3xl bg-gradient-to-br from-primary to-primary/80 px-8 py-16 text-center text-primary-foreground sm:px-16">
+        <Reveal className="flex flex-col items-center gap-6 rounded-3xl bg-gradient-to-br from-primary to-primary/80 px-8 py-16 text-center text-primary-foreground sm:px-16">
           <h2 className="max-w-xl text-3xl font-bold tracking-tight sm:text-4xl">{title}</h2>
           <p className="max-w-lg text-base text-primary-foreground/85 sm:text-lg">{description}</p>
           <div className="flex flex-wrap justify-center gap-3">
@@ -41,7 +42,7 @@ export function PageCta({
               {secondaryLabel}
             </Button>
           </div>
-        </div>
+        </Reveal>
       </Container>
     </section>
   );

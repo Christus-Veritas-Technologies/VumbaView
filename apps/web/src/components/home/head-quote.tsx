@@ -1,4 +1,5 @@
 import { Container } from "@/components/marketing/container";
+import { Reveal } from "@/components/motion/reveal";
 import { schoolFacts } from "@/lib/site-config";
 import { images } from "@/lib/images";
 import { Quote } from "lucide-react";
@@ -8,7 +9,7 @@ export function HeadQuote() {
   return (
     <section className="py-20 sm:py-28">
       <Container>
-        <div className="grid items-center gap-10 rounded-3xl bg-primary px-8 py-12 text-primary-foreground sm:px-12 lg:grid-cols-[auto_1fr] lg:gap-16">
+        <Reveal className="grid items-center gap-10 rounded-3xl bg-primary px-8 py-12 text-primary-foreground sm:px-12 lg:grid-cols-[auto_1fr] lg:gap-16">
           <div className="relative mx-auto size-32 shrink-0 overflow-hidden rounded-full ring-4 ring-white/20 sm:size-40">
             <Image
               src={images.teacherLecturing.src}
@@ -33,7 +34,7 @@ export function HeadQuote() {
               </p>
             </div>
           </div>
-        </div>
+        </Reveal>
       </Container>
     </section>
   );
