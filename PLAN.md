@@ -14,10 +14,10 @@ Inspired by the SMA Dr. Soetomo reference (extracted as reusable principles, not
 
 ## Fictional school facts (placeholder, plausible)
 
-- **Name**: VumbaView Academy · **Founded**: 1987 · **Motto**: "Through the Mist, Into the Light"
+- **Name**: VumbaView Academy · **Founded**: 2022 · **Motto**: "Through the Mist, Into the Light"
 - **Location**: 14 Vumba Road, Mutare, Manicaland, Zimbabwe — on the Christmas Pass road toward the Bvumba Mountains
 - **Levels**: ECD A/B → Grade 1–7 (Primary) → Form 1–4 (O-Level) → Form 5–6 (A-Level), ZIMSEC curriculum
-- **Enrollment**: ~650 students · staff:student ratio 1:14
+- **Enrollment**: 200+ students · staff:student ratio 1:14
 - **Head of School**: Mrs. Tendai Chikwava
 - **Contact**: +263 20 123 4567 · info@vumbaview.ac.zw · Mon–Fri 7:30–16:00
 
@@ -87,6 +87,22 @@ Each Todo = exactly one git commit.
 - [x] Responsive & accessibility pass (alt text, contrast, mobile menu, focus states)
 - [ ] Typecheck/build verification — **blocked**: sandbox shell unavailable all session and `node_modules` was never installed in this checkout, so `pnpm check-types`/`pnpm build` could not be run. Code was reviewed by hand for the known failure patterns (Base UI `render` prop vs. `asChild`, import ordering, route-typing). Run `pnpm install && pnpm check-types && pnpm build` before deploying.
 - [x] Add placeholder-content note for future replacement (see below)
+
+### Feature 8 — Post-Launch Fixes & Animation Pass
+
+- [x] Correct founding year (1987 → 2022) and enrollment (650+ → 200+) across `site-config.ts` and hardcoded narrative copy in `about/page.tsx`, `history-story.tsx`, `welcome-intro.tsx`; also resolved a leadership/FAQ contradiction by renaming "Head of Boarding & Pastoral Care" → "Head of Pastoral Care" (school is day-only per FAQ)
+- [x] Replace broken Google Maps iframe embed with a working OpenStreetMap embed (`site-config.ts` `mapEmbedSrc` + `location-map.tsx`)
+- [x] Fix Eyebrow badge stretching past its content in flex-col parents (`w-fit` on root span)
+- [x] Fix dark-mode card background — use white (matching light mode) instead of teal (`packages/ui/src/styles/globals.css`)
+- [x] Add Framer Motion infrastructure: `framer-motion` dependency, `Reveal`/`StaggerGroup`+`StaggerItem`/`MotionLink` primitives, sitewide `MotionConfig reducedMotion="user"`, `active:scale-[0.97]` click feedback on shared `Button`
+- [x] Animate header navigation: shared-element active-link pill (`layoutId`), animated mobile menu icon swap, animated mobile nav panel expand/collapse
+- [x] Animate shared `PageHero` (staggered entry) and `PageCta` (scroll reveal) primitives
+- [x] Animate Home page sections (hero on-mount stagger; scroll reveals + staggered grids on welcome-intro, history-snippet, mission-vision-teaser, head-quote, academic-pathways-preview, facilities-gallery-preview, closing-cta)
+- [x] Animate About page sections (history-story, mission-vision-values, head-welcome, leadership-highlight)
+- [x] Animate Academics page sections (pathway-cards, curriculum-pillars, facilities-labs-grid, extracurriculars)
+- [x] Animate Admissions page sections (process-steps, requirements-dates, inquiry-form, faq-section)
+- [x] Animate Contact page sections (contact-info-cards, location-map, contact-form)
+- [ ] Typecheck/build verification — **blocked**: sandbox shell unavailable this session as well; changes were reviewed by hand (balanced JSX, correct imports, `Reveal`/`Stagger` usage matches the primitives' prop signatures). Run `pnpm install && pnpm check-types && pnpm build` before deploying.
 
 ## Placeholder content note
 
