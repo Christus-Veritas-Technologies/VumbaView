@@ -3,6 +3,7 @@
 import { navLinks, siteConfig } from "@/lib/site-config";
 import { Button } from "@vva/ui/components/button";
 import { cn } from "@vva/ui/lib/utils";
+import { AnimatePresence, motion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -32,12 +33,19 @@ export default function Header() {
                 key={href}
                 href={href}
                 className={cn(
-                  "rounded-full px-4 py-2 text-sm font-medium transition-colors",
+                  "relative rounded-full px-4 py-2 text-sm font-medium transition-colors",
                   active
-                    ? "bg-secondary text-secondary-foreground"
+                    ? "text-secondary-foreground"
                     : "text-foreground/80 hover:bg-secondary hover:text-secondary-foreground",
                 )}
               >
+                {active ? (
+                  <motion.span
+                    layoutId="nav-active-pill"
+                    className="absolute inset-0 -z-10 rounded-full bg-secondary"
+                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                  />
+                ) : null}
                 {label}
               </Link>
             );
@@ -63,39 +71,74 @@ export default function Header() {
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
             onClick={() => setMobileOpen((open) => !open)}
           >
-            {mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+            <AnimatePresence mode="wait" initial={false}>
+              {mobileOpen ? (
+                <motion.span
+                  key="close"
+                  initial={{ rotate: -90, opacity: 0 }}
+                  animate={{ rotate: 0, opacity: 1 }}
+                  exit={{ rotate: 90, opacity: 0 }}
+                  transition={{ duration: 0.18 }}
+                  className="flex"
+                >
+                  <X className="size-5" />
+                </motion.span>
+              ) : (
+                <motion.span
+                  key="open"
+                  initial={{ rotate: 90, opacity: 0 }}
+                  animate={{ rotate: 0, opacity: 1 }}
+                  exit={{ rotate: -90, opacity: 0 }}
+                  transition={{ duration: 0.18 }}
+                  className="flex"
+                >
+                  <Menu className="size-5" />
+                </motion.span>
+              )}
+            </AnimatePresence>
           </Button>
         </div>
       </div>
 
-      {mobileOpen ? (
-        <nav className="flex flex-col gap-1 border-t border-border px-4 pb-4 md:hidden">
-          {navLinks.map(({ href, label }) => {
-            const active = pathname === href;
-            return (
-              <Link
-                key={href}
-                href={href}
-                onClick={() => setMobileOpen(false)}
-                className={cn(
-                  "rounded-full px-4 py-2 text-sm font-medium transition-colors",
-                  active
-                    ? "bg-secondary text-secondary-foreground"
-                    : "text-foreground/80 hover:bg-secondary hover:text-secondary-foreground",
-                )}
-              >
-                {label}
-              </Link>
-            );
-          })}
-          <Button
-            render={<Link href="/admissions" onClick={() => setMobileOpen(false)} />}
-            className="mt-2 rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
+      <AnimatePresence initial={false}>
+        {mobileOpen ? (
+          <motion.div
+            key="mobile-nav"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            className="overflow-hidden border-t border-border md:hidden"
           >
-            Apply Now
-          </Button>
-        </nav>
-      ) : null}
+            <nav className="flex flex-col gap-1 px-4 py-4">
+              {navLinks.map(({ href, label }) => {
+                const active = pathname === href;
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    onClick={() => setMobileOpen(false)}
+                    className={cn(
+                      "rounded-full px-4 py-2 text-sm font-medium transition-colors",
+                      active
+                        ? "bg-secondary text-secondary-foreground"
+                        : "text-foreground/80 hover:bg-secondary hover:text-secondary-foreground",
+                    )}
+                  >
+                    {label}
+                  </Link>
+                );
+              })}
+              <Button
+                render={<Link href="/admissions" onClick={() => setMobileOpen(false)} />}
+                className="mt-2 rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
+              >
+                Apply Now
+              </Button>
+            </nav>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </header>
   );
 }
