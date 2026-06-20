@@ -4,9 +4,12 @@ WORKDIR /app
 
 # Prisma's query engine needs OpenSSL; ca-certificates for TLS to a managed
 # Postgres (Neon/Supabase/RDS with sslmode=require, etc.); curl to fetch the
-# pnpm standalone installer below.
+# pnpm standalone installer below. The pnpm standalone binary is a compiled
+# glibc build that dynamically links libatomic — not installed by default on
+# this image ("libatomic.so.1: cannot open shared object file") — hence
+# libatomic1 here too.
 RUN apt-get update -y \
-  && apt-get install -y openssl ca-certificates curl \
+  && apt-get install -y openssl ca-certificates curl libatomic1 \
   && rm -rf /var/lib/apt/lists/*
 
 # Bun is the runtime, but installs go through pnpm. pnpm-workspace.yaml uses
