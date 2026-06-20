@@ -1,5 +1,6 @@
 "use client";
 
+import { InquiryDialog } from "@/components/admissions/inquiry-dialog";
 import { Eyebrow } from "@/components/marketing/eyebrow";
 import { schoolFacts, siteConfig } from "@/lib/site-config";
 import { images } from "@/lib/images";
@@ -52,12 +53,13 @@ export function Hero() {
           capable young people.
         </motion.p>
         <motion.div variants={item} className="flex flex-wrap gap-3">
-          <Button
-            render={<Link href="/admissions" />}
-            className="h-12 rounded-full bg-accent px-6 text-base text-accent-foreground hover:bg-accent/90"
-          >
-            Begin Your Application
-          </Button>
+          <InquiryDialog
+            trigger={
+              <Button className="h-12 rounded-full bg-accent px-6 text-base text-accent-foreground hover:bg-accent/90">
+                Begin Your Application
+              </Button>
+            }
+          />
           <Button
             render={<Link href="/about" />}
             variant="outline"
