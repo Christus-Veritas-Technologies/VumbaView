@@ -1,0 +1,52 @@
+# Build from the monorepo root: docker build -f apps/server/Dockerfile .
+FROM oven/bun:1
+WORKDIR /app
+
+# Prisma's query engine needs OpenSSL; ca-certificates for TLS to a managed
+# Postgres (Neon/Supabase/RDS with sslmode=require, etc.).
+RUN apt-get update -y \
+  && apt-get install -y openssl ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
+
+# Bun is the runtime, but installs go through pnpm. pnpm-workspace.yaml uses
+# the `catalog:` protocol for shared dependency versions (zod, typescript,
+# dotenv, ...) which `bun install` doesn't resolve the same way pnpm's
+# workspace linker does — so we install pnpm itself rather than `bun install`.
+RUN bun install -g pnpm@11.4.0
+
+# Manifests + lockfile first, for layer caching. apps/server only needs
+# @vva/env (runtime) and @vva/config (tsconfig base) from packages/ — the
+# web and reception apps are left out of this image on purpose.
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
+COPY packages/config/package.json packages/config/
+COPY packages/env/package.json packages/env/
+COPY apps/server/package.json apps/server/
+
+# prisma.config.ts (Prisma 7) reads DATABASE_URL through prisma/config's
+# `env()` helper, which throws if the variable is missing entirely — so even
+# `prisma generate`, which never touches a real database, fails at build
+# time without *something* set here. Pass the real value at `docker run`
+# (along with JWT_SECRET, which has no build-time dependency and is only
+# validated at container startup).
+ARG DATABASE_URL=postgresql://build:build@localhost:5432/build
+ENV DATABASE_URL=${DATABASE_URL}
+
+RUN pnpm install --frozen-lockfile
+
+# Source after install for better layer caching.
+COPY packages/config/ packages/config/
+COPY packages/env/ packages/env/
+COPY apps/server/ apps/server/
+
+RUN pnpm --filter server db:generate
+
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV CORS_ORIGIN=http://localhost:3001
+EXPOSE 3000
+
+# No build step on purpose: apps/server has no build/dist script (unlike the
+# reference this was adapted from) — Bun runs the TypeScript source directly,
+# same as the project's own "dev" script.
+WORKDIR /app/apps/server
+CMD ["bun", "run", "src/index.ts"]
