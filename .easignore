@@ -1,0 +1,113 @@
+# .easignore — controls what EAS Build uploads for ALL apps in this monorepo.
+#
+# IMPORTANT: once this file exists, EAS CLI stops reading every .gitignore
+# in the repo (root + apps/reception/.gitignore + apps/web/.gitignore +
+# apps/server/.gitignore) and uses ONLY this file instead. So this is a
+# superset/merge of those three .gitignore files, not an addition to them —
+# removing a line here un-ignores it for EAS even though git still ignores it.
+# Must live at the git repo root (not inside apps/reception) to take effect.
+# Ref: https://expo.fyi/eas-build-archive
+
+# ============ Dependencies (the big one — node_modules is excluded by ============
+# ============ EAS by default regardless, but listed for clarity/safety) ============
+node_modules
+.pnp
+.pnp.js
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+.pnpm-store/
+
+# ============ Build outputs / caches (per-app, all apps in the workspace) ============
+dist/
+build/
+out/
+.next/
+.expo/
+.turbo
+.nx
+.cache
+.metro-health-check*
+web-build/
+expo-env.d.ts
+next-env.d.ts
+*.tsbuildinfo
+.vinxi
+.output
+.react-router/
+.tanstack/
+.nitro/
+dev-dist
+.open-next
+apps/web/src/routeTree.gen.ts
+
+# ============ Native build folders (Expo CNG regenerates these on the ============
+# ============ build server — don't upload locally-prebuilt copies) ============
+ios
+android
+
+# ============ Local build artifacts from past attempts ============
+*.apk
+*.aab
+*.ipa
+*.app
+
+# ============ Secrets / signing material — never upload these ============
+.env
+.env*
+!.env.example
+*.jks
+*.p8
+*.p12
+*.key
+*.keystore
+*.mobileprovision
+*.pem
+
+# ============ Deployment-target caches (not needed for an Android/iOS build) ============
+.vercel
+.netlify
+.wrangler
+.dev.vars*
+.alchemy
+
+# ============ Testing ============
+coverage
+.nyc_output
+
+# ============ Logs ============
+logs
+*.log
+*.log*
+npm-debug.log*
+npm-debug.*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# ============ IDE / editor ============
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea
+.vs/
+*.user
+*.swp
+*.swo
+*~
+*.orig.*
+
+# ============ OS junk ============
+.DS_Store
+Thumbs.db
+
+# ============ Misc ============
+*.tgz
+tmp
+temp
