@@ -42,6 +42,13 @@ enum PaymentCategory {
   CUSTOM
 }
 
+enum InquiryStatus {
+  NEW
+  CONTACTED
+  ENROLLED
+  DECLINED
+}
+
 /// A staff login. Accounts are created by an Admin from inside the app — no public signup.
 model Staff {
   id           String    @id @default(cuid())
@@ -146,4 +153,45 @@ model Payment {
   createdAt DateTime @default(now())
 
   @@map("payments")
+}
+
+/// A public admissions inquiry submitted from the marketing site's form (page
+/// or navbar dialog) — no staff login required to create one. `status`
+/// starts at NEW and is meant to be triaged from the reception/admin app once
+/// an inquiries view is built there; no endpoint changes it yet. `type`
+/// distinguishes a full application from a tour request — both are the same
+/// top-of-funnel admissions pipeline, so they share this model/status flow
+/// rather than splitting into a separate TourRequest model.
+model Inquiry {
+  id         String        @id @default(cuid())
+  type       InquiryType   @default(APPLICATION)
+  parentName String
+  email      String
+  phone      String
+  childName  String
+  level      AcademicLevel
+  message    String?
+  status     InquiryStatus @default(NEW)
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  @@map("inquiries")
+}
+
+enum InquiryType {
+  APPLICATION
+  TOUR_REQUEST
+}
+
+/// A general public contact-page message — distinct from Inquiry, since it
+/// isn't part of the admissions pipeline and has no academic level/child.
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String
+  message   String
+  createdAt DateTime @default(now())
+
+  @@map("contact_messages")
 }
