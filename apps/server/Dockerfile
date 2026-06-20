@@ -25,6 +25,12 @@ RUN apt-get update -y \
 # entirely for this one step.
 ENV PNPM_HOME="/root/.local/share/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
+# The installer's post-install step runs `pnpm setup`, which tries to detect
+# the calling shell to patch its profile file — `docker build`'s /bin/sh -c
+# has no $SHELL set, so it fails with ERR_PNPM_UNKNOWN_SHELL. We already set
+# PNPM_HOME/PATH ourselves above, so the shell only needs to exist, not be
+# "right".
+ENV SHELL=/bin/bash
 RUN curl -fsSL https://get.pnpm.io/install.sh | env PNPM_VERSION=11.4.0 sh -
 
 # Coolify (and similar platforms) can inject NODE_ENV=production as a
