@@ -1,32 +1,77 @@
 # vva
 
-This project was created with [Better-T-Stack](https://github.com/AmanVarshney01/create-better-t-stack), a modern TypeScript stack that combines Next.js, Self, and more.
+This project was created with [Better-T-Stack](https://github.com/AmanVarshney01/create-better-t-stack). It now contains three apps:
 
-## Features
+- **`apps/web`** — Next.js marketing site (TailwindCSS, shared `packages/ui` shadcn/ui primitives). See `PLAN.md` for page-by-page scope.
+- **`apps/server`** — Hono API (Prisma + PostgreSQL) backing the Reception System below.
+- **`apps/reception`** — Expo app for front-desk student/fee management (Receptionist + Admin roles), offline-first. See `RECEPTION_PLAN.md` for feature scope.
 
-- **TypeScript** - For type safety and improved developer experience
-- **Next.js** - Full-stack React framework
-- **TailwindCSS** - Utility-first CSS for rapid UI development
-- **Shared UI package** - shadcn/ui primitives live in `packages/ui`
-- **Turborepo** - Optimized monorepo build system
-
-## Getting Started
-
-First, install the dependencies:
+## Getting started
 
 ```bash
 pnpm install
 ```
 
-Then, run the development server:
-
 ```bash
-pnpm run dev
+pnpm run dev          # all apps
+pnpm run dev:web      # apps/web only
+pnpm run check-types  # typecheck across all apps
 ```
 
-Open [http://localhost:3001](http://localhost:3001) in your browser to see the fullstack application.
+`apps/web` runs at [http://localhost:3001](http://localhost:3001).
 
-## UI Customization
+### `apps/server` setup
+
+Copy `apps/server/.env.example` to `apps/server/.env` and fill in:
+
+| Variable | Description |
+| --- | --- |
+| `DATABASE_URL` | PostgreSQL connection string (self-hosted; no docker-compose is provided). |
+| `JWT_SECRET` | Random secret used to sign staff session tokens. |
+| `CORS_ORIGIN` | Origin allowed to call the API — defaults to the Expo dev server (`http://localhost:8081`). |
+| `PORT` | Port the API listens on. Defaults to `3000`. |
+| `NODE_ENV` | `development` or `production`. |
+
+```bash
+cd apps/server
+pnpm db:generate   # prisma generate
+pnpm db:migrate     # prisma migrate dev
+pnpm db:seed        # fictional students + demo admin/receptionist accounts
+pnpm dev
+```
+
+### `apps/reception` setup
+
+Set `EXPO_PUBLIC_API_URL` (e.g. in `apps/reception/.env` or your shell) to the server's URL — defaults to `http://localhost:3000` if unset. The app is offline-first: students and payments queue locally (`expo-sqlite`) and sync automatically once the server is reachable.
+
+```bash
+cd apps/reception
+npx expo install   # ensures native module versions match the installed Expo SDK
+npx expo prebuild   # regenerates ios/android — required after adding the Bluetooth printer native module
+npm run start         # expo start --dev-client (a custom dev client is required — Expo Go doesn't have the Bluetooth printer native module)
+```
+
+Bluetooth receipt printing (`/receipt/[id]`) is Android-only — third-party iOS apps can't reach classic-Bluetooth SPP printers without MFi certification, so the app surfaces a clear error on iOS instead of silently failing.
+
+### `apps/web`
+
+No required env vars beyond what `@vva/env` validates at build time.
+
+```bash
+cd apps/web
+pnpm dev
+```
+
+## Verifying a checkout before deploying
+
+```bash
+pnpm install
+pnpm -F server exec tsc --noEmit
+pnpm -F reception exec tsc --noEmit
+pnpm -F web build
+```
+
+## UI customization (`apps/web`)
 
 React web apps in this stack share shadcn/ui primitives through `packages/ui`.
 
@@ -34,9 +79,7 @@ React web apps in this stack share shadcn/ui primitives through `packages/ui`.
 - Update shared primitives in `packages/ui/src/components/*`
 - Adjust shadcn aliases or style config in `packages/ui/components.json` and `apps/web/components.json`
 
-### Add more shared components
-
-Run this from the project root to add more primitives to the shared UI package:
+Add more shared components from the project root:
 
 ```bash
 npx shadcn@latest add accordion dialog popover sheet table -c packages/ui
@@ -48,23 +91,16 @@ Import shared components like this:
 import { Button } from "@vva/ui/components/button";
 ```
 
-### Add app-specific blocks
+If you want app-specific blocks instead of shared primitives, run the shadcn CLI from `apps/web`.
 
-If you want to add app-specific blocks instead of shared primitives, run the shadcn CLI from `apps/web`.
-
-## Project Structure
+## Project structure
 
 ```
 vva/
 ├── apps/
-│   └── web/         # Fullstack application (Next.js)
+│   ├── web/         # Marketing site (Next.js)
+│   ├── server/      # Reception API (Hono + Prisma)
+│   └── reception/   # Reception app (Expo)
 ├── packages/
-│   ├── ui/          # Shared shadcn/ui components and styles
+│   └── ui/          # Shared shadcn/ui components and styles
 ```
-
-## Available Scripts
-
-- `pnpm run dev`: Start all applications in development mode
-- `pnpm run build`: Build all applications
-- `pnpm run dev:web`: Start only the web application
-- `pnpm run check-types`: Check TypeScript types across all apps
