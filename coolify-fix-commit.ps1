@@ -17,6 +17,12 @@ function Commit($message, $paths) {
 Commit "fix(server): install pnpm via standalone script instead of bun install -g" `
   @("apps/server/Dockerfile")
 
+Commit "fix(server): add libatomic1 for pnpm standalone binary" `
+  @("apps/server/Dockerfile")
+
+Commit "fix(server): set SHELL so pnpm installer's setup step doesn't fail with ERR_PNPM_UNKNOWN_SHELL" `
+  @("apps/server/Dockerfile")
+
 Commit "chore: add coolify-fix-commit.ps1" `
   @("coolify-fix-commit.ps1")
 
