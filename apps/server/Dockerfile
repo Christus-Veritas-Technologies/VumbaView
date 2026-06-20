@@ -23,15 +23,23 @@ RUN apt-get update -y \
 # ("error: No such built-in module: node:sqlite"). pnpm's standalone
 # installer ships its own self-contained Node runtime, sidestepping Bun
 # entirely for this one step.
+# The installer puts the actual binary in $PNPM_HOME/bin, not $PNPM_HOME
+# itself — confirmed by its own printed setup instructions ("export
+# PATH=\"$PNPM_HOME/bin:$PATH\""). Missing /bin here is exactly why the next
+# step previously failed with "pnpm: not found".
 ENV PNPM_HOME="/root/.local/share/pnpm"
-ENV PATH="$PNPM_HOME:$PATH"
+ENV PATH="$PNPM_HOME/bin:$PATH"
 # The installer's post-install step runs `pnpm setup`, which tries to detect
 # the calling shell to patch its profile file — `docker build`'s /bin/sh -c
 # has no $SHELL set, so it fails with ERR_PNPM_UNKNOWN_SHELL. We already set
 # PNPM_HOME/PATH ourselves above, so the shell only needs to exist, not be
 # "right".
 ENV SHELL=/bin/bash
-RUN curl -fsSL https://get.pnpm.io/install.sh | env PNPM_VERSION=11.4.0 sh -
+# `pnpm --version` at the end makes this step itself fail fast (with a clear
+# error, at this line) if the binary still isn't reachable, instead of
+# surfacing as a confusing "pnpm: not found" one step later.
+RUN curl -fsSL https://get.pnpm.io/install.sh | env PNPM_VERSION=11.4.0 sh - \
+  && pnpm --version
 
 # Coolify (and similar platforms) can inject NODE_ENV=production as a
 # build-time variable; pnpm treats that the same as `--prod` and silently
