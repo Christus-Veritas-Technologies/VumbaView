@@ -22,8 +22,8 @@ export function Hero() {
   return (
     <section className="relative overflow-hidden">
       <Image
-        src={images.heroMountains.src}
-        alt={images.heroMountains.alt}
+        src={images.mountainValley.src}
+        alt={images.mountainValley.alt}
         fill
         priority
         sizes="100vw"

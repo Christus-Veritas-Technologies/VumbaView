@@ -2,14 +2,26 @@ import { Container } from "@/components/marketing/container";
 import { SectionHeading } from "@/components/marketing/section-heading";
 import { Reveal } from "@/components/motion/reveal";
 import { StaggerGroup, StaggerItem } from "@/components/motion/stagger";
-import { images } from "@/lib/images";
+import { placeholderPhoto } from "@/lib/images";
 import Image from "next/image";
 
 const gallery = [
-  { image: images.emptyClassroom, label: "Modern Classrooms" },
-  { image: images.libraryCircular, label: "Resource Library" },
-  { image: images.soccerKidsTwo, label: "Sport & Recreation" },
-  { image: images.studentAtDesk, label: "Focused Learning" },
+  {
+    image: { src: placeholderPhoto("gallery-classrooms"), alt: "Modern classroom interior" },
+    label: "Modern Classrooms",
+  },
+  {
+    image: { src: placeholderPhoto("gallery-library"), alt: "School library reading area" },
+    label: "Resource Library",
+  },
+  {
+    image: { src: placeholderPhoto("gallery-sport"), alt: "Students playing sport outdoors" },
+    label: "Sport & Recreation",
+  },
+  {
+    image: { src: placeholderPhoto("gallery-study"), alt: "Student focused on schoolwork" },
+    label: "Focused Learning",
+  },
 ] as const;
 
 export function FacilitiesGalleryPreview() {

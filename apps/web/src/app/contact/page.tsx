@@ -17,7 +17,7 @@ export default function ContactPage() {
         eyebrow="Contact"
         title="We'd love to hear from you"
         description="Whether you're a prospective family or a current parent, our team is here to help."
-        image={images.mountainRise}
+        image={images.mountainValley}
       />
       <ContactInfoCards />
       <LocationMap />

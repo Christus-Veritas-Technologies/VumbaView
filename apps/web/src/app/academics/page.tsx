@@ -19,7 +19,7 @@ export default function AcademicsPage() {
         eyebrow="Academics"
         title="A ZIMSEC curriculum built for every stage"
         description="From ECD A&B through to A-Level, our curriculum is designed to be rigorous, well-resourced, and personal."
-        image={images.forestDay}
+        image={images.mountainValley}
       />
       <PathwayCards />
       <CurriculumPillars />

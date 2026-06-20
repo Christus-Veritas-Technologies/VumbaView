@@ -2,7 +2,7 @@ import { Container } from "@/components/marketing/container";
 import { SectionHeading } from "@/components/marketing/section-heading";
 import { Reveal } from "@/components/motion/reveal";
 import { schoolFacts, siteConfig } from "@/lib/site-config";
-import { images } from "@/lib/images";
+import { placeholderPhoto } from "@/lib/images";
 import Image from "next/image";
 
 export function HistorySnippet() {
@@ -11,8 +11,8 @@ export function HistorySnippet() {
       <Container className="grid items-center gap-12 lg:grid-cols-2">
         <Reveal className="relative aspect-[4/3] overflow-hidden rounded-3xl">
           <Image
-            src={images.mountainRise.src}
-            alt={images.mountainRise.alt}
+            src={placeholderPhoto("history-snippet")}
+            alt="VumbaView Academy campus grounds"
             fill
             sizes="(min-width: 1024px) 50vw, 100vw"
             className="object-cover"

@@ -3,7 +3,7 @@ import { SectionHeading } from "@/components/marketing/section-heading";
 import { MotionLink } from "@/components/motion/motion-link";
 import { Reveal } from "@/components/motion/reveal";
 import { StaggerGroup, StaggerItem } from "@/components/motion/stagger";
-import { images } from "@/lib/images";
+import { placeholderPhoto } from "@/lib/images";
 import { siteConfig } from "@/lib/site-config";
 import { Button } from "@vva/ui/components/button";
 import Image from "next/image";
@@ -13,25 +13,25 @@ const quickLinks = [
   {
     href: "/about",
     label: "About Us",
-    image: images.mountainValley,
+    image: { src: placeholderPhoto("welcome-about"), alt: "VumbaView Academy campus" },
     caption: `Our story since ${siteConfig.founded}`,
   },
   {
     href: "/academics",
     label: "Academics",
-    image: images.teacherLecturing,
+    image: { src: placeholderPhoto("welcome-academics"), alt: "Teacher leading a classroom lesson" },
     caption: "ECD to A-Level",
   },
   {
     href: "/academics",
     label: "Facilities",
-    image: images.libraryCircular,
+    image: { src: placeholderPhoto("welcome-facilities"), alt: "School library and resource center" },
     caption: "Labs, library & sport",
   },
   {
     href: "/admissions",
     label: "Admissions",
-    image: images.graduationToss,
+    image: { src: placeholderPhoto("welcome-admissions"), alt: "Graduates celebrating at commencement" },
     caption: "Join our community",
   },
 ] as const;

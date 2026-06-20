@@ -14,6 +14,16 @@ function unsplash(id: string, params = "w=1800&q=80&auto=format&fit=crop") {
   return `https://images.unsplash.com/${id}?${params}`;
 }
 
+/**
+ * Lorem Picsum placeholder photo, seeded so a given slot always gets the
+ * same "random" stock photo instead of reshuffling on every render. Used for
+ * home-page body imagery where a real campus/people photo doesn't exist yet
+ * - see the placeholder-content note in PLAN.md.
+ */
+export function placeholderPhoto(seed: string, width = 1200, height = 900) {
+  return `https://picsum.photos/seed/${seed}/${width}/${height}`;
+}
+
 export const images = {
   heroMountains: {
     src: unsplash("photo-1758642882005-447873fd2d29"),

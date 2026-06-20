@@ -1,7 +1,7 @@
 import { Container } from "@/components/marketing/container";
 import { Reveal } from "@/components/motion/reveal";
 import { schoolFacts } from "@/lib/site-config";
-import { images } from "@/lib/images";
+import { placeholderPhoto } from "@/lib/images";
 import { Quote } from "lucide-react";
 import Image from "next/image";
 
@@ -12,7 +12,7 @@ export function HeadQuote() {
         <Reveal className="grid items-center gap-10 rounded-3xl bg-primary px-8 py-12 text-primary-foreground sm:px-12 lg:grid-cols-[auto_1fr] lg:gap-16">
           <div className="relative mx-auto size-32 shrink-0 overflow-hidden rounded-full ring-4 ring-white/20 sm:size-40">
             <Image
-              src={images.teacherLecturing.src}
+              src={placeholderPhoto("head-of-school-portrait", 480, 480)}
               alt={`${schoolFacts.headOfSchool.name}, ${schoolFacts.headOfSchool.title}`}
               fill
               sizes="160px"
