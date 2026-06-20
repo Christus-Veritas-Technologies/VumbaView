@@ -28,7 +28,7 @@ Copy `apps/server/.env.example` to `apps/server/.env` and fill in:
 | --- | --- |
 | `DATABASE_URL` | PostgreSQL connection string (self-hosted; no docker-compose is provided). |
 | `JWT_SECRET` | Random secret used to sign staff session tokens. |
-| `CORS_ORIGIN` | Origin allowed to call the API — defaults to the Expo dev server (`http://localhost:8081`). |
+| `CORS_ORIGIN` | Origin allowed to call the API — defaults to `apps/web`'s dev server (`http://localhost:3001`). The Expo reception app is native-only and isn't subject to browser CORS. |
 | `PORT` | Port the API listens on. Defaults to `3000`. |
 | `NODE_ENV` | `development` or `production`. |
 
@@ -55,7 +55,11 @@ Bluetooth receipt printing (`/receipt/[id]`) is Android-only — third-party iOS
 
 ### `apps/web`
 
-No required env vars beyond what `@vva/env` validates at build time.
+Copy `apps/web/.env.example` to `apps/web/.env` and set:
+
+| Variable | Description |
+| --- | --- |
+| `NEXT_PUBLIC_API_URL` | Base URL of `apps/server`'s API — used by the admissions inquiry form (page + navbar dialog) to submit directly from the browser. Defaults to `http://localhost:3000`. |
 
 ```bash
 cd apps/web
