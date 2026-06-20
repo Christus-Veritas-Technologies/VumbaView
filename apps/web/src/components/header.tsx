@@ -1,5 +1,6 @@
 "use client";
 
+import { InquiryDialog } from "@/components/admissions/inquiry-dialog";
 import { navLinks, siteConfig } from "@/lib/site-config";
 import { Button } from "@vva/ui/components/button";
 import { cn } from "@vva/ui/lib/utils";
@@ -54,12 +55,13 @@ export default function Header() {
 
         <div className="hidden items-center gap-2 md:flex">
           <ModeToggle />
-          <Button
-            render={<Link href="/admissions" />}
-            className="rounded-full bg-primary px-5 text-primary-foreground hover:bg-primary/90"
-          >
-            Apply Now
-          </Button>
+          <InquiryDialog
+            trigger={
+              <Button className="rounded-full bg-primary px-5 text-primary-foreground hover:bg-primary/90">
+                Apply Now
+              </Button>
+            }
+          />
         </div>
 
         <div className="flex items-center gap-2 md:hidden">
@@ -129,12 +131,16 @@ export default function Header() {
                   </Link>
                 );
               })}
-              <Button
-                render={<Link href="/admissions" onClick={() => setMobileOpen(false)} />}
-                className="mt-2 rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
-              >
-                Apply Now
-              </Button>
+              <InquiryDialog
+                trigger={
+                  <Button
+                    onClick={() => setMobileOpen(false)}
+                    className="mt-2 rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
+                  >
+                    Apply Now
+                  </Button>
+                }
+              />
             </nav>
           </motion.div>
         ) : null}
