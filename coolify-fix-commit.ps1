@@ -23,6 +23,9 @@ Commit "fix(server): add libatomic1 for pnpm standalone binary" `
 Commit "fix(server): set SHELL so pnpm installer's setup step doesn't fail with ERR_PNPM_UNKNOWN_SHELL" `
   @("apps/server/Dockerfile")
 
+Commit "fix(server): correct PNPM_HOME PATH to include /bin, verify pnpm --version at build time" `
+  @("apps/server/Dockerfile")
+
 Commit "chore: add coolify-fix-commit.ps1" `
   @("coolify-fix-commit.ps1")
 
