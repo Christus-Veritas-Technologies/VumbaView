@@ -9,6 +9,8 @@ import staff from "./routes/staff";
 import settings from "./routes/settings";
 import payments from "./routes/payments";
 import dashboard from "./routes/dashboard";
+import admissions from "./routes/admissions";
+import contact from "./routes/contact";
 
 const app = new Hono();
 
@@ -26,6 +28,8 @@ app.route("/staff", staff);
 app.route("/settings", settings);
 app.route("/payments", payments);
 app.route("/dashboard", dashboard);
+app.route("/admissions", admissions);
+app.route("/contact", contact);
 
 app.notFound((c) => c.json({ error: "Not found" }, 404));
 app.onError(errorHandler);
