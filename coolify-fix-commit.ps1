@@ -1,20 +1,23 @@
-# Commits the fix for the Coolify server build failure (node:sqlite under Bun).
+# Commits fixes for the Coolify server build failures. Safe to re-run even if
+# some of these were already committed in a previous run — Commit() skips any
+# file with nothing staged.
 
 Set-Location "C:\Users\kinzi\Desktop\projects\vva"
 
-git add -- "apps/server/Dockerfile"
-git commit -m "fix(server): install pnpm via standalone script instead of bun install -g
+function Commit($message, $paths) {
+  git add -- $paths
+  $staged = git diff --cached --name-only
+  if ($staged) {
+    git commit -m $message
+  } else {
+    Write-Host "Skipping (nothing staged): $message"
+  }
+}
 
-bun install -g pnpm runs pnpm's CLI under Bun's JS engine, and pnpm 11's
-lockfile/store code imports node:sqlite, which Bun 1.3.14 doesn't
-implement (error: No such built-in module: node:sqlite). Switch to
-pnpm's standalone installer, which bundles its own Node runtime.
+Commit "fix(server): install pnpm via standalone script instead of bun install -g" `
+  @("apps/server/Dockerfile")
 
-Also force NODE_ENV=development across the install/generate steps so a
-build-time NODE_ENV=production injected by the platform can't cause
-pnpm to skip devDependencies (which would drop the prisma CLI)."
-
-git add -- "coolify-fix-commit.ps1"
-git commit -m "chore: add coolify-fix-commit.ps1"
+Commit "chore: add coolify-fix-commit.ps1" `
+  @("coolify-fix-commit.ps1")
 
 Write-Host "Done."
