@@ -28,9 +28,7 @@ export default function AcademicsPage() {
       <PageCta
         title="See our classrooms for yourself"
         description="Schedule a campus visit to meet our teachers and sit in on a lesson."
-        primaryHref="/admissions"
         primaryLabel="Apply Now"
-        secondaryHref="/contact"
         secondaryLabel="Book a Tour"
       />
     </>

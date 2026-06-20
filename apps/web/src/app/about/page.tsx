@@ -28,9 +28,7 @@ export default function AboutPage() {
       <PageCta
         title="Come see VumbaView in person"
         description="The best way to understand our school is to visit it. Book a tour or start your child's application today."
-        primaryHref="/admissions"
         primaryLabel="Start an Application"
-        secondaryHref="/contact"
         secondaryLabel="Book a Tour"
       />
     </>
