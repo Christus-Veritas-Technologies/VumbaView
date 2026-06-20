@@ -3,6 +3,7 @@
 import { Container } from "@/components/marketing/container";
 import { SectionHeading } from "@/components/marketing/section-heading";
 import { Reveal } from "@/components/motion/reveal";
+import { submitContactMessage } from "@/lib/api";
 import { Button } from "@vva/ui/components/button";
 import { Input } from "@vva/ui/components/input";
 import { Label } from "@vva/ui/components/label";
@@ -15,9 +16,11 @@ type FormState = {
   email: string;
   subject: string;
   message: string;
+  /** Honeypot — real users never see or fill this. */
+  website: string;
 };
 
-const initialState: FormState = { name: "", email: "", subject: "", message: "" };
+const initialState: FormState = { name: "", email: "", subject: "", message: "", website: "" };
 
 type FormErrors = Partial<Record<keyof FormState, string>>;
 
@@ -41,20 +44,33 @@ export function ContactForm() {
     setValues((prev) => ({ ...prev, [key]: value }));
   }
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const validationErrors = validate(values);
     setErrors(validationErrors);
     if (Object.keys(validationErrors).length > 0) return;
 
     setSubmitting(true);
-    setTimeout(() => {
-      setSubmitting(false);
+    try {
+      await submitContactMessage({
+        name: values.name.trim(),
+        email: values.email.trim(),
+        subject: values.subject.trim(),
+        message: values.message.trim(),
+        website: values.website,
+      });
       toast.success("Message sent", {
         description: "Thanks for reaching out — we'll reply within 2 working days.",
       });
       setValues(initialState);
-    }, 600);
+      setErrors({});
+    } catch (error) {
+      toast.error("Couldn't send your message", {
+        description: error instanceof Error ? error.message : "Please try again in a moment.",
+      });
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -75,6 +91,23 @@ export function ContactForm() {
           noValidate
           className="flex flex-col gap-5 rounded-3xl border border-border bg-card p-8"
         >
+          {/* Honeypot: invisible to real users, often auto-filled by bots. */}
+          <div
+            className="absolute left-[-9999px] top-auto h-px w-px overflow-hidden"
+            aria-hidden="true"
+          >
+            <Label htmlFor="contact-website">Website</Label>
+            <input
+              id="contact-website"
+              name="website"
+              type="text"
+              tabIndex={-1}
+              autoComplete="off"
+              value={values.website}
+              onChange={(event) => handleChange("website", event.target.value)}
+            />
+          </div>
+
           <div className="grid gap-5 sm:grid-cols-2">
             <div className="flex flex-col gap-2">
               <Label htmlFor="contact-name">Your Name</Label>
