@@ -82,4 +82,16 @@ EXPOSE 3000
 # reference this was adapted from) — Bun runs the TypeScript source directly,
 # same as the project's own "dev" script.
 WORKDIR /app/apps/server
-CMD ["bun", "run", "src/index.ts"]
+
+# Apply any migrations that exist in prisma/migrations/ but haven't been
+# recorded as applied yet, before the server starts taking traffic. This runs
+# at container *startup*, not build time, on purpose:
+#  - it needs the real DATABASE_URL, which Coolify injects at runtime, not the
+#    `build:build@localhost` placeholder ARG'd in above
+#  - it needs to be on the same Docker network as the database, which only the
+#    running container (not the build step) is
+# `migrate deploy` only applies un-applied migration files — it's a no-op if
+# everything's already up to date, so this is safe to run on every restart.
+# `exec` replaces the shell with the bun process so it keeps receiving signals
+# (e.g. SIGTERM) directly for a clean shutdown, instead of going to the shell.
+CMD ["sh", "-c", "pnpm run db:migrate:deploy && exec bun run src/index.ts"]
