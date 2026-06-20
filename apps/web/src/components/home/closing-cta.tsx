@@ -1,3 +1,4 @@
+import { InquiryDialog } from "@/components/admissions/inquiry-dialog";
 import { Container } from "@/components/marketing/container";
 import { Reveal } from "@/components/motion/reveal";
 import { Button } from "@vva/ui/components/button";
@@ -16,12 +17,13 @@ export function ClosingCta() {
             right fit for your child.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
-            <Button
-              render={<Link href="/admissions" />}
-              className="h-12 rounded-full bg-accent px-6 text-base text-accent-foreground hover:bg-accent/90"
-            >
-              Start an Application
-            </Button>
+            <InquiryDialog
+              trigger={
+                <Button className="h-12 rounded-full bg-accent px-6 text-base text-accent-foreground hover:bg-accent/90">
+                  Start an Application
+                </Button>
+              }
+            />
             <Button
               render={<Link href="/contact" />}
               variant="outline"
