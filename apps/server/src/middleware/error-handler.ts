@@ -1,6 +1,6 @@
 import type { ErrorHandler } from "hono";
 
-export type ApiErrorStatus = 400 | 401 | 403 | 404 | 409 | 422 | 500;
+export type ApiErrorStatus = 400 | 401 | 403 | 404 | 409 | 422 | 429 | 500;
 
 /** Throw this from a route to return a clean `{ error }` JSON response. */
 export class ApiError extends Error {
