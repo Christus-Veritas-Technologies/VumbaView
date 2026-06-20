@@ -1,6 +1,6 @@
 {
+  "extends": "@vva/config/tsconfig.base.json",
   "compilerOptions": {
-    "strict": true,
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx"
   }

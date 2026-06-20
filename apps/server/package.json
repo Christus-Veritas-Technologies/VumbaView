@@ -2,6 +2,7 @@
   "name": "server",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "bun run --hot src/index.ts",
     "db:generate": "prisma generate",
@@ -9,18 +10,20 @@
     "db:seed": "bun run prisma/seed.ts",
     "db:studio": "prisma studio"
   },
-  "prisma": {
-    "seed": "bun run prisma/seed.ts"
-  },
   "dependencies": {
-    "@prisma/client": "^6.0.0",
+    "@prisma/adapter-pg": "^7.0.0",
+    "@prisma/client": "^7.0.0",
     "@vva/env": "workspace:*",
     "hono": "^4.12.26",
+    "pg": "^8.13.0",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "prisma": "^6.0.0",
+    "@types/pg": "^8.11.0",
+    "@vva/config": "workspace:*",
+    "dotenv": "catalog:",
+    "prisma": "^7.0.0",
     "typescript": "catalog:"
   }
 }

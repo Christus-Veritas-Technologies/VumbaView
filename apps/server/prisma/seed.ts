@@ -1,9 +1,15 @@
 import { PrismaClient } from "@prisma/client";
 import type { AcademicLevel, EnrollmentStatus, PaymentCategory } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { env } from "@vva/env/server";
 import { hashPassword } from "../src/lib/password";
 import { ACADEMIC_LEVELS } from "../src/lib/levels";
 
-const prisma = new PrismaClient();
+// Prisma 7 requires an explicit driver adapter for every database — this is
+// a standalone script (not the long-lived app client in src/db.ts), so it
+// gets its own short-lived adapter/connection.
+const adapter = new PrismaPg({ connectionString: env.DATABASE_URL });
+const prisma = new PrismaClient({ adapter });
 
 // Fictional demo data only — consistent with the marketing site's setting
 // (VumbaView, near Mutare / the Vumba mountains, Zimbabwe).

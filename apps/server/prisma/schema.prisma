@@ -2,9 +2,10 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// Prisma 7: the connection URL no longer lives here — it's configured in
+// prisma.config.ts (and read by the app itself via @vva/env's DATABASE_URL).
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 enum StaffRole {
