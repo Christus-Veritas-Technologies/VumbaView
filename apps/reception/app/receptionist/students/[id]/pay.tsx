@@ -1,19 +1,19 @@
 import { useState } from "react";
-import { View } from "react-native";
+import { ScrollView, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { MotiView } from "moti";
-import { CreditCard, Wallet } from "lucide-react-native";
+import { CreditCard, Receipt, Wallet } from "lucide-react-native";
 import { Text } from "@/components/ui/text";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { ErrorState } from "@/components/ui/error-state";
+import { SheetScreen } from "@/components/ui/sheet-screen";
 import { getStudentCache } from "@/lib/storage/db";
 import { queueRecordPayment } from "@/lib/sync";
 import { useAuthStore } from "@/store/auth-store";
 import { useSyncStore } from "@/store/sync-store";
-import { PAYMENT_CATEGORIES, type PaymentCategory } from "@/lib/types";
+import { LEVEL_LABELS, PAYMENT_CATEGORIES, type PaymentCategory } from "@/lib/types";
 import { isBlank, requiredAmount } from "@/lib/validation";
 
 const CATEGORY_OPTIONS = PAYMENT_CATEGORIES.map((c) => ({
@@ -35,9 +35,11 @@ export default function RecordPaymentScreen() {
 
   if (!student || !id) {
     return (
-      <View className="flex-1 items-center justify-center bg-white p-4">
-        <ErrorState message="Student not found in the local cache." />
-      </View>
+      <SheetScreen>
+        <View className="flex-1 items-center justify-center bg-white p-4">
+          <ErrorState message="Student not found in the local cache." />
+        </View>
+      </SheetScreen>
     );
   }
 
@@ -72,63 +74,87 @@ export default function RecordPaymentScreen() {
   }
 
   return (
-    <MotiView
-      from={{ opacity: 0, translateY: 10 }}
-      animate={{ opacity: 1, translateY: 0 }}
-      transition={{ type: "timing", duration: 280 }}
-      className="w-full flex-1 bg-white p-4 md:mx-auto md:max-w-md md:p-6 lg:max-w-lg"
-    >
-      <View className="mb-6 flex-row items-center gap-3 rounded-xl border border-slate-100 bg-slate-50 p-3">
-        <View className="h-10 w-10 items-center justify-center rounded-full bg-gold-100">
-          <Wallet size={18} color="#A37A1D" />
+    <SheetScreen>
+      <ScrollView className="flex-1" keyboardShouldPersistTaps="handled">
+        {/* Phone: summary stacked above the form. Tablet/desktop: the
+            summary becomes a left-hand column so the sheet actually uses
+            the extra width instead of just centering a narrow form on it. */}
+        <View className="w-full flex-col gap-6 p-4 md:mx-auto md:max-w-3xl md:flex-row md:items-start md:p-8 lg:max-w-4xl">
+          <View className="gap-4 md:w-72">
+            <View className="flex-row items-center gap-3 rounded-2xl border border-gold-100 bg-gold-50 p-4">
+              <View className="h-12 w-12 items-center justify-center rounded-full bg-gold-100">
+                <Wallet size={20} color="#A37A1D" />
+              </View>
+              <View className="flex-1">
+                <Text variant="subheading">{student.fullName}</Text>
+                <Text variant="muted">{LEVEL_LABELS[student.level]}</Text>
+              </View>
+            </View>
+
+            <View className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
+              <Text variant="label" className="mb-1 text-slate-500">
+                Current balance
+              </Text>
+              <Text
+                className={cnBalance(balance)}
+              >
+                ${balance.toFixed(2)}
+              </Text>
+              <Text variant="muted" className="mt-1">
+                {balance > 0 ? "Outstanding fees for this term." : "Fully paid for this term."}
+              </Text>
+            </View>
+
+            {category !== "FEES" ? (
+              <View className="flex-row items-start gap-2 rounded-2xl border border-slate-100 bg-white p-3">
+                <Receipt size={16} color="#94a3b8" />
+                <Text variant="muted" className="flex-1">
+                  {category === "UNIFORMS" ? "Uniform" : "Custom"} payments are logged for record-keeping only and
+                  don't affect the fee balance.
+                </Text>
+              </View>
+            ) : null}
+          </View>
+
+          <View className="flex-1 md:max-w-md">
+            {error ? <ErrorState message={error} onRetry={handleSubmit} className="mb-4" /> : null}
+
+            <View className="mb-4">
+              <Label>Category</Label>
+              <Select
+                options={CATEGORY_OPTIONS}
+                value={category}
+                onValueChange={(v) => setCategory(v as PaymentCategory)}
+                placeholder="Select category"
+              />
+            </View>
+
+            <View className="mb-4">
+              <Label>Amount (USD)</Label>
+              <Input value={amount} onChangeText={setAmount} placeholder="0.00" keyboardType="decimal-pad" />
+              {(submitAttempted || !isBlank(amount)) && amountError ? (
+                <Text className="mt-1 text-xs font-body-medium text-danger-600">{amountError}</Text>
+              ) : null}
+            </View>
+
+            <View className="mb-6">
+              <Label>Note (optional)</Label>
+              <Input value={note} onChangeText={setNote} placeholder="e.g. Term 1 deposit" />
+            </View>
+
+            <Button disabled={!isValid} loading={submitting} onPress={handleSubmit}>
+              <CreditCard size={16} color="#fff" />
+              <Text className="ml-2 font-body-semibold text-base text-white">Record payment</Text>
+            </Button>
+          </View>
         </View>
-        <View>
-          <Text variant="subheading">{student.fullName}</Text>
-          <Text variant="muted">
-            Current balance{" "}
-            <Text className={balance > 0 ? "font-body-semibold text-danger-700" : "font-body-semibold text-success-700"}>
-              ${balance.toFixed(2)}
-            </Text>
-          </Text>
-        </View>
-      </View>
-
-      {error ? <ErrorState message={error} onRetry={handleSubmit} className="mb-4" /> : null}
-
-      <View className="mb-4">
-        <Label>Category</Label>
-        <Select
-          options={CATEGORY_OPTIONS}
-          value={category}
-          onValueChange={(v) => setCategory(v as PaymentCategory)}
-          placeholder="Select category"
-        />
-      </View>
-
-      <View className="mb-4">
-        <Label>Amount (USD)</Label>
-        <Input value={amount} onChangeText={setAmount} placeholder="0.00" keyboardType="decimal-pad" />
-        {(submitAttempted || !isBlank(amount)) && amountError ? (
-          <Text className="mt-1 text-xs font-body-medium text-danger-600">{amountError}</Text>
-        ) : null}
-      </View>
-
-      <View className="mb-6">
-        <Label>Note (optional)</Label>
-        <Input value={note} onChangeText={setNote} placeholder="e.g. Term 1 deposit" />
-      </View>
-
-      {category !== "FEES" ? (
-        <Text variant="muted" className="mb-4">
-          {category === "UNIFORMS" ? "Uniform" : "Custom"} payments are logged for record-keeping only and don't
-          affect the fee balance.
-        </Text>
-      ) : null}
-
-      <Button disabled={!isValid} loading={submitting} onPress={handleSubmit}>
-        <CreditCard size={16} color="#fff" />
-        <Text className="ml-2 font-body-semibold text-base text-white">Record payment</Text>
-      </Button>
-    </MotiView>
+      </ScrollView>
+    </SheetScreen>
   );
+}
+
+function cnBalance(balance: number) {
+  return balance > 0
+    ? "font-heading-semibold text-2xl text-danger-700"
+    : "font-heading-semibold text-2xl text-success-700";
 }
