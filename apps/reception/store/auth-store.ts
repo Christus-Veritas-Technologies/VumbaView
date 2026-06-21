@@ -1,6 +1,13 @@
 import { create } from "zustand";
-import { api, ApiClientError } from "@/lib/api";
-import { clearToken, getToken, setToken } from "@/lib/storage/token";
+import { api, ApiClientError, setUnauthorizedHandler } from "@/lib/api";
+import {
+  clearCachedStaff,
+  clearToken,
+  getCachedStaff,
+  getToken,
+  setCachedStaff,
+  setToken,
+} from "@/lib/storage/token";
 import type { Staff } from "@/lib/types";
 
 interface AuthState {
@@ -27,12 +34,27 @@ export const useAuthStore = create<AuthState>((set) => ({
       return;
     }
 
+    // Restore the cached session immediately. The token is good for 30
+    // days (see signStaffToken on the server) — its mere presence is
+    // enough to let the user straight through to every screen, even if
+    // the device is offline right now and /auth/me below never resolves.
+    const cached = await getCachedStaff();
+    set({ staff: cached, hydrated: true });
+
     try {
       const me = await api.get<Staff>("/auth/me");
-      set({ staff: me, hydrated: true });
-    } catch {
-      await clearToken();
-      set({ staff: null, hydrated: true });
+      await setCachedStaff(me);
+      set({ staff: me });
+    } catch (err) {
+      // Only a genuine 401 (bad/expired token, deactivated account) ends
+      // the session here. A network failure (ApiClientError status 0) or
+      // any other hiccup just means "keep using the cached session" —
+      // exactly what makes the app usable offline after one online login.
+      if (err instanceof ApiClientError && err.status === 401) {
+        await clearToken();
+        await clearCachedStaff();
+        set({ staff: null });
+      }
     }
   },
 
@@ -46,6 +68,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         { auth: false },
       );
       await setToken(res.token);
+      await setCachedStaff(res.staff);
       set({ staff: res.staff, loading: false });
       return true;
     } catch (err) {
@@ -57,6 +80,20 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   logout: async () => {
     await clearToken();
+    await clearCachedStaff();
     set({ staff: null });
   },
 }));
+
+// Wired here — rather than inside api.ts, which can't import the store
+// back without a circular import — so that a 401 on ANY authenticated
+// request, on any screen, immediately clears the session. Every protected
+// layout (admin/_layout.tsx, receptionist/_layout.tsx, index.tsx) already
+// watches `staff` reactively and redirects to /login the moment it's null,
+// so this one hook is what makes "redirect on a genuinely invalid/expired
+// token, on every page" work without per-screen code.
+setUnauthorizedHandler(() => {
+  void clearToken();
+  void clearCachedStaff();
+  useAuthStore.setState({ staff: null });
+});
