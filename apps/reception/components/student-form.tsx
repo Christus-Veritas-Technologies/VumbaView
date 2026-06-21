@@ -14,6 +14,7 @@ import {
   type AcademicLevel,
   type EnrollmentStatus,
 } from "@/lib/types";
+import { optionalEmail, optionalPhone, requiredText } from "@/lib/validation";
 
 export interface StudentFormValues {
   fullName: string;
@@ -44,8 +45,17 @@ export function StudentForm({ initial, submitLabel, submitting, showStatus, onSu
   const [guardianPhone, setGuardianPhone] = useState(initial?.guardianPhone ?? "");
   const [guardianEmail, setGuardianEmail] = useState(initial?.guardianEmail ?? "");
   const [guardianAddress, setGuardianAddress] = useState(initial?.guardianAddress ?? "");
+  const [errors, setErrors] = useState<{ fullName?: string; guardianPhone?: string; guardianEmail?: string }>({});
 
   function handleSubmit() {
+    const nextErrors = {
+      fullName: requiredText(fullName, "Full name"),
+      guardianPhone: optionalPhone(guardianPhone, "Guardian phone"),
+      guardianEmail: optionalEmail(guardianEmail, "Guardian email"),
+    };
+    setErrors(nextErrors);
+    if (Object.values(nextErrors).some(Boolean)) return;
+
     onSubmit({
       fullName: fullName.trim(),
       level,
@@ -78,6 +88,9 @@ export function StudentForm({ initial, submitLabel, submitting, showStatus, onSu
           <View className="flex-1">
             <Label>Full name</Label>
             <Input value={fullName} onChangeText={setFullName} placeholder="Student's full name" />
+            {errors.fullName ? (
+              <Text className="mt-1 text-xs font-body-medium text-danger-600">{errors.fullName}</Text>
+            ) : null}
           </View>
 
           <View className="flex-1">
@@ -124,6 +137,9 @@ export function StudentForm({ initial, submitLabel, submitting, showStatus, onSu
               placeholder="Optional"
               keyboardType="phone-pad"
             />
+            {errors.guardianPhone ? (
+              <Text className="mt-1 text-xs font-body-medium text-danger-600">{errors.guardianPhone}</Text>
+            ) : null}
           </View>
         </View>
 
@@ -137,6 +153,9 @@ export function StudentForm({ initial, submitLabel, submitting, showStatus, onSu
               keyboardType="email-address"
               autoCapitalize="none"
             />
+            {errors.guardianEmail ? (
+              <Text className="mt-1 text-xs font-body-medium text-danger-600">{errors.guardianEmail}</Text>
+            ) : null}
           </View>
 
           <View className="flex-1">
