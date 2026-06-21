@@ -1,3 +1,5 @@
 # deps
 node_modules/
 chrome/
+.wwebjs_auth/
+.wwebjs_cache/
