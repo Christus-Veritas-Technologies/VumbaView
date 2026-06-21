@@ -2,6 +2,8 @@ import { useCallback, useState } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import { Alert, ScrollView, View } from "react-native";
 import { useRouter } from "expo-router";
+import { MotiView } from "moti";
+import { Calendar, Check, UserPlus, Users, Wallet } from "lucide-react-native";
 import { Text } from "@/components/ui/text";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -10,8 +12,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ErrorState } from "@/components/ui/error-state";
+import { Pagination } from "@/components/ui/pagination";
 import { api, ApiClientError } from "@/lib/api";
 import { ACADEMIC_LEVELS, LEVEL_LABELS, type AcademicLevel, type StaffRole } from "@/lib/types";
+import { usePagination } from "@/lib/use-pagination";
 
 interface StaffRow {
   id: string;
@@ -34,6 +38,7 @@ export default function AdminSettingsScreen() {
   const [savingFees, setSavingFees] = useState(false);
   const [startingTerm, setStartingTerm] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const staffPag = usePagination(staff);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -122,7 +127,12 @@ export default function AdminSettingsScreen() {
 
   return (
     <ScrollView className="flex-1 bg-slate-50">
-      <View className="w-full p-4 md:mx-auto md:max-w-4xl md:p-6 lg:max-w-5xl">
+      <MotiView
+        from={{ opacity: 0, translateY: 10 }}
+        animate={{ opacity: 1, translateY: 0 }}
+        transition={{ type: "timing", duration: 280 }}
+        className="w-full p-4 md:mx-auto md:max-w-4xl md:p-6 lg:max-w-5xl"
+      >
         <Text variant="heading" className="mb-4">
           Settings
         </Text>
@@ -135,9 +145,13 @@ export default function AdminSettingsScreen() {
           <Card className="mb-4 md:mb-0 md:flex-1">
             <CardHeader>
               <View className="flex-row items-center justify-between">
-                <CardTitle>Staff accounts</CardTitle>
+                <View className="flex-row items-center gap-2">
+                  <Users size={16} color="#A37A1D" />
+                  <CardTitle>Staff accounts</CardTitle>
+                </View>
                 <Button size="sm" onPress={() => router.push("/admin/settings/new-staff")}>
-                  Add staff
+                  <UserPlus size={14} color="#fff" />
+                  <Text className="ml-1.5 font-body-semibold text-sm text-white">Add staff</Text>
                 </Button>
               </View>
             </CardHeader>
@@ -145,12 +159,12 @@ export default function AdminSettingsScreen() {
               {staff.length === 0 ? (
                 <Text variant="muted">{loading ? "Loading…" : "No staff accounts yet."}</Text>
               ) : (
-                staff.map((row, i) => (
+                staffPag.pageItems.map((row, i) => (
                   <View key={row.id}>
                     {i > 0 ? <Separator className="my-2" /> : null}
                     <View className="flex-row items-center justify-between">
                       <View>
-                        <Text className="font-medium">{row.username}</Text>
+                        <Text className="font-body-medium">{row.username}</Text>
                         <Text variant="muted">{row.role}</Text>
                       </View>
                       <View className="flex-row items-center gap-2">
@@ -168,12 +182,25 @@ export default function AdminSettingsScreen() {
                 ))
               )}
             </CardContent>
+            <Pagination
+              page={staffPag.page}
+              totalPages={staffPag.totalPages}
+              hasPrev={staffPag.hasPrev}
+              hasNext={staffPag.hasNext}
+              onPrev={staffPag.prev}
+              onNext={staffPag.next}
+              total={staffPag.total}
+              className="border-t-0"
+            />
           </Card>
 
           <View className="flex-1 gap-4">
             <Card>
               <CardHeader>
-                <CardTitle>Fee schedule</CardTitle>
+                <View className="flex-row items-center gap-2">
+                  <Wallet size={16} color="#A37A1D" />
+                  <CardTitle>Fee schedule</CardTitle>
+                </View>
               </CardHeader>
               <CardContent>
                 {ACADEMIC_LEVELS.map((level) => (
@@ -188,14 +215,18 @@ export default function AdminSettingsScreen() {
                   </View>
                 ))}
                 <Button loading={savingFees} onPress={handleSaveFees}>
-                  Save fee schedule
+                  <Check size={16} color="#fff" />
+                  <Text className="ml-2 font-body-semibold text-base text-white">Save fee schedule</Text>
                 </Button>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle>Term</CardTitle>
+                <View className="flex-row items-center gap-2">
+                  <Calendar size={16} color="#A37A1D" />
+                  <CardTitle>Term</CardTitle>
+                </View>
               </CardHeader>
               <CardContent>
                 <Text variant="muted" className="mb-4">
@@ -203,13 +234,14 @@ export default function AdminSettingsScreen() {
                   of each school term.
                 </Text>
                 <Button variant="secondary" loading={startingTerm} onPress={handleStartNewTerm}>
-                  Start new term
+                  <Calendar size={16} color="#0f172a" />
+                  <Text className="ml-2 font-body-semibold text-base text-slate-900">Start new term</Text>
                 </Button>
               </CardContent>
             </Card>
           </View>
         </View>
-      </View>
+      </MotiView>
     </ScrollView>
   );
 }

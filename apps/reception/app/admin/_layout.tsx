@@ -13,7 +13,18 @@ export default function AdminLayout() {
   }
 
   return (
-    <Tabs screenOptions={{ headerShown: true, tabBarActiveTintColor: "#0f172a" }}>
+    <Tabs
+      screenOptions={{
+        headerShown: true,
+        headerStyle: { backgroundColor: "#ffffff" },
+        headerShadowVisible: false,
+        headerTitleStyle: { fontFamily: "PlusJakartaSans_700Bold", fontSize: 17, color: "#0f172a" },
+        tabBarActiveTintColor: "#A37A1D",
+        tabBarInactiveTintColor: "#94a3b8",
+        tabBarStyle: { borderTopColor: "#f1f5f9" },
+        tabBarLabelStyle: { fontFamily: "Inter_600SemiBold", fontSize: 11 },
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{ title: "Dashboard", tabBarIcon: ({ color, size }) => <LayoutDashboard color={color} size={size} /> }}

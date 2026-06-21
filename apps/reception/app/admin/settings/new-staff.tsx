@@ -1,10 +1,13 @@
 import { useState } from "react";
 import { Alert, View } from "react-native";
 import { useRouter } from "expo-router";
+import { MotiView } from "moti";
+import { UserPlus } from "lucide-react-native";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Text } from "@/components/ui/text";
 import { api, ApiClientError } from "@/lib/api";
 import type { StaffRole } from "@/lib/types";
 
@@ -36,7 +39,22 @@ export default function NewStaffScreen() {
   }
 
   return (
-    <View className="w-full flex-1 bg-white p-4 md:mx-auto md:max-w-md md:p-6 lg:max-w-lg">
+    <MotiView
+      from={{ opacity: 0, translateY: 10 }}
+      animate={{ opacity: 1, translateY: 0 }}
+      transition={{ type: "timing", duration: 280 }}
+      className="w-full flex-1 bg-white p-4 md:mx-auto md:max-w-md md:p-6 lg:max-w-lg"
+    >
+      <View className="mb-6 flex-row items-center gap-3 rounded-xl border border-slate-100 bg-slate-50 p-3">
+        <View className="h-10 w-10 items-center justify-center rounded-full bg-gold-100">
+          <UserPlus size={18} color="#A37A1D" />
+        </View>
+        <View>
+          <Text variant="subheading">New staff account</Text>
+          <Text variant="muted">Create sign-in access for a receptionist or admin.</Text>
+        </View>
+      </View>
+
       <View className="mb-4">
         <Label>Username</Label>
         <Input
@@ -64,8 +82,9 @@ export default function NewStaffScreen() {
       </View>
 
       <Button disabled={!isValid} loading={submitting} onPress={handleSubmit}>
-        Create account
+        <UserPlus size={16} color="#fff" />
+        <Text className="ml-2 font-body-semibold text-base text-white">Create account</Text>
       </Button>
-    </View>
+    </MotiView>
   );
 }
