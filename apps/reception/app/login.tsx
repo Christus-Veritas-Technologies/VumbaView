@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { KeyboardAvoidingView, Platform, View } from "react-native";
 import { Redirect } from "expo-router";
+import { MotiView } from "moti";
+import { GraduationCap, LogIn } from "lucide-react-native";
 import { useAuthStore } from "@/store/auth-store";
 import { useSyncStore } from "@/store/sync-store";
 import { Text } from "@/components/ui/text";
@@ -34,9 +36,23 @@ export default function LoginScreen() {
     >
       {/* Capped, centered card on tablet/desktop instead of a full-bleed
           column — the form looks lost stretched across a wide screen. */}
-      <View className="w-full self-center md:max-w-sm md:rounded-xl md:border md:border-slate-200 md:bg-white md:p-8 md:shadow-sm">
+      <MotiView
+        from={{ opacity: 0, translateY: 16, scale: 0.97 }}
+        animate={{ opacity: 1, translateY: 0, scale: 1 }}
+        transition={{ type: "timing", duration: 320 }}
+        className="w-full self-center md:max-w-sm md:rounded-xl md:border md:border-slate-200 md:bg-white md:p-8 md:shadow-sm"
+      >
+        <MotiView
+          from={{ opacity: 0, scale: 0.7 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ type: "spring", delay: 80 }}
+          className="mb-5 h-14 w-14 items-center justify-center rounded-2xl bg-gold-100"
+        >
+          <GraduationCap size={26} color="#A37A1D" />
+        </MotiView>
+
         <Text variant="heading" className="mb-1">
-          VumbaView Reception
+          VumbaView Academy
         </Text>
         <Text variant="muted" className="mb-8">
           Sign in with your staff account
@@ -64,12 +80,13 @@ export default function LoginScreen() {
           />
         </View>
 
-        {error ? <Text className="mb-4 text-sm text-red-600">{error}</Text> : null}
+        {error ? <Text className="mb-4 text-sm font-body-medium text-danger-600">{error}</Text> : null}
 
         <Button className="mt-4" loading={loading} disabled={!username.trim() || !password} onPress={handleSubmit}>
-          Sign in
+          <LogIn size={16} color="#fff" />
+          <Text className="ml-2 font-body-semibold text-base text-white">Sign in</Text>
         </Button>
-      </View>
+      </MotiView>
     </KeyboardAvoidingView>
   );
 }

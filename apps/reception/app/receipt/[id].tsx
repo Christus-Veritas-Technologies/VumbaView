@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { ScrollView, View } from "react-native";
 import { Redirect, useLocalSearchParams, useRouter } from "expo-router";
+import { MotiView } from "moti";
+import { CheckCircle2, Printer as PrinterIcon, Receipt as ReceiptIcon } from "lucide-react-native";
 import { Text } from "@/components/ui/text";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,7 +20,7 @@ import { getConnectedPrinter, isPrinterSupported, printReceipt, type PrinterDevi
 import { useAuthStore } from "@/store/auth-store";
 import { LEVEL_LABELS } from "@/lib/types";
 
-const SCHOOL_NAME = "VumbaView School";
+const SCHOOL_NAME = "VumbaView Academy";
 
 export default function ReceiptScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -134,17 +136,33 @@ export default function ReceiptScreen() {
 
   return (
     <ScrollView className="flex-1 bg-slate-50">
-      <View className="w-full p-4 md:mx-auto md:max-w-2xl md:p-6 lg:max-w-3xl">
-        <Text variant="heading" className="mb-1">
-          Receipt
-        </Text>
-        <Text variant="muted" className="mb-4">
-          Payment recorded successfully.
-        </Text>
+      <MotiView
+        from={{ opacity: 0, translateY: 10 }}
+        animate={{ opacity: 1, translateY: 0 }}
+        transition={{ type: "timing", duration: 280 }}
+        className="w-full p-4 md:mx-auto md:max-w-2xl md:p-6 lg:max-w-3xl"
+      >
+        <View className="mb-4 flex-row items-center gap-3">
+          <MotiView
+            from={{ opacity: 0, scale: 0.6 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ type: "spring", delay: 80 }}
+            className="h-12 w-12 items-center justify-center rounded-full bg-success-100"
+          >
+            <CheckCircle2 size={22} color="#047857" />
+          </MotiView>
+          <View>
+            <Text variant="heading">Receipt</Text>
+            <Text variant="muted">Payment recorded successfully.</Text>
+          </View>
+        </View>
 
         <Card className="mb-4">
           <CardHeader>
-            <CardTitle>{student.fullName}</CardTitle>
+            <View className="flex-row items-center gap-2">
+              <ReceiptIcon size={16} color="#A37A1D" />
+              <CardTitle>{student.fullName}</CardTitle>
+            </View>
           </CardHeader>
           <CardContent>
             <View className="mb-2 flex-row items-center justify-between">
@@ -153,7 +171,7 @@ export default function ReceiptScreen() {
             </View>
             <View className="mb-2 flex-row items-center justify-between">
               <Text variant="muted">Amount</Text>
-              <Text className="font-semibold">${payment.amount.toFixed(2)}</Text>
+              <Text className="font-body-semibold">${payment.amount.toFixed(2)}</Text>
             </View>
             <View className="mb-2 flex-row items-center justify-between">
               <Text variant="muted">Date</Text>
@@ -170,7 +188,7 @@ export default function ReceiptScreen() {
                 <Separator className="my-2" />
                 <View className="flex-row items-center justify-between">
                   <Text variant="muted">Balance after</Text>
-                  <Text className="font-semibold">${(student.feeBalance ?? 0).toFixed(2)}</Text>
+                  <Text className="font-body-semibold">${(student.feeBalance ?? 0).toFixed(2)}</Text>
                 </View>
               </>
             ) : null}
@@ -181,21 +199,28 @@ export default function ReceiptScreen() {
           <ErrorState message={printError} onRetry={connectedDevice ? doPrint : handlePrintPress} className="mb-4" />
         ) : null}
         {printed ? (
-          <Card className="mb-4 border-green-200 bg-green-50">
+          <Card className="mb-4 border-success-200 bg-success-50">
             <CardContent>
-              <Text className="text-green-700">Receipt sent to the printer.</Text>
+              <View className="flex-row items-center gap-2">
+                <CheckCircle2 size={16} color="#047857" />
+                <Text className="font-body-medium text-success-700">Receipt sent to the printer.</Text>
+              </View>
             </CardContent>
           </Card>
         ) : null}
 
         <Button loading={printing} onPress={handlePrintPress} className="mb-3">
-          {connectedDevice ? `Print receipt (${connectedDevice.name || "printer"})` : "Print receipt"}
+          <PrinterIcon size={16} color="#fff" />
+          <Text className="ml-2 font-body-semibold text-base text-white">
+            {connectedDevice ? `Print receipt (${connectedDevice.name || "printer"})` : "Print receipt"}
+          </Text>
         </Button>
 
         <Button variant="secondary" onPress={() => router.replace(`/receptionist/students/${student.id}`)}>
-          Done
+          <CheckCircle2 size={16} color="#0f172a" />
+          <Text className="ml-2 font-body-semibold text-base text-slate-900">Done</Text>
         </Button>
-      </View>
+      </MotiView>
 
       <PrinterDevicePicker
         visible={pickerVisible}
