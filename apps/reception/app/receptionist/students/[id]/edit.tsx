@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Alert, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ErrorState } from "@/components/ui/error-state";
+import { SheetScreen } from "@/components/ui/sheet-screen";
 import { StudentForm, type StudentFormValues } from "@/components/student-form";
 import { getStudentCache, type StudentCacheRow } from "@/lib/storage/db";
 import { queueUpdateStudent } from "@/lib/sync";
@@ -23,9 +24,11 @@ export default function EditStudentScreen() {
 
   if (!student) {
     return (
-      <View className="flex-1 items-center justify-center bg-white p-4">
-        <ErrorState message={loadError ?? "Student not found."} />
-      </View>
+      <SheetScreen>
+        <View className="flex-1 items-center justify-center bg-white p-4">
+          <ErrorState message={loadError ?? "Student not found."} />
+        </View>
+      </SheetScreen>
     );
   }
 
@@ -51,20 +54,22 @@ export default function EditStudentScreen() {
   }
 
   return (
-    <StudentForm
-      submitLabel="Save changes"
-      submitting={submitting}
-      showStatus
-      initial={{
-        fullName: student.fullName,
-        level: student.level,
-        status: student.status,
-        guardianName: student.guardianName ?? "",
-        guardianPhone: student.guardianPhone ?? "",
-        guardianEmail: student.guardianEmail ?? "",
-        guardianAddress: student.guardianAddress ?? "",
-      }}
-      onSubmit={handleSubmit}
-    />
+    <SheetScreen>
+      <StudentForm
+        submitLabel="Save changes"
+        submitting={submitting}
+        showStatus
+        initial={{
+          fullName: student.fullName,
+          level: student.level,
+          status: student.status,
+          guardianName: student.guardianName ?? "",
+          guardianPhone: student.guardianPhone ?? "",
+          guardianEmail: student.guardianEmail ?? "",
+          guardianAddress: student.guardianAddress ?? "",
+        }}
+        onSubmit={handleSubmit}
+      />
+    </SheetScreen>
   );
 }

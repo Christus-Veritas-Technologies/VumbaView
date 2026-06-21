@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Alert } from "react-native";
 import { useRouter } from "expo-router";
+import { SheetScreen } from "@/components/ui/sheet-screen";
 import { StudentForm, type StudentFormValues } from "@/components/student-form";
 import { useAuthStore } from "@/store/auth-store";
 import { useSyncStore } from "@/store/sync-store";
@@ -39,5 +40,9 @@ export default function NewStudentScreen() {
     }
   }
 
-  return <StudentForm submitLabel="Add student" submitting={submitting} onSubmit={handleSubmit} />;
+  return (
+    <SheetScreen>
+      <StudentForm submitLabel="Add student" submitting={submitting} onSubmit={handleSubmit} />
+    </SheetScreen>
+  );
 }
