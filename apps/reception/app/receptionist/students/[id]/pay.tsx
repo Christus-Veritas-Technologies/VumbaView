@@ -14,6 +14,7 @@ import { queueRecordPayment } from "@/lib/sync";
 import { useAuthStore } from "@/store/auth-store";
 import { useSyncStore } from "@/store/sync-store";
 import { PAYMENT_CATEGORIES, type PaymentCategory } from "@/lib/types";
+import { isBlank, requiredAmount } from "@/lib/validation";
 
 const CATEGORY_OPTIONS = PAYMENT_CATEGORIES.map((c) => ({
   label: c.charAt(0) + c.slice(1).toLowerCase(),
@@ -30,6 +31,7 @@ export default function RecordPaymentScreen() {
   const [note, setNote] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [submitAttempted, setSubmitAttempted] = useState(false);
 
   if (!student || !id) {
     return (
@@ -41,9 +43,14 @@ export default function RecordPaymentScreen() {
 
   const balance = student.feeBalance ?? 0;
   const parsedAmount = Number(amount);
-  const isValid = amount.trim().length > 0 && Number.isFinite(parsedAmount) && parsedAmount > 0;
+  // requiredAmount catches empty/non-numeric text; a numeric-but-zero-or-
+  // negative amount needs its own message since "0" parses fine but isn't
+  // a valid payment.
+  const amountError = requiredAmount(amount, "Amount") ?? (parsedAmount <= 0 ? "Amount must be greater than $0." : undefined);
+  const isValid = !amountError;
 
   function handleSubmit() {
+    setSubmitAttempted(true);
     if (!isValid) return;
     setSubmitting(true);
     setError(null);
@@ -101,6 +108,9 @@ export default function RecordPaymentScreen() {
       <View className="mb-4">
         <Label>Amount (USD)</Label>
         <Input value={amount} onChangeText={setAmount} placeholder="0.00" keyboardType="decimal-pad" />
+        {(submitAttempted || !isBlank(amount)) && amountError ? (
+          <Text className="mt-1 text-xs font-body-medium text-danger-600">{amountError}</Text>
+        ) : null}
       </View>
 
       <View className="mb-6">
