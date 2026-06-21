@@ -4,6 +4,7 @@ import { prisma } from "../db";
 import { requireAuth } from "../middleware/auth";
 import { ApiError } from "../middleware/error-handler";
 import { getCurrentTerm } from "../lib/term";
+import { notifyPaymentRecorded } from "../lib/whatsapp";
 import { PAYMENT_CATEGORIES } from "../lib/constants";
 import type { AppEnv } from "../types";
 import type { PaymentCategory } from "@prisma/client";
@@ -51,6 +52,10 @@ payments.post("/", async (c) => {
       recordedById: staff.id,
     },
   });
+
+  // Fire-and-forget — the payment is already recorded; a WhatsApp hiccup
+  // shouldn't turn a successful write into a failed request.
+  void notifyPaymentRecorded(payment, student, staff.username);
 
   return c.json(payment, 201);
 });
