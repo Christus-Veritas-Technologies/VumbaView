@@ -22,9 +22,9 @@ export default function ReceptionistLayout() {
       }}
     >
       <Stack.Screen name="index" options={{ title: "Students" }} />
-      <Stack.Screen name="students/new" options={{ title: "Add Student" }} />
+      <Stack.Screen name="students/new" options={{ title: "Add Student", presentation: "modal" }} />
       <Stack.Screen name="students/[id]" options={{ title: "Student" }} />
-      <Stack.Screen name="students/[id]/edit" options={{ title: "Edit Student" }} />
+      <Stack.Screen name="students/[id]/edit" options={{ title: "Edit Student", presentation: "modal" }} />
       <Stack.Screen name="students/[id]/pay" options={{ title: "Record Payment", presentation: "modal" }} />
     </Stack>
   );
