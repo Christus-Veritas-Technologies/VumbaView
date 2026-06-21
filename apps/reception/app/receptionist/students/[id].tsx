@@ -10,6 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { FeeStatusBadge } from "@/components/fee-status-badge";
 import { PendingSyncBadge } from "@/components/pending-sync-badge";
+import { StudentAvatar } from "@/components/student-avatar";
+import { DecorativeShapes } from "@/components/decorative-shapes";
 import { ErrorState } from "@/components/ui/error-state";
 import { LoadingState } from "@/components/ui/loading-state";
 import { Pagination } from "@/components/ui/pagination";
@@ -93,24 +95,32 @@ export default function StudentDetailScreen() {
         transition={{ type: "timing", duration: 280 }}
         className="w-full p-4 md:mx-auto md:max-w-3xl md:p-6 lg:max-w-4xl"
       >
-        <View className="mb-1 flex-row items-center justify-between">
-          <Text variant="heading">{student.fullName}</Text>
-          {student.pendingSync ? <PendingSyncBadge /> : null}
+        <View className="mb-4 flex-row items-center gap-3">
+          <StudentAvatar name={student.fullName} level={student.level} size="lg" />
+          <View className="flex-1">
+            <View className="flex-row items-center gap-2">
+              <Text variant="heading">{student.fullName}</Text>
+              {student.pendingSync ? <PendingSyncBadge /> : null}
+            </View>
+            <Text variant="muted">
+              {LEVEL_LABELS[student.level]}
+              {student.admissionNo ? ` · Admission #${student.admissionNo}` : ""} · {student.status}
+            </Text>
+          </View>
         </View>
-        <Text variant="muted" className="mb-4">
-          {LEVEL_LABELS[student.level]}
-          {student.admissionNo ? ` · Admission #${student.admissionNo}` : ""} · {student.status}
-        </Text>
 
         {error ? <ErrorState message={error} onRetry={load} className="mb-4" /> : null}
 
         {/* Term fees + Guardian contact sit side-by-side once there's room
             (md:flex-row); they stack on phone. */}
         <View className="mb-4 flex-col gap-4 md:flex-row">
-          <Card className="md:flex-1">
+          <Card className="relative overflow-hidden md:flex-1">
+            <DecorativeShapes tone="gold" />
             <CardHeader>
               <View className="flex-row items-center gap-2">
-                <Wallet size={16} color="#A37A1D" />
+                <View className="h-8 w-8 items-center justify-center rounded-full bg-gold-100">
+                  <Wallet size={16} color="#A37A1D" />
+                </View>
                 <CardTitle>Term fees</CardTitle>
               </View>
             </CardHeader>
@@ -134,10 +144,13 @@ export default function StudentDetailScreen() {
             </CardContent>
           </Card>
 
-          <Card className="md:flex-1">
+          <Card className="relative overflow-hidden md:flex-1">
+            <DecorativeShapes tone="info" />
             <CardHeader>
               <View className="flex-row items-center gap-2">
-                <Users size={16} color="#A37A1D" />
+                <View className="h-8 w-8 items-center justify-center rounded-full bg-info-100">
+                  <Users size={16} color="#2563EB" />
+                </View>
                 <CardTitle>Guardian contact</CardTitle>
               </View>
             </CardHeader>
@@ -165,10 +178,13 @@ export default function StudentDetailScreen() {
           </Button>
         </View>
 
-        <Card>
+        <Card className="relative overflow-hidden">
+          <DecorativeShapes tone="violet" />
           <CardHeader>
             <View className="flex-row items-center gap-2">
-              <Receipt size={16} color="#A37A1D" />
+              <View className="h-8 w-8 items-center justify-center rounded-full bg-violet-100">
+                <Receipt size={16} color="#7C3AED" />
+              </View>
               <CardTitle>Payment history</CardTitle>
             </View>
           </CardHeader>
