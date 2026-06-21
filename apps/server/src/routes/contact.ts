@@ -1,18 +1,25 @@
 import { Hono } from "hono";
 import { z } from "zod";
-import { prisma } from "../db";
 import { ApiError } from "../middleware/error-handler";
 import { rateLimit } from "../middleware/rate-limit";
+import { notifyContactMessage } from "../lib/whatsapp";
 
 // Public — same shape as admissions.ts: no auth (general site visitors send
 // these), so it gets the same rate limit + honeypot defenses.
+//
+// Contact messages are intentionally NOT persisted to the database — there's
+// no admin inbox/triage view for them, so a stored row would just sit there
+// unseen. Instead this forwards straight to the admin's WhatsApp (see
+// notifyContactMessage), the same channel payments/inquiries already notify
+// on. If that ever needs a stored record again, reintroduce a ContactMessage
+// model + create() call here.
 const contact = new Hono();
 
 contact.use("*", rateLimit({ max: 5, windowMs: 10 * 60 * 1000 }));
 
 const contactInput = z.object({
   name: z.string().min(1),
-  email: z.email(),
+  phone: z.string().min(1),
   subject: z.string().min(1),
   message: z.string().min(1),
   website: z.string().optional(),
@@ -31,9 +38,11 @@ contact.post("/", async (c) => {
     return c.json({ ok: true }, 201);
   }
 
-  const message = await prisma.contactMessage.create({ data });
+  // Fire-and-forget, same reasoning as payments.ts/admissions.ts — there's no
+  // database write here to await in the first place.
+  void notifyContactMessage(data);
 
-  return c.json(message, 201);
+  return c.json({ ok: true }, 201);
 });
 
 export default contact;

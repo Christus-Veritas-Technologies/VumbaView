@@ -23,7 +23,6 @@ admissions.use("*", rateLimit({ max: 5, windowMs: 10 * 60 * 1000 }));
 
 const inquiryInput = z.object({
   parentName: z.string().min(1),
-  email: z.email(),
   phone: z.string().min(1),
   childName: z.string().min(1),
   level: z.enum(ACADEMIC_LEVELS),

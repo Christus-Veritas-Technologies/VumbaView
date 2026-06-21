@@ -167,7 +167,6 @@ model Inquiry {
   id         String        @id @default(cuid())
   type       InquiryType   @default(APPLICATION)
   parentName String
-  email      String
   phone      String
   childName  String
   level      AcademicLevel
@@ -182,17 +181,4 @@ model Inquiry {
 enum InquiryType {
   APPLICATION
   TOUR_REQUEST
-}
-
-/// A general public contact-page message — distinct from Inquiry, since it
-/// isn't part of the admissions pipeline and has no academic level/child.
-model ContactMessage {
-  id        String   @id @default(cuid())
-  name      String
-  email     String
-  subject   String
-  message   String
-  createdAt DateTime @default(now())
-
-  @@map("contact_messages")
 }

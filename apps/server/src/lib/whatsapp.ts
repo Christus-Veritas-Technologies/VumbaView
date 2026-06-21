@@ -125,11 +125,32 @@ export function notifyInquiryCreated(inquiry: Inquiry): Promise<void> {
     `Parent: ${inquiry.parentName}`,
     `Child: ${inquiry.childName} (${inquiry.level.replace(/_/g, " ")})`,
     `Phone: ${inquiry.phone}`,
-    `Email: ${inquiry.email}`,
     inquiry.message ? `Message: ${inquiry.message}` : null,
   ]
     .filter((line) => line !== null)
     .join("\n");
+
+  return sendAdminWhatsApp(message);
+}
+
+/// Contact-page messages aren't persisted to the database (see contact.ts) —
+/// this WhatsApp message IS the record. No Inquiry/Payment-style Prisma model
+/// backs it, hence the inline type instead of importing one from
+/// @prisma/client.
+export function notifyContactMessage(data: {
+  name: string;
+  phone: string;
+  subject: string;
+  message: string;
+}): Promise<void> {
+  const message = [
+    "✉️ New contact message",
+    "",
+    `Name: ${data.name}`,
+    `Phone: ${data.phone}`,
+    `Subject: ${data.subject}`,
+    `Message: ${data.message}`,
+  ].join("\n");
 
   return sendAdminWhatsApp(message);
 }
