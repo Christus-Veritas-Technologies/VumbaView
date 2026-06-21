@@ -70,6 +70,31 @@ module.exports = {
             800: "#9A3412",
             900: "#7C2D12",
           },
+          // Purely decorative accents (icon badges, stat cards, background
+          // shapes) — not status colors, so they're separate from
+          // success/danger/warning above. Gives the dashboard/list screens
+          // the same multi-color icon-badge variety as the reference
+          // designs instead of everything reading in shades of gold.
+          info: {
+            50: "#EFF6FF",
+            100: "#DBEAFE",
+            200: "#BFDBFE",
+            300: "#93C5FD",
+            400: "#60A5FA",
+            500: "#3B82F6",
+            600: "#2563EB",
+            700: "#1D4ED8",
+          },
+          violet: {
+            50: "#F5F3FF",
+            100: "#EDE9FE",
+            200: "#DDD6FE",
+            300: "#C4B5FD",
+            400: "#A78BFA",
+            500: "#8B5CF6",
+            600: "#7C3AED",
+            700: "#6D28D9",
+          },
         },
         fontFamily: {
           heading: ["PlusJakartaSans_700Bold"],
