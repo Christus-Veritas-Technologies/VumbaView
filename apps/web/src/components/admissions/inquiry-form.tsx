@@ -5,6 +5,7 @@ import { SectionHeading } from "@/components/marketing/section-heading";
 import { Reveal } from "@/components/motion/reveal";
 import { ACADEMIC_LEVELS, LEVEL_LABELS } from "@/lib/academic-levels";
 import { submitInquiry } from "@/lib/api";
+import { validatePhone } from "@/lib/form-validation";
 import { Button } from "@vva/ui/components/button";
 import { Input } from "@vva/ui/components/input";
 import { Label } from "@vva/ui/components/label";
@@ -36,7 +37,8 @@ type FormErrors = Partial<Record<keyof FormState, string>>;
 function validate(values: FormState): FormErrors {
   const errors: FormErrors = {};
   if (!values.parentName.trim()) errors.parentName = "Please enter your full name.";
-  if (!values.phone.trim()) errors.phone = "Please enter a contact phone number.";
+  const phoneError = validatePhone(values.phone, "Phone number");
+  if (phoneError) errors.phone = phoneError;
   if (!values.childName.trim()) errors.childName = "Please enter your child's name.";
   if (!values.level) errors.level = "Please select an academic level.";
   return errors;
