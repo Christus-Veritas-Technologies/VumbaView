@@ -8,8 +8,29 @@ WORKDIR /app
 # glibc build that dynamically links libatomic — not installed by default on
 # this image ("libatomic.so.1: cannot open shared object file") — hence
 # libatomic1 here too.
+#
+# The rest of this list is whatsapp-web.js's headless-Chromium runtime deps —
+# shared libraries Chromium itself needs, not Chromium (puppeteer's own
+# postinstall, in `pnpm install` below, downloads that). Adapted from
+# whatsapp-web.js's "no-gui systems" install guide
+# (https://wwebjs.dev/guide/installation.html#installation-on-no-gui-systems)
+# and cross-checked against Puppeteer's own current Debian dependency list
+# (https://pptr.dev/troubleshooting#chrome-doesnt-launch-on-linux), since this
+# image is Debian 12 (bookworm), not the older Ubuntu that doc's list targets:
+# dropped gconf-service/libgconf-2-4/libappindicator1/libgdk-pixbuf2.0-0 (GConf
+# and this appindicator package no longer exist in bookworm's repos — `apt-get
+# install` fails entirely if any single package name is invalid), swapped
+# libgbm-dev for libgbm1 (only the runtime .so is needed, not dev headers),
+# and added libatk-bridge2.0-0 (missing from that doc's list, present on
+# Puppeteer's).
 RUN apt-get update -y \
   && apt-get install -y openssl ca-certificates curl libatomic1 \
+    fonts-liberation libasound2 libatk-bridge2.0-0 libatk1.0-0 libc6 libcairo2 \
+    libcups2 libdbus-1-3 libexpat1 libfontconfig1 libgbm1 libgcc1 libglib2.0-0 \
+    libgtk-3-0 libnspr4 libnss3 libpango-1.0-0 libpangocairo-1.0-0 libstdc++6 \
+    libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 libxdamage1 \
+    libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 libxtst6 \
+    lsb-release wget xdg-utils \
   && rm -rf /var/lib/apt/lists/*
 
 # Bun is the runtime, but installs go through pnpm. pnpm-workspace.yaml uses
