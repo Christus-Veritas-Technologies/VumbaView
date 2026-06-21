@@ -7,6 +7,13 @@ import { defineConfig, env } from "prisma/config";
 // migrate dev`, or `pnpm prisma migrate dev` — never `pnpm dlx prisma ...`,
 // which ignores this pin and fetches whatever CLI version is latest on the
 // registry instead.
+//
+// Prisma Postgres issues two connection strings that share credentials but
+// differ in host: `pooled.db.prisma.io` for application traffic (used by
+// src/db.ts's PrismaPg adapter via DATABASE_URL) and `db.prisma.io` for
+// migrations/introspection/Studio (DIRECT_URL, used here). Pointing the CLI
+// at the pooled host instead is the documented cause of migration failures —
+// the pooler doesn't preserve the session state `migrate` needs.
 export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
@@ -14,6 +21,6 @@ export default defineConfig({
     seed: "bun run prisma/seed.ts",
   },
   datasource: {
-    url: env("DATABASE_URL"),
+    url: env("DIRECT_URL"),
   },
 });
