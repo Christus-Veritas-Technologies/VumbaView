@@ -15,6 +15,18 @@ export class ApiClientError extends Error {
   }
 }
 
+// Fired exactly once per genuine 401 from an authenticated request — never
+// on a network failure (status 0, see the catch below) and never on the
+// login call itself (which passes auth:false and is excluded below). Wired
+// from auth-store.ts to clear the session; api.ts can't import the store
+// directly (store imports api.ts), so this small pub/sub avoids a circular
+// import while still letting any screen's failed request trigger sign-out.
+let unauthorizedHandler: (() => void) | null = null;
+
+export function setUnauthorizedHandler(fn: () => void): void {
+  unauthorizedHandler = fn;
+}
+
 function buildUrl(path: string, query?: Record<string, string | undefined>): string {
   const cleanPath = path.startsWith("/") ? path : `/${path}`;
   let url = `${BASE_URL}${cleanPath}`;
@@ -67,6 +79,17 @@ async function request<T>(method: string, path: string, options: RequestOptions 
       data && typeof data === "object" && "error" in data
         ? String((data as { error: unknown }).error)
         : `Request failed (${res.status})`;
+
+    // A real 401 from the server (bad/expired token, deactivated account) —
+    // as opposed to a network failure, which never reaches this branch —
+    // means the session is genuinely dead. Sign out globally so every
+    // screen's reactive `if (!staff) <Redirect href="/login" />` guard
+    // takes over, instead of leaving the raw "Invalid or expired token"
+    // string on screen with no way forward.
+    if (res.status === 401 && auth) {
+      unauthorizedHandler?.();
+    }
+
     throw new ApiClientError(res.status, message);
   }
 
