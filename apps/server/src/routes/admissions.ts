@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "../db";
 import { ApiError } from "../middleware/error-handler";
 import { rateLimit } from "../middleware/rate-limit";
+import { notifyInquiryCreated } from "../lib/whatsapp";
 import { ACADEMIC_LEVELS } from "../lib/levels";
 import type { AcademicLevel, InquiryType } from "@prisma/client";
 
@@ -51,6 +52,11 @@ admissions.post("/", async (c) => {
       type: data.type as InquiryType,
     },
   });
+
+  // Covers both APPLICATION and TOUR_REQUEST — both are the same admissions
+  // funnel (see the model comment in schema.prisma), and the admin wants
+  // visibility into either. Fire-and-forget, same reasoning as payments.ts.
+  void notifyInquiryCreated(inquiry);
 
   return c.json(inquiry, 201);
 });
