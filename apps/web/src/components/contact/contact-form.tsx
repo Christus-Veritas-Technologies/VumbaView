@@ -13,23 +13,21 @@ import { toast } from "sonner";
 
 type FormState = {
   name: string;
-  email: string;
+  phone: string;
   subject: string;
   message: string;
   /** Honeypot — real users never see or fill this. */
   website: string;
 };
 
-const initialState: FormState = { name: "", email: "", subject: "", message: "", website: "" };
+const initialState: FormState = { name: "", phone: "", subject: "", message: "", website: "" };
 
 type FormErrors = Partial<Record<keyof FormState, string>>;
 
 function validate(values: FormState): FormErrors {
   const errors: FormErrors = {};
   if (!values.name.trim()) errors.name = "Please enter your name.";
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
-    errors.email = "Please enter a valid email address.";
-  }
+  if (!values.phone.trim()) errors.phone = "Please enter a contact phone number.";
   if (!values.subject.trim()) errors.subject = "Please enter a subject.";
   if (!values.message.trim()) errors.message = "Please enter a message.";
   return errors;
@@ -54,7 +52,7 @@ export function ContactForm() {
     try {
       await submitContactMessage({
         name: values.name.trim(),
-        email: values.email.trim(),
+        phone: values.phone.trim(),
         subject: values.subject.trim(),
         message: values.message.trim(),
         website: values.website,
@@ -122,16 +120,16 @@ export function ContactForm() {
             </div>
 
             <div className="flex flex-col gap-2">
-              <Label htmlFor="contact-email">Email Address</Label>
+              <Label htmlFor="contact-phone">Phone Number</Label>
               <Input
-                id="contact-email"
-                type="email"
+                id="contact-phone"
+                type="tel"
                 className="h-11 rounded-xl text-sm"
-                value={values.email}
-                onChange={(event) => handleChange("email", event.target.value)}
-                aria-invalid={Boolean(errors.email)}
+                value={values.phone}
+                onChange={(event) => handleChange("phone", event.target.value)}
+                aria-invalid={Boolean(errors.phone)}
               />
-              {errors.email ? <p className="text-xs text-destructive">{errors.email}</p> : null}
+              {errors.phone ? <p className="text-xs text-destructive">{errors.phone}</p> : null}
             </div>
           </div>
 

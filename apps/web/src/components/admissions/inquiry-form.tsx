@@ -14,7 +14,6 @@ import { toast } from "sonner";
 
 type FormState = {
   parentName: string;
-  email: string;
   phone: string;
   childName: string;
   level: string;
@@ -25,7 +24,6 @@ type FormState = {
 
 const initialState: FormState = {
   parentName: "",
-  email: "",
   phone: "",
   childName: "",
   level: "",
@@ -38,9 +36,6 @@ type FormErrors = Partial<Record<keyof FormState, string>>;
 function validate(values: FormState): FormErrors {
   const errors: FormErrors = {};
   if (!values.parentName.trim()) errors.parentName = "Please enter your full name.";
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
-    errors.email = "Please enter a valid email address.";
-  }
   if (!values.phone.trim()) errors.phone = "Please enter a contact phone number.";
   if (!values.childName.trim()) errors.childName = "Please enter your child's name.";
   if (!values.level) errors.level = "Please select an academic level.";
@@ -83,7 +78,6 @@ export function InquiryFormFields({
     try {
       await submitInquiry({
         parentName: values.parentName.trim(),
-        email: values.email.trim(),
         phone: values.phone.trim(),
         childName: values.childName.trim(),
         level: values.level,
@@ -122,7 +116,7 @@ export function InquiryFormFields({
         />
       </div>
 
-      <div className="grid gap-5 sm:grid-cols-2">
+      <div className="grid gap-5 sm:grid-cols-3">
         <div className="flex flex-col gap-2">
           <Label htmlFor="parentName">Parent / Guardian Name</Label>
           <Input
@@ -135,19 +129,6 @@ export function InquiryFormFields({
           {errors.parentName ? (
             <p className="text-xs text-destructive">{errors.parentName}</p>
           ) : null}
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="email">Email Address</Label>
-          <Input
-            id="email"
-            type="email"
-            className="h-11 rounded-xl text-sm"
-            value={values.email}
-            onChange={(event) => handleChange("email", event.target.value)}
-            aria-invalid={Boolean(errors.email)}
-          />
-          {errors.email ? <p className="text-xs text-destructive">{errors.email}</p> : null}
         </div>
 
         <div className="flex flex-col gap-2">

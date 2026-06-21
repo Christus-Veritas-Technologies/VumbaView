@@ -2,7 +2,6 @@ import { env } from "@vva/env/web";
 
 export type InquiryPayload = {
   parentName: string;
-  email: string;
   phone: string;
   childName: string;
   level: string;
@@ -31,7 +30,7 @@ export async function submitInquiry(payload: InquiryPayload) {
 
 export type ContactMessagePayload = {
   name: string;
-  email: string;
+  phone: string;
   subject: string;
   message: string;
   /** Honeypot — always sent empty by the real form. Non-empty means a bot filled it. */
