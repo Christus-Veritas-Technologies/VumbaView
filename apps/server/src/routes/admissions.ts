@@ -5,6 +5,7 @@ import { ApiError } from "../middleware/error-handler";
 import { rateLimit } from "../middleware/rate-limit";
 import { notifyInquiryCreated } from "../lib/whatsapp";
 import { ACADEMIC_LEVELS } from "../lib/levels";
+import { findMissingField, GENERIC_INVALID_MESSAGE } from "../lib/validation-messages";
 import type { AcademicLevel, InquiryType } from "@prisma/client";
 
 // Public — prospective families submit this from the marketing site (the
@@ -33,10 +34,25 @@ const inquiryInput = z.object({
 
 admissions.post("/", async (c) => {
   const json = await c.req.json().catch(() => null);
-  const body = inquiryInput.safeParse(json);
 
+  // Plain-English check first — see contact.ts for why: it stops a stale or
+  // malformed client from ever surfacing zod's raw "expected string,
+  // received undefined" wording to the end user.
+  const missing = findMissingField(json, [
+    { key: "parentName", label: "Parent / guardian name" },
+    { key: "phone", label: "Phone number" },
+    { key: "childName", label: "Child's name" },
+  ]);
+  if (missing) throw new ApiError(400, missing);
+
+  const record = json as Record<string, unknown>;
+  if (!record.level || typeof record.level !== "string") {
+    throw new ApiError(400, "Academic level is empty, please select one.");
+  }
+
+  const body = inquiryInput.safeParse(json);
   if (!body.success) {
-    throw new ApiError(400, body.error.issues[0]?.message ?? "Invalid inquiry payload");
+    throw new ApiError(400, GENERIC_INVALID_MESSAGE);
   }
 
   const { website, ...data } = body.data;

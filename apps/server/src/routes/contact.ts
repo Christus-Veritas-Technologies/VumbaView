@@ -3,6 +3,7 @@ import { z } from "zod";
 import { ApiError } from "../middleware/error-handler";
 import { rateLimit } from "../middleware/rate-limit";
 import { notifyContactMessage } from "../lib/whatsapp";
+import { findMissingField, GENERIC_INVALID_MESSAGE } from "../lib/validation-messages";
 
 // Public — same shape as admissions.ts: no auth (general site visitors send
 // these), so it gets the same rate limit + honeypot defenses.
@@ -27,10 +28,21 @@ const contactInput = z.object({
 
 contact.post("/", async (c) => {
   const json = await c.req.json().catch(() => null);
-  const body = contactInput.safeParse(json);
 
+  // Checked first, in plain English, so a stale or malformed client (e.g.
+  // one still sending a since-removed field) never surfaces zod's raw
+  // "expected string, received undefined" wording to the end user.
+  const missing = findMissingField(json, [
+    { key: "name", label: "Name" },
+    { key: "phone", label: "Phone number" },
+    { key: "subject", label: "Subject" },
+    { key: "message", label: "Message" },
+  ]);
+  if (missing) throw new ApiError(400, missing);
+
+  const body = contactInput.safeParse(json);
   if (!body.success) {
-    throw new ApiError(400, body.error.issues[0]?.message ?? "Invalid message payload");
+    throw new ApiError(400, GENERIC_INVALID_MESSAGE);
   }
 
   const { website, ...data } = body.data;
