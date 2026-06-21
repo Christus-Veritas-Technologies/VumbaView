@@ -17,6 +17,16 @@ through the project's pinned local binary — `pnpm dlx prisma ...` ignores the 
 `package.json` and fetches whatever's latest from the registry, which can pull in breaking changes
 this schema isn't written for.
 
+Two env vars are required, both in `.env` locally and as Coolify runtime variables in prod:
+
+- `DATABASE_URL` — used by `src/db.ts`'s PrismaPg adapter for the app's own queries. On Prisma
+  Postgres, this is the **pooled** connection string (host `pooled.db.prisma.io`).
+- `DIRECT_URL` — used by `prisma.config.ts` for everything the CLI does (migrate, introspect,
+  Studio). On Prisma Postgres, this must be the **direct** connection string (host `db.prisma.io`)
+  — the pooled host doesn't preserve the session state migrations need, and is also a common cause
+  of migrations simply failing to connect. Outside Prisma Postgres (plain local/self-hosted
+  Postgres), both vars are the same value.
+
 ```sh
 pnpm db:generate          # regenerate the Prisma Client
 pnpm db:migrate -- --name init   # create + apply a migration (local dev DB only)
