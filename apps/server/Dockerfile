@@ -120,4 +120,4 @@ WORKDIR /app/apps/server
 # everything's already up to date, so this is safe to run on every restart.
 # `exec` replaces the shell with the bun process so it keeps receiving signals
 # (e.g. SIGTERM) directly for a clean shutdown, instead of going to the shell.
-CMD ["sh", "-c", "pnpm run db:migrate:deploy && exec bun run src/index.ts"]
+CMD ["sh", "-c", "pnpm run db:migrate:deploy && pnpm run db:seed:admin && exec bun run src/index.ts"]
