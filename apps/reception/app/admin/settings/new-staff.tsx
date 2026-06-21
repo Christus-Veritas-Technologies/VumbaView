@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { api, ApiClientError } from "@/lib/api";
 import type { StaffRole } from "@/lib/types";
+import { isBlank, minLength, requiredText } from "@/lib/validation";
 
 const ROLE_OPTIONS = [
   { label: "Receptionist", value: "RECEPTIONIST" },
@@ -22,10 +23,14 @@ export default function NewStaffScreen() {
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<StaffRole>("RECEPTIONIST");
   const [submitting, setSubmitting] = useState(false);
+  const [submitAttempted, setSubmitAttempted] = useState(false);
 
-  const isValid = username.trim().length > 0 && password.length >= 6;
+  const usernameError = requiredText(username, "Username");
+  const passwordError = minLength(password, "Password", 6);
+  const isValid = !usernameError && !passwordError;
 
   async function handleSubmit() {
+    setSubmitAttempted(true);
     if (!isValid) return;
     setSubmitting(true);
     try {
@@ -64,11 +69,17 @@ export default function NewStaffScreen() {
           onChangeText={setUsername}
           placeholder="e.g. jsmith"
         />
+        {(submitAttempted || !isBlank(username)) && usernameError ? (
+          <Text className="mt-1 text-xs font-body-medium text-danger-600">{usernameError}</Text>
+        ) : null}
       </View>
 
       <View className="mb-4">
         <Label>Temporary password</Label>
         <Input secureTextEntry value={password} onChangeText={setPassword} placeholder="At least 6 characters" />
+        {(submitAttempted || !isBlank(password)) && passwordError ? (
+          <Text className="mt-1 text-xs font-body-medium text-danger-600">{passwordError}</Text>
+        ) : null}
       </View>
 
       <View className="mb-6">
