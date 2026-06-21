@@ -17,11 +17,15 @@
     "@vva/env": "workspace:*",
     "hono": "^4.12.26",
     "pg": "^8.13.0",
+    "puppeteer": "^24.38.0",
+    "qrcode-terminal": "^0.12.0",
+    "whatsapp-web.js": "^1.34.7",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@types/bun": "latest",
     "@types/pg": "^8.11.0",
+    "@types/qrcode-terminal": "^0.12.2",
     "@vva/config": "workspace:*",
     "dotenv": "catalog:",
     "prisma": "^7.0.0",

@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { env } from "@vva/env/server";
 import { errorHandler } from "./middleware/error-handler";
+import { initWhatsApp } from "./lib/whatsapp";
 import health from "./routes/health";
 import auth from "./routes/auth";
 import students from "./routes/students";
@@ -13,6 +14,11 @@ import admissions from "./routes/admissions";
 import contact from "./routes/contact";
 
 const app = new Hono();
+
+// Fire-and-forget: starting the WhatsApp/Chromium session can take a while
+// (or fail if it's never been authenticated) and must never delay Bun from
+// serving HTTP traffic.
+void initWhatsApp();
 
 app.use(
   "*",

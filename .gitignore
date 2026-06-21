@@ -52,3 +52,9 @@ coverage
 .cache
 tmp
 temp
+
+# WhatsApp (apps/server) — puppeteer's downloaded Chromium binary and the
+# logged-in WhatsApp session; both are local/environment-specific and the
+# session dir holds auth secrets, so neither belongs in git.
+apps/server/chrome/
+apps/server/.wwebjs_auth/
