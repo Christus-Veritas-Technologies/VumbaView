@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ErrorState } from "@/components/ui/error-state";
 import { Pagination } from "@/components/ui/pagination";
+import { DecorativeShapes } from "@/components/decorative-shapes";
 import { api, ApiClientError } from "@/lib/api";
 import { ACADEMIC_LEVELS, LEVEL_LABELS, type AcademicLevel, type StaffRole } from "@/lib/types";
 import { usePagination } from "@/lib/use-pagination";
@@ -151,11 +152,14 @@ export default function AdminSettingsScreen() {
         {/* Staff accounts column alongside Fee schedule + Term once there's
             room; everything stacks on phone. */}
         <View className="flex-col gap-4 md:flex-row md:items-start">
-          <Card className="mb-4 md:mb-0 md:flex-1">
+          <Card className="relative mb-4 overflow-hidden md:mb-0 md:flex-1">
+            <DecorativeShapes tone="info" />
             <CardHeader>
               <View className="flex-row items-center justify-between">
                 <View className="flex-row items-center gap-2">
-                  <Users size={16} color="#A37A1D" />
+                  <View className="h-8 w-8 items-center justify-center rounded-full bg-info-100">
+                    <Users size={16} color="#2563EB" />
+                  </View>
                   <CardTitle>Staff accounts</CardTitle>
                 </View>
                 <Button size="sm" onPress={() => router.push("/admin/settings/new-staff")}>
@@ -204,10 +208,13 @@ export default function AdminSettingsScreen() {
           </Card>
 
           <View className="flex-1 gap-4">
-            <Card>
+            <Card className="relative overflow-hidden">
+              <DecorativeShapes tone="gold" />
               <CardHeader>
                 <View className="flex-row items-center gap-2">
-                  <Wallet size={16} color="#A37A1D" />
+                  <View className="h-8 w-8 items-center justify-center rounded-full bg-gold-100">
+                    <Wallet size={16} color="#A37A1D" />
+                  </View>
                   <CardTitle>Fee schedule</CardTitle>
                 </View>
               </CardHeader>
@@ -233,10 +240,13 @@ export default function AdminSettingsScreen() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="relative overflow-hidden">
+              <DecorativeShapes tone="violet" />
               <CardHeader>
                 <View className="flex-row items-center gap-2">
-                  <Calendar size={16} color="#A37A1D" />
+                  <View className="h-8 w-8 items-center justify-center rounded-full bg-violet-100">
+                    <Calendar size={16} color="#7C3AED" />
+                  </View>
                   <CardTitle>Term</CardTitle>
                 </View>
               </CardHeader>
