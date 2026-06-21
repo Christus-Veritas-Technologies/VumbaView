@@ -4,6 +4,7 @@ import { Container } from "@/components/marketing/container";
 import { SectionHeading } from "@/components/marketing/section-heading";
 import { Reveal } from "@/components/motion/reveal";
 import { submitContactMessage } from "@/lib/api";
+import { validatePhone } from "@/lib/form-validation";
 import { Button } from "@vva/ui/components/button";
 import { Input } from "@vva/ui/components/input";
 import { Label } from "@vva/ui/components/label";
@@ -27,7 +28,8 @@ type FormErrors = Partial<Record<keyof FormState, string>>;
 function validate(values: FormState): FormErrors {
   const errors: FormErrors = {};
   if (!values.name.trim()) errors.name = "Please enter your name.";
-  if (!values.phone.trim()) errors.phone = "Please enter a contact phone number.";
+  const phoneError = validatePhone(values.phone, "Phone number");
+  if (phoneError) errors.phone = phoneError;
   if (!values.subject.trim()) errors.subject = "Please enter a subject.";
   if (!values.message.trim()) errors.message = "Please enter a message.";
   return errors;
