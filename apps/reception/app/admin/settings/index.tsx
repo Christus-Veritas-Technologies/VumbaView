@@ -16,6 +16,7 @@ import { Pagination } from "@/components/ui/pagination";
 import { api, ApiClientError } from "@/lib/api";
 import { ACADEMIC_LEVELS, LEVEL_LABELS, type AcademicLevel, type StaffRole } from "@/lib/types";
 import { usePagination } from "@/lib/use-pagination";
+import { optionalAmount } from "@/lib/validation";
 
 interface StaffRow {
   id: string;
@@ -39,6 +40,13 @@ export default function AdminSettingsScreen() {
   const [startingTerm, setStartingTerm] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const staffPag = usePagination(staff);
+
+  const feeErrors: Partial<Record<AcademicLevel, string>> = {};
+  for (const level of ACADEMIC_LEVELS) {
+    const message = optionalAmount(fees[level] ?? "", LEVEL_LABELS[level]);
+    if (message) feeErrors[level] = message;
+  }
+  const hasFeeErrors = Object.keys(feeErrors).length > 0;
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -86,6 +94,7 @@ export default function AdminSettingsScreen() {
   }
 
   async function handleSaveFees() {
+    if (hasFeeErrors) return;
     setSavingFees(true);
     try {
       const payload = {
@@ -212,9 +221,12 @@ export default function AdminSettingsScreen() {
                       keyboardType="decimal-pad"
                       placeholder="0.00"
                     />
+                    {feeErrors[level] ? (
+                      <Text className="mt-1 text-xs font-body-medium text-danger-600">{feeErrors[level]}</Text>
+                    ) : null}
                   </View>
                 ))}
-                <Button loading={savingFees} onPress={handleSaveFees}>
+                <Button disabled={hasFeeErrors} loading={savingFees} onPress={handleSaveFees}>
                   <Check size={16} color="#fff" />
                   <Text className="ml-2 font-body-semibold text-base text-white">Save fee schedule</Text>
                 </Button>
