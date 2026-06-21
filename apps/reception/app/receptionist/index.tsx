@@ -1,15 +1,17 @@
 import { useCallback, useEffect, useState } from "react";
 import { useFocusEffect } from "@react-navigation/native";
-import { FlatList, Pressable, View } from "react-native";
+import { FlatList, View } from "react-native";
 import { useRouter } from "expo-router";
 import { MotiView } from "moti";
-import { Plus, Search } from "lucide-react-native";
+import { Search } from "lucide-react-native";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Text } from "@/components/ui/text";
 import { StudentListItem } from "@/components/student-list-item";
 import { ErrorState } from "@/components/ui/error-state";
+import { Fab } from "@/components/ui/fab";
 import { Pagination } from "@/components/ui/pagination";
+import { DecorativeShapes } from "@/components/decorative-shapes";
 import { listStudentsCache, type StudentCacheRow } from "@/lib/storage/db";
 import { syncNow } from "@/lib/sync";
 import { ACADEMIC_LEVELS, LEVEL_LABELS } from "@/lib/types";
@@ -69,8 +71,17 @@ export default function StudentDirectoryScreen() {
         from={{ opacity: 0, translateY: -6 }}
         animate={{ opacity: 1, translateY: 0 }}
         transition={{ type: "timing", duration: 220 }}
-        className="border-b border-slate-100 p-4 md:px-6"
+        className="relative overflow-hidden border-b border-slate-100 bg-gold-50/60 p-4 md:px-6"
       >
+        <DecorativeShapes tone="gold" />
+        <View className="mb-3 flex-row items-center justify-between">
+          <Text variant="heading">Students</Text>
+          {students.length > 0 ? (
+            <View className="rounded-full bg-gold-100 px-3 py-1">
+              <Text className="font-body-semibold text-xs text-gold-700">{students.length} active</Text>
+            </View>
+          ) : null}
+        </View>
         <View className="flex-col gap-3 md:flex-row md:items-center">
           <View className="relative md:flex-1">
             <View className="absolute left-3 top-0 z-10 h-11 w-5 items-center justify-center">
@@ -130,19 +141,7 @@ export default function StudentDirectoryScreen() {
         className="mb-16"
       />
 
-      <MotiView
-        from={{ scale: 0, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ type: "spring", delay: 150 }}
-        className="absolute bottom-6 right-6"
-      >
-        <Pressable
-          onPress={() => router.push("/receptionist/students/new")}
-          className="h-14 w-14 items-center justify-center rounded-full bg-gold-600 shadow-lg active:bg-gold-700"
-        >
-          <Plus color="#fff" size={24} />
-        </Pressable>
-      </MotiView>
+      <Fab accessibilityLabel="Add student" onPress={() => router.push("/receptionist/students/new")} />
     </View>
   );
 }
