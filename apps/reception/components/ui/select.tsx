@@ -26,11 +26,11 @@ export function Select({ options, value, onValueChange, placeholder = "Select...
       <Pressable
         onPress={() => setOpen(true)}
         className={cn(
-          "h-11 flex-row items-center justify-between rounded-md border border-slate-300 bg-white px-3",
+          "h-11 flex-row items-center justify-between rounded-lg border border-slate-300 bg-white px-3",
           className,
         )}
       >
-        <Text className={selected ? "text-base text-slate-900" : "text-base text-slate-400"}>
+        <Text className={selected ? "font-body text-base text-slate-900" : "font-body text-base text-slate-400"}>
           {selected ? selected.label : placeholder}
         </Text>
         <ChevronDown size={18} color="#94a3b8" />
@@ -51,12 +51,16 @@ export function Select({ options, value, onValueChange, placeholder = "Select...
                     onValueChange(item.value);
                     setOpen(false);
                   }}
-                  className="flex-row items-center justify-between border-b border-slate-100 px-4 py-3"
+                  className="flex-row items-center justify-between border-b border-slate-100 px-4 py-3 active:bg-gold-50"
                 >
-                  <Text className={item.value === value ? "font-medium text-slate-900" : "text-slate-700"}>
+                  <Text
+                    className={
+                      item.value === value ? "font-body-semibold text-gold-800" : "font-body text-slate-700"
+                    }
+                  >
                     {item.label}
                   </Text>
-                  {item.value === value ? <Check size={18} color="#0f172a" /> : null}
+                  {item.value === value ? <Check size={18} color="#A37A1D" /> : null}
                 </Pressable>
               )}
             />

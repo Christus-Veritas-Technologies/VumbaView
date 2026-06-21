@@ -3,14 +3,14 @@ import { Text as RNText, type TextProps as RNTextProps } from "react-native";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
-const textVariants = cva("text-slate-900", {
+const textVariants = cva("font-body text-slate-900", {
   variants: {
     variant: {
-      default: "text-base text-slate-900",
-      muted: "text-sm text-slate-500",
-      heading: "text-2xl font-bold text-slate-900",
-      subheading: "text-lg font-semibold text-slate-900",
-      label: "text-sm font-medium text-slate-700",
+      default: "font-body text-base text-slate-900",
+      muted: "font-body text-sm text-slate-500",
+      heading: "font-heading text-2xl text-slate-900",
+      subheading: "font-heading-semibold text-lg text-slate-900",
+      label: "font-body-medium text-sm text-slate-700",
     },
   },
   defaultVariants: { variant: "default" },

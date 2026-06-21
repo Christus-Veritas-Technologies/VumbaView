@@ -6,21 +6,23 @@ const badgeVariants = cva("self-start rounded-full px-2.5 py-1", {
   variants: {
     variant: {
       default: "bg-slate-100",
-      success: "bg-emerald-100",
-      warning: "bg-amber-100",
-      danger: "bg-red-100",
+      success: "bg-success-100",
+      warning: "bg-warning-100",
+      danger: "bg-danger-100",
+      gold: "bg-gold-100",
     },
   },
   defaultVariants: { variant: "default" },
 });
 
-const badgeTextVariants = cva("text-xs font-medium", {
+const badgeTextVariants = cva("text-xs font-body-semibold", {
   variants: {
     variant: {
       default: "text-slate-700",
-      success: "text-emerald-700",
-      warning: "text-amber-700",
-      danger: "text-red-700",
+      success: "text-success-700",
+      warning: "text-warning-700",
+      danger: "text-danger-700",
+      gold: "text-gold-800",
     },
   },
   defaultVariants: { variant: "default" },

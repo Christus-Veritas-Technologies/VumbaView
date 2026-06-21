@@ -10,7 +10,11 @@ export const Input = forwardRef<TextInput, InputProps>(({ className, ...props },
   <TextInput
     ref={ref}
     placeholderTextColor="#94a3b8"
-    className={cn("h-11 rounded-md border border-slate-300 bg-white px-3 text-base text-slate-900", className)}
+    selectionColor="#A37A1D"
+    className={cn(
+      "h-11 rounded-lg border border-slate-300 bg-white px-3 font-body text-base text-slate-900 focus:border-gold-500",
+      className,
+    )}
     {...props}
   />
 ));
