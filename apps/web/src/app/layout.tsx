@@ -24,6 +24,9 @@ export const metadata: Metadata = {
     template: `%s | ${siteConfig.shortName}`,
   },
   description: siteConfig.description,
+  appleWebApp: {
+    title: "VVA Site",
+  },
 };
 
 export default function RootLayout({
