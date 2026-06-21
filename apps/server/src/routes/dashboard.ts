@@ -55,7 +55,7 @@ dashboard.get("/fees", async (c) => {
 });
 
 dashboard.get("/activity", async (c) => {
-  const [recentStudents, recentPayments] = await Promise.all([
+  const [recentStudents, recentPayments, recentInquiries] = await Promise.all([
     prisma.student.findMany({
       orderBy: { createdAt: "desc" },
       take: 10,
@@ -78,6 +78,17 @@ dashboard.get("/activity", async (c) => {
         recordedBy: { select: { username: true } },
       },
     }),
+    prisma.inquiry.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 10,
+      select: {
+        id: true,
+        type: true,
+        parentName: true,
+        childName: true,
+        createdAt: true,
+      },
+    }),
   ]);
 
   const activity = [
@@ -92,6 +103,15 @@ dashboard.get("/activity", async (c) => {
       at: p.createdAt,
       summary: `${p.student.fullName} — $${Number(p.amount).toFixed(2)} (${p.category.toLowerCase()})`,
       by: p.recordedBy.username,
+    })),
+    ...recentInquiries.map((i) => ({
+      type: "INQUIRY_RECEIVED" as const,
+      at: i.createdAt,
+      summary:
+        i.type === "TOUR_REQUEST"
+          ? `${i.parentName} requested a tour for ${i.childName}`
+          : `${i.parentName} applied for ${i.childName}`,
+      by: "Website",
     })),
   ]
     .sort((a, b) => b.at.getTime() - a.at.getTime())

@@ -126,7 +126,7 @@ export interface DashboardFees {
 }
 
 export interface ActivityItem {
-  type: "STUDENT_ADDED" | "PAYMENT_RECORDED";
+  type: "STUDENT_ADDED" | "PAYMENT_RECORDED" | "INQUIRY_RECEIVED";
   at: string;
   summary: string;
   by: string | null;
