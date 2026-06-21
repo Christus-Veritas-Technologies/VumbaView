@@ -12,7 +12,15 @@ export default function ReceptionistLayout() {
   }
 
   return (
-    <Stack screenOptions={{ headerShown: true }}>
+    <Stack
+      screenOptions={{
+        headerShown: true,
+        headerStyle: { backgroundColor: "#ffffff" },
+        headerShadowVisible: false,
+        headerTintColor: "#A37A1D",
+        headerTitleStyle: { fontFamily: "PlusJakartaSans_700Bold", fontSize: 17, color: "#0f172a" },
+      }}
+    >
       <Stack.Screen name="index" options={{ title: "Students" }} />
       <Stack.Screen name="students/new" options={{ title: "Add Student" }} />
       <Stack.Screen name="students/[id]" options={{ title: "Student" }} />

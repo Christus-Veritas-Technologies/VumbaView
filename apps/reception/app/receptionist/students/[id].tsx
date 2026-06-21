@@ -2,6 +2,8 @@ import { useCallback, useState } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import { RefreshControl, ScrollView, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { MotiView } from "moti";
+import { CreditCard, Pencil, Receipt, Users, Wallet } from "lucide-react-native";
 import { Text } from "@/components/ui/text";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,10 +12,12 @@ import { FeeStatusBadge } from "@/components/fee-status-badge";
 import { PendingSyncBadge } from "@/components/pending-sync-badge";
 import { ErrorState } from "@/components/ui/error-state";
 import { LoadingState } from "@/components/ui/loading-state";
+import { Pagination } from "@/components/ui/pagination";
 import { getStudentCache, listPaymentsCache, type PaymentCacheRow, type StudentCacheRow } from "@/lib/storage/db";
 import { pullPaymentsForStudent } from "@/lib/sync";
 import { useSyncStore } from "@/store/sync-store";
 import { LEVEL_LABELS } from "@/lib/types";
+import { usePagination } from "@/lib/use-pagination";
 
 export default function StudentDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -24,6 +28,7 @@ export default function StudentDetailScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const paymentsPag = usePagination(payments);
 
   const load = useCallback(() => {
     if (!id) return;
@@ -82,7 +87,12 @@ export default function StudentDetailScreen() {
     >
       {/* Full-width on phone; capped and centered on tablet/desktop so the
           detail view doesn't stretch into one unreadably-wide column. */}
-      <View className="w-full p-4 md:mx-auto md:max-w-3xl md:p-6 lg:max-w-4xl">
+      <MotiView
+        from={{ opacity: 0, translateY: 10 }}
+        animate={{ opacity: 1, translateY: 0 }}
+        transition={{ type: "timing", duration: 280 }}
+        className="w-full p-4 md:mx-auto md:max-w-3xl md:p-6 lg:max-w-4xl"
+      >
         <View className="mb-1 flex-row items-center justify-between">
           <Text variant="heading">{student.fullName}</Text>
           {student.pendingSync ? <PendingSyncBadge /> : null}
@@ -99,7 +109,10 @@ export default function StudentDetailScreen() {
         <View className="mb-4 flex-col gap-4 md:flex-row">
           <Card className="md:flex-1">
             <CardHeader>
-              <CardTitle>Term fees</CardTitle>
+              <View className="flex-row items-center gap-2">
+                <Wallet size={16} color="#A37A1D" />
+                <CardTitle>Term fees</CardTitle>
+              </View>
             </CardHeader>
             <CardContent>
               <View className="mb-2 flex-row items-center justify-between">
@@ -116,14 +129,17 @@ export default function StudentDetailScreen() {
               </View>
               <View className="flex-row items-center justify-between">
                 <Text variant="muted">Balance</Text>
-                <Text className="font-semibold">${(student.feeBalance ?? 0).toFixed(2)}</Text>
+                <Text className="font-body-semibold">${(student.feeBalance ?? 0).toFixed(2)}</Text>
               </View>
             </CardContent>
           </Card>
 
           <Card className="md:flex-1">
             <CardHeader>
-              <CardTitle>Guardian contact</CardTitle>
+              <View className="flex-row items-center gap-2">
+                <Users size={16} color="#A37A1D" />
+                <CardTitle>Guardian contact</CardTitle>
+              </View>
             </CardHeader>
             <CardContent>
               <Text className="mb-1">{student.guardianName || "—"}</Text>
@@ -140,22 +156,27 @@ export default function StudentDetailScreen() {
 
         <View className="mb-4 flex-row gap-3">
           <Button className="flex-1" variant="secondary" onPress={() => router.push(`/receptionist/students/${id}/edit`)}>
-            Edit
+            <Pencil size={16} color="#0f172a" />
+            <Text className="ml-2 font-body-semibold text-base text-slate-900">Edit</Text>
           </Button>
           <Button className="flex-1" onPress={() => router.push(`/receptionist/students/${id}/pay`)}>
-            Record payment
+            <CreditCard size={16} color="#fff" />
+            <Text className="ml-2 font-body-semibold text-base text-white">Record payment</Text>
           </Button>
         </View>
 
         <Card>
           <CardHeader>
-            <CardTitle>Payment history</CardTitle>
+            <View className="flex-row items-center gap-2">
+              <Receipt size={16} color="#A37A1D" />
+              <CardTitle>Payment history</CardTitle>
+            </View>
           </CardHeader>
           <CardContent>
             {payments.length === 0 ? (
               <Text variant="muted">No payments recorded yet.</Text>
             ) : (
-              payments.map((p, i) => (
+              paymentsPag.pageItems.map((p, i) => (
                 <View key={p.id}>
                   {i > 0 ? <Separator className="my-2" /> : null}
                   <View className="flex-row items-center justify-between">
@@ -165,15 +186,25 @@ export default function StudentDetailScreen() {
                     </View>
                     <View className="flex-row items-center gap-2">
                       {p.pendingSync ? <PendingSyncBadge label="Pending" /> : null}
-                      <Text className="font-semibold">${p.amount.toFixed(2)}</Text>
+                      <Text className="font-body-semibold">${p.amount.toFixed(2)}</Text>
                     </View>
                   </View>
                 </View>
               ))
             )}
           </CardContent>
+          <Pagination
+            page={paymentsPag.page}
+            totalPages={paymentsPag.totalPages}
+            hasPrev={paymentsPag.hasPrev}
+            hasNext={paymentsPag.hasNext}
+            onPrev={paymentsPag.prev}
+            onNext={paymentsPag.next}
+            total={paymentsPag.total}
+            className="border-t-0"
+          />
         </Card>
-      </View>
+      </MotiView>
     </ScrollView>
   );
 }

@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { MotiView } from "moti";
+import { CreditCard, Wallet } from "lucide-react-native";
 import { Text } from "@/components/ui/text";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,6 +39,7 @@ export default function RecordPaymentScreen() {
     );
   }
 
+  const balance = student.feeBalance ?? 0;
   const parsedAmount = Number(amount);
   const isValid = amount.trim().length > 0 && Number.isFinite(parsedAmount) && parsedAmount > 0;
 
@@ -62,13 +65,26 @@ export default function RecordPaymentScreen() {
   }
 
   return (
-    <View className="w-full flex-1 bg-white p-4 md:mx-auto md:max-w-md md:p-6 lg:max-w-lg">
-      <Text variant="subheading" className="mb-1">
-        {student.fullName}
-      </Text>
-      <Text variant="muted" className="mb-6">
-        Current balance: ${(student.feeBalance ?? 0).toFixed(2)}
-      </Text>
+    <MotiView
+      from={{ opacity: 0, translateY: 10 }}
+      animate={{ opacity: 1, translateY: 0 }}
+      transition={{ type: "timing", duration: 280 }}
+      className="w-full flex-1 bg-white p-4 md:mx-auto md:max-w-md md:p-6 lg:max-w-lg"
+    >
+      <View className="mb-6 flex-row items-center gap-3 rounded-xl border border-slate-100 bg-slate-50 p-3">
+        <View className="h-10 w-10 items-center justify-center rounded-full bg-gold-100">
+          <Wallet size={18} color="#A37A1D" />
+        </View>
+        <View>
+          <Text variant="subheading">{student.fullName}</Text>
+          <Text variant="muted">
+            Current balance{" "}
+            <Text className={balance > 0 ? "font-body-semibold text-danger-700" : "font-body-semibold text-success-700"}>
+              ${balance.toFixed(2)}
+            </Text>
+          </Text>
+        </View>
+      </View>
 
       {error ? <ErrorState message={error} onRetry={handleSubmit} className="mb-4" /> : null}
 
@@ -100,8 +116,9 @@ export default function RecordPaymentScreen() {
       ) : null}
 
       <Button disabled={!isValid} loading={submitting} onPress={handleSubmit}>
-        Record payment
+        <CreditCard size={16} color="#fff" />
+        <Text className="ml-2 font-body-semibold text-base text-white">Record payment</Text>
       </Button>
-    </View>
+    </MotiView>
   );
 }
