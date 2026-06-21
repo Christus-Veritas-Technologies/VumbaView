@@ -55,14 +55,17 @@ COPY packages/config/package.json packages/config/
 COPY packages/env/package.json packages/env/
 COPY apps/server/package.json apps/server/
 
-# prisma.config.ts (Prisma 7) reads DATABASE_URL through prisma/config's
+# prisma.config.ts (Prisma 7) reads DIRECT_URL through prisma/config's
 # `env()` helper, which throws if the variable is missing entirely — so even
 # `prisma generate`, which never touches a real database, fails at build
-# time without *something* set here. Pass the real value at `docker run`
-# (along with JWT_SECRET, which has no build-time dependency and is only
-# validated at container startup).
+# time without *something* set here. DATABASE_URL is also required (it's what
+# src/db.ts's PrismaPg adapter uses at runtime). Pass the real values at
+# container start (along with JWT_SECRET, which has no build-time dependency
+# and is only validated at startup) — these build-time defaults are dummies.
 ARG DATABASE_URL=postgresql://build:build@localhost:5432/build
 ENV DATABASE_URL=${DATABASE_URL}
+ARG DIRECT_URL=postgresql://build:build@localhost:5432/build
+ENV DIRECT_URL=${DIRECT_URL}
 
 RUN pnpm install --frozen-lockfile
 
@@ -86,10 +89,12 @@ WORKDIR /app/apps/server
 # Apply any migrations that exist in prisma/migrations/ but haven't been
 # recorded as applied yet, before the server starts taking traffic. This runs
 # at container *startup*, not build time, on purpose:
-#  - it needs the real DATABASE_URL, which Coolify injects at runtime, not the
-#    `build:build@localhost` placeholder ARG'd in above
-#  - it needs to be on the same Docker network as the database, which only the
-#    running container (not the build step) is
+#  - it needs the real DIRECT_URL (prisma.config.ts's datasource — see there
+#    for why migrations use the direct, not pooled, connection on Prisma
+#    Postgres), which Coolify injects at runtime, not the `build:build@
+#    localhost` placeholder ARG'd in above
+#  - it needs to be on the same network as the database, which only the
+#    running container (not the build step) is guaranteed to be
 # `migrate deploy` only applies un-applied migration files — it's a no-op if
 # everything's already up to date, so this is safe to run on every restart.
 # `exec` replaces the shell with the bun process so it keeps receiving signals
