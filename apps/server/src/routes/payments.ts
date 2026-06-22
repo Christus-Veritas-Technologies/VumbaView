@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { z } from "zod";
 import { prisma } from "../db";
 import { requireAuth } from "../middleware/auth";
+import { requireRole } from "../middleware/role";
 import { ApiError } from "../middleware/error-handler";
 import { getCurrentTerm } from "../lib/term";
 import { notifyPaymentRecorded } from "../lib/whatsapp";
@@ -70,6 +71,71 @@ payments.get("/", async (c) => {
   });
 
   return c.json(list);
+});
+
+const adminListQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  pageSize: z.coerce.number().int().min(1).max(100).default(20),
+  category: z.enum(PAYMENT_CATEGORIES).optional(),
+  q: z.string().trim().min(1).optional(),
+});
+
+// Admin-only browse view: every payment across the school, with the student
+// and the receptionist who recorded it joined in, paginated and filterable.
+// Kept as its own route (rather than overloading GET /) so the plain
+// studentId-scoped list above — used by the offline sync engine — never has
+// to change shape.
+payments.get("/admin", requireRole("ADMIN"), async (c) => {
+  const parsed = adminListQuerySchema.safeParse({
+    page: c.req.query("page"),
+    pageSize: c.req.query("pageSize"),
+    category: c.req.query("category") || undefined,
+    q: c.req.query("q") || undefined,
+  });
+
+  if (!parsed.success) {
+    throw new ApiError(400, "Invalid query parameters");
+  }
+
+  const { page, pageSize, category, q } = parsed.data;
+
+  const where = {
+    ...(category ? { category } : {}),
+    ...(q ? { student: { fullName: { contains: q, mode: "insensitive" as const } } } : {}),
+  };
+
+  const [rows, total] = await Promise.all([
+    prisma.payment.findMany({
+      where,
+      orderBy: { occurredAt: "desc" },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      include: {
+        student: { select: { fullName: true, admissionNo: true, level: true } },
+        recordedBy: { select: { username: true } },
+      },
+    }),
+    prisma.payment.count({ where }),
+  ]);
+
+  return c.json({
+    items: rows.map((p) => ({
+      id: p.id,
+      category: p.category,
+      amount: Number(p.amount),
+      note: p.note,
+      occurredAt: p.occurredAt,
+      studentId: p.studentId,
+      studentName: p.student.fullName,
+      admissionNo: p.student.admissionNo,
+      level: p.student.level,
+      recordedBy: p.recordedBy.username,
+    })),
+    total,
+    page,
+    pageSize,
+    totalPages: Math.max(1, Math.ceil(total / pageSize)),
+  });
 });
 
 export default payments;
