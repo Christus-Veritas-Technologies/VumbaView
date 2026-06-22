@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { View } from "react-native";
 import { MotiView } from "moti";
+import { BrandMark } from "@/components/brand-mark";
 import { cn } from "@/lib/utils";
 
 export interface SheetScreenProps {
@@ -31,7 +32,8 @@ export function SheetScreen({ children, className }: SheetScreenProps) {
         className={cn("flex-1 overflow-hidden rounded-t-3xl bg-white", className)}
       >
         <View className="items-center pb-1 pt-2.5">
-          <View className="h-1.5 w-10 rounded-full bg-slate-200" />
+          <View className="mb-1.5 h-1.5 w-10 rounded-full bg-slate-200" />
+          <BrandMark size="xs" />
         </View>
         {children}
       </MotiView>

@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { ErrorState } from "@/components/ui/error-state";
 import { LoadingState } from "@/components/ui/loading-state";
 import { PrinterDevicePicker } from "@/components/printer-device-picker";
+import { BrandMark } from "@/components/brand-mark";
 import {
   getPaymentCache,
   getStudentCache,
@@ -153,6 +154,7 @@ export default function ReceiptScreen() {
           </MotiView>
           <View>
             <Text variant="heading">Receipt</Text>
+            <BrandMark size="xs" className="mt-0.5" />
             <Text variant="muted">Payment recorded successfully.</Text>
           </View>
         </View>

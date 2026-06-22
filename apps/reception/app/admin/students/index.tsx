@@ -10,6 +10,7 @@ import { Text } from "@/components/ui/text";
 import { StudentListItem } from "@/components/student-list-item";
 import { ErrorState } from "@/components/ui/error-state";
 import { Pagination } from "@/components/ui/pagination";
+import { BrandMark } from "@/components/brand-mark";
 import { listStudentsCache, type StudentCacheRow } from "@/lib/storage/db";
 import { syncNow } from "@/lib/sync";
 import { ACADEMIC_LEVELS, LEVEL_LABELS } from "@/lib/types";
@@ -68,6 +69,10 @@ export default function AdminStudentDirectoryScreen() {
         transition={{ type: "timing", duration: 220 }}
         className="border-b border-slate-100 p-4 md:px-6"
       >
+        <View className="mb-3 flex-row items-center justify-between">
+          <Text variant="heading">Students</Text>
+          <BrandMark />
+        </View>
         <View className="flex-col gap-3 md:flex-row md:items-center">
           <View className="relative md:flex-1">
             <View className="absolute left-3 top-0 z-10 h-11 w-5 items-center justify-center">

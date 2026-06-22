@@ -12,6 +12,7 @@ import { PendingSyncBadge } from "@/components/pending-sync-badge";
 import { ErrorState } from "@/components/ui/error-state";
 import { LoadingState } from "@/components/ui/loading-state";
 import { Pagination } from "@/components/ui/pagination";
+import { BrandMark } from "@/components/brand-mark";
 import { getStudentCache, listPaymentsCache, type PaymentCacheRow, type StudentCacheRow } from "@/lib/storage/db";
 import { pullPaymentsForStudent } from "@/lib/sync";
 import { LEVEL_LABELS } from "@/lib/types";
@@ -89,6 +90,7 @@ export default function AdminStudentDetailScreen() {
           <Text variant="heading">{student.fullName}</Text>
           {student.pendingSync ? <PendingSyncBadge /> : null}
         </View>
+        <BrandMark className="mb-1" />
         <Text variant="muted" className="mb-4">
           {LEVEL_LABELS[student.level]}
           {student.admissionNo ? ` · Admission #${student.admissionNo}` : ""} · {student.status}

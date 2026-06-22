@@ -56,7 +56,7 @@ export default function LoginScreen() {
               <GraduationCap size={26} color="#A37A1D" />
             </MotiView>
 
-            <Text variant="heading" className="mb-1 text-center">
+            <Text variant="heading" className="mb-1 text-center text-danger-600">
               VumbaView Academy
             </Text>
             <Text variant="muted" className="mb-8 text-center">

@@ -15,6 +15,7 @@ import { DecorativeShapes } from "@/components/decorative-shapes";
 import { ErrorState } from "@/components/ui/error-state";
 import { LoadingState } from "@/components/ui/loading-state";
 import { Pagination } from "@/components/ui/pagination";
+import { BrandMark } from "@/components/brand-mark";
 import { getStudentCache, listPaymentsCache, type PaymentCacheRow, type StudentCacheRow } from "@/lib/storage/db";
 import { pullPaymentsForStudent } from "@/lib/sync";
 import { useSyncStore } from "@/store/sync-store";
@@ -102,6 +103,7 @@ export default function StudentDetailScreen() {
               <Text variant="heading">{student.fullName}</Text>
               {student.pendingSync ? <PendingSyncBadge /> : null}
             </View>
+            <BrandMark className="mb-0.5" />
             <Text variant="muted">
               {LEVEL_LABELS[student.level]}
               {student.admissionNo ? ` · Admission #${student.admissionNo}` : ""} · {student.status}

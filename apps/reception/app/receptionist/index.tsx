@@ -12,6 +12,7 @@ import { ErrorState } from "@/components/ui/error-state";
 import { Fab } from "@/components/ui/fab";
 import { Pagination } from "@/components/ui/pagination";
 import { DecorativeShapes } from "@/components/decorative-shapes";
+import { BrandMark } from "@/components/brand-mark";
 import { listStudentsCache, type StudentCacheRow } from "@/lib/storage/db";
 import { syncNow } from "@/lib/sync";
 import { ACADEMIC_LEVELS, LEVEL_LABELS } from "@/lib/types";
@@ -75,7 +76,10 @@ export default function StudentDirectoryScreen() {
       >
         <DecorativeShapes tone="gold" />
         <View className="mb-3 flex-row items-center justify-between">
-          <Text variant="heading">Students</Text>
+          <View>
+            <Text variant="heading">Students</Text>
+            <BrandMark className="mt-0.5" />
+          </View>
           {students.length > 0 ? (
             <View className="rounded-full bg-gold-100 px-3 py-1">
               <Text className="font-body-semibold text-xs text-gold-700">{students.length} active</Text>
