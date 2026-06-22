@@ -2,6 +2,7 @@ import { Client, LocalAuth } from "whatsapp-web.js";
 import qrcode from "qrcode-terminal";
 import puppeteer from "puppeteer";
 import { env } from "@vva/env/server";
+import { studentJoinedMessage, paymentMadeMessage } from "./event-templates";
 import type { Inquiry, Payment, Student } from "@prisma/client";
 
 /// Sends the admin a WhatsApp message whenever a payment is recorded or an
@@ -101,17 +102,26 @@ async function sendAdminWhatsApp(message: string): Promise<void> {
 
 export function notifyPaymentRecorded(payment: Payment, student: Student, recordedByUsername: string): Promise<void> {
   const message = [
-    "💰 New payment recorded",
+    `💰 ${paymentMadeMessage(payment.category, Number(payment.amount), student.fullName)}`,
     "",
-    `Student: ${student.fullName} (#${student.admissionNo})`,
-    `Category: ${payment.category}`,
-    `Amount: $${Number(payment.amount).toFixed(2)}`,
+    `Admission #: ${student.admissionNo}`,
     payment.note ? `Note: ${payment.note}` : null,
     `Recorded by: ${recordedByUsername}`,
     `Date: ${payment.occurredAt.toLocaleString("en-ZW", { timeZone: "Africa/Harare" })}`,
   ]
     .filter((line) => line !== null)
     .join("\n");
+
+  return sendAdminWhatsApp(message);
+}
+
+export function notifyStudentAdded(student: Student, addedByUsername: string): Promise<void> {
+  const message = [
+    `🎒 ${studentJoinedMessage(student.fullName, student.level)}`,
+    "",
+    `Admission #: ${student.admissionNo}`,
+    `Added by: ${addedByUsername}`,
+  ].join("\n");
 
   return sendAdminWhatsApp(message);
 }

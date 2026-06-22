@@ -4,6 +4,7 @@ import { requireAuth } from "../middleware/auth";
 import { requireRole } from "../middleware/role";
 import { ACADEMIC_LEVELS } from "../lib/levels";
 import { getCurrentTerm } from "../lib/term";
+import { studentJoinedMessage, paymentMadeMessage } from "../lib/event-templates";
 import type { AppEnv } from "../types";
 
 const dashboard = new Hono<AppEnv>();
@@ -23,6 +24,17 @@ dashboard.get("/enrollment", async (c) => {
   const total = enrollment.reduce((sum, row) => sum + row.count, 0);
 
   return c.json({ total, byLevel: enrollment });
+});
+
+// Term-independent headline counts — meaningful even before any term has
+// been started, so this must never call getCurrentTerm().
+dashboard.get("/summary", async (c) => {
+  const [studentsCount, paymentsCount] = await Promise.all([
+    prisma.student.count({ where: { status: "ACTIVE" } }),
+    prisma.payment.count(),
+  ]);
+
+  return c.json({ studentsCount, paymentsCount });
 });
 
 dashboard.get("/fees", async (c) => {
@@ -54,21 +66,26 @@ dashboard.get("/fees", async (c) => {
   });
 });
 
+// Split into two natural-language feeds (new students / recent payments) per
+// the admin's request for separate sections instead of one merged list. Both
+// read their copy from lib/event-templates so the wording matches the
+// WhatsApp notifications fired for the same events.
 dashboard.get("/activity", async (c) => {
-  const [recentStudents, recentPayments, recentInquiries] = await Promise.all([
+  const [recentStudents, recentPayments] = await Promise.all([
     prisma.student.findMany({
       orderBy: { createdAt: "desc" },
-      take: 10,
+      take: 5,
       select: {
         id: true,
         fullName: true,
+        level: true,
         createdAt: true,
         createdBy: { select: { username: true } },
       },
     }),
     prisma.payment.findMany({
       orderBy: { createdAt: "desc" },
-      take: 10,
+      take: 5,
       select: {
         id: true,
         amount: true,
@@ -78,46 +95,24 @@ dashboard.get("/activity", async (c) => {
         recordedBy: { select: { username: true } },
       },
     }),
-    prisma.inquiry.findMany({
-      orderBy: { createdAt: "desc" },
-      take: 10,
-      select: {
-        id: true,
-        type: true,
-        parentName: true,
-        childName: true,
-        createdAt: true,
-      },
-    }),
   ]);
 
-  const activity = [
-    ...recentStudents.map((s) => ({
+  return c.json({
+    recentStudents: recentStudents.map((s) => ({
+      id: s.id,
       type: "STUDENT_ADDED" as const,
       at: s.createdAt,
-      summary: `${s.fullName} enrolled`,
+      summary: studentJoinedMessage(s.fullName, s.level),
       by: s.createdBy?.username ?? null,
     })),
-    ...recentPayments.map((p) => ({
+    recentPayments: recentPayments.map((p) => ({
+      id: p.id,
       type: "PAYMENT_RECORDED" as const,
       at: p.createdAt,
-      summary: `${p.student.fullName} — $${Number(p.amount).toFixed(2)} (${p.category.toLowerCase()})`,
+      summary: paymentMadeMessage(p.category, Number(p.amount), p.student.fullName),
       by: p.recordedBy.username,
     })),
-    ...recentInquiries.map((i) => ({
-      type: "INQUIRY_RECEIVED" as const,
-      at: i.createdAt,
-      summary:
-        i.type === "TOUR_REQUEST"
-          ? `${i.parentName} requested a tour for ${i.childName}`
-          : `${i.parentName} applied for ${i.childName}`,
-      by: "Website",
-    })),
-  ]
-    .sort((a, b) => b.at.getTime() - a.at.getTime())
-    .slice(0, 15);
-
-  return c.json(activity);
+  });
 });
 
 export default dashboard;

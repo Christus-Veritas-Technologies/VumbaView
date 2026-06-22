@@ -6,6 +6,7 @@ import { ApiError } from "../middleware/error-handler";
 import { ACADEMIC_LEVELS } from "../lib/levels";
 import { ENROLLMENT_STATUSES } from "../lib/constants";
 import { getCurrentTerm, attachFeeStatus } from "../lib/term";
+import { notifyStudentAdded } from "../lib/whatsapp";
 import type { AppEnv } from "../types";
 import type { AcademicLevel, EnrollmentStatus } from "@prisma/client";
 
@@ -52,6 +53,10 @@ students.post("/", async (c) => {
       createdById: staff.id,
     },
   });
+
+  // Fire-and-forget — the student is already saved; a WhatsApp hiccup
+  // shouldn't turn a successful write into a failed request.
+  void notifyStudentAdded(student, staff.username);
 
   return c.json(student, 201);
 });

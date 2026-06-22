@@ -3,18 +3,17 @@ import { useFocusEffect } from "@react-navigation/native";
 import { RefreshControl, ScrollView, View } from "react-native";
 import { MotiView } from "moti";
 import Svg, { Circle, Defs, LinearGradient as SvgGradient, Rect, Stop } from "react-native-svg";
-import { Activity, GraduationCap, MessageCircleHeart, UserPlus, Wallet } from "lucide-react-native";
+import { Calendar, GraduationCap, Receipt, UserPlus, Users, Wallet } from "lucide-react-native";
 import { Text } from "@/components/ui/text";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { ErrorState } from "@/components/ui/error-state";
-import { LoadingState } from "@/components/ui/loading-state";
-import { Pagination } from "@/components/ui/pagination";
+import { Skeleton, SkeletonList, SkeletonStatCard } from "@/components/ui/skeleton";
 import { DecorativeShapes } from "@/components/decorative-shapes";
+import { StartNewTermButton } from "@/components/start-new-term-button";
 import { api, ApiClientError } from "@/lib/api";
 import { notifyNewActivity } from "@/lib/notifications";
 import { LEVEL_LABELS, type AcademicLevel } from "@/lib/types";
-import { usePagination } from "@/lib/use-pagination";
 
 interface EnrollmentData {
   total: number;
@@ -28,23 +27,40 @@ interface FeesData {
   outstanding: number;
 }
 
-interface ActivityItem {
-  type: "STUDENT_ADDED" | "PAYMENT_RECORDED" | "INQUIRY_RECEIVED";
-  at: string;
-  summary: string;
-  by: string;
+interface SummaryData {
+  studentsCount: number;
+  paymentsCount: number;
 }
 
-const ACTIVITY_ICON: Record<ActivityItem["type"], { Icon: typeof UserPlus; badge: string; tint: string }> = {
-  STUDENT_ADDED: { Icon: UserPlus, badge: "bg-info-100", tint: "#2563EB" },
-  PAYMENT_RECORDED: { Icon: Wallet, badge: "bg-gold-100", tint: "#A37A1D" },
-  INQUIRY_RECEIVED: { Icon: MessageCircleHeart, badge: "bg-violet-100", tint: "#7C3AED" },
-};
+interface ActivityRow {
+  id: string;
+  type: "STUDENT_ADDED" | "PAYMENT_RECORDED";
+  at: string;
+  summary: string;
+  by: string | null;
+}
+
+interface ActivityFeed {
+  recentStudents: ActivityRow[];
+  recentPayments: ActivityRow[];
+}
+
+const EMPTY_FEED: ActivityFeed = { recentStudents: [], recentPayments: [] };
 
 /** Gold-gradient hero banner — the dashboard's "vumba sunset" moment, mirroring
  * the sign-in screen's background treatment so the brand feel carries through
  * past login instead of disappearing into a flat white app shell. */
-function DashboardHero({ termNumber, collected, expected }: { termNumber: number; collected: number; expected: number }) {
+function DashboardHero({
+  termNumber,
+  collected,
+  expected,
+  noTerm,
+}: {
+  termNumber?: number;
+  collected: number;
+  expected: number;
+  noTerm?: boolean;
+}) {
   const pct = expected > 0 ? Math.min(100, Math.round((collected / expected) * 100)) : 0;
 
   return (
@@ -65,35 +81,110 @@ function DashboardHero({ termNumber, collected, expected }: { termNumber: number
       </View>
 
       <View className="p-5 md:p-6">
-        <Text className="font-body-medium text-sm text-gold-100">Term {termNumber}</Text>
+        <View className="flex-row items-start justify-between">
+          <Text className="font-body-medium text-sm text-gold-100">{noTerm ? "No active term" : `Term ${termNumber}`}</Text>
+          {/* Branding pill — present in both the active-term and no-term states. */}
+          <View className="rounded-full bg-white px-2.5 py-1">
+            <Text className="font-body-semibold text-[11px] text-danger-600">VumbaView Academy</Text>
+          </View>
+        </View>
         <Text className="mt-1 font-heading-extrabold text-2xl text-white">Dashboard</Text>
 
-        <View className="mt-5 flex-row items-end justify-between">
-          <View>
-            <Text className="font-body-medium text-xs text-gold-100">Collected this term</Text>
-            <Text className="font-heading-semibold text-3xl text-white">${collected.toFixed(2)}</Text>
-          </View>
-          <View className="items-end">
-            <Text className="font-body-semibold text-base text-white">{pct}%</Text>
-            <Text className="font-body text-xs text-gold-100">of ${expected.toFixed(2)}</Text>
-          </View>
-        </View>
+        {noTerm ? (
+          <Text className="mt-5 font-body text-sm text-gold-100">
+            Start a term below to begin tracking fees collected this period.
+          </Text>
+        ) : (
+          <>
+            <View className="mt-5 flex-row items-end justify-between">
+              <View>
+                <Text className="font-body-medium text-xs text-gold-100">Collected this term</Text>
+                <Text className="font-heading-semibold text-3xl text-white">${collected.toFixed(2)}</Text>
+              </View>
+              <View className="items-end">
+                <Text className="font-body-semibold text-base text-white">{pct}%</Text>
+                <Text className="font-body text-xs text-gold-100">of ${expected.toFixed(2)}</Text>
+              </View>
+            </View>
 
-        <View className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-white/20">
-          <View className="h-1.5 rounded-full bg-white" style={{ width: `${pct}%` }} />
-        </View>
+            <View className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-white/20">
+              <View className="h-1.5 rounded-full bg-white" style={{ width: `${pct}%` }} />
+            </View>
+          </>
+        )}
       </View>
     </View>
+  );
+}
+
+function ActivityFeedCard({
+  title,
+  icon,
+  tone,
+  badgeClass,
+  tint,
+  rows,
+  loading,
+  emptyLabel,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  tone: "info" | "violet";
+  badgeClass: string;
+  tint: string;
+  rows: ActivityRow[];
+  loading: boolean;
+  emptyLabel: string;
+}) {
+  return (
+    <Card className="relative overflow-hidden">
+      <DecorativeShapes tone={tone} />
+      <CardHeader>
+        <View className="flex-row items-center gap-2">
+          <View className={`h-8 w-8 items-center justify-center rounded-full ${badgeClass}`}>{icon}</View>
+          <CardTitle>{title}</CardTitle>
+        </View>
+      </CardHeader>
+      <CardContent>
+        {loading && rows.length === 0 ? (
+          <SkeletonList rows={3} />
+        ) : rows.length === 0 ? (
+          <Text variant="muted">{emptyLabel}</Text>
+        ) : (
+          rows.map((item, i) => (
+            <View key={item.id}>
+              {i > 0 ? <Separator className="my-2" /> : null}
+              <View className="flex-row items-center gap-3">
+                <View className={`h-9 w-9 items-center justify-center rounded-full ${badgeClass}`}>
+                  {item.type === "STUDENT_ADDED" ? (
+                    <UserPlus size={15} color={tint} />
+                  ) : (
+                    <Wallet size={15} color={tint} />
+                  )}
+                </View>
+                <View className="flex-1">
+                  <Text>{item.summary}</Text>
+                  <Text variant="muted">
+                    {item.by ?? "—"} · {new Date(item.at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                  </Text>
+                </View>
+              </View>
+            </View>
+          ))
+        )}
+      </CardContent>
+    </Card>
   );
 }
 
 export default function AdminDashboardScreen() {
   const [enrollment, setEnrollment] = useState<EnrollmentData | null>(null);
   const [fees, setFees] = useState<FeesData | null>(null);
-  const [activity, setActivity] = useState<ActivityItem[]>([]);
+  const [summary, setSummary] = useState<SummaryData | null>(null);
+  const [activity, setActivity] = useState<ActivityFeed>(EMPTY_FEED);
+  const [noTerm, setNoTerm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const activityPag = usePagination(activity);
   // Tracks activity keys already seen so a notification only fires for
   // genuinely new events — not for the first load, and not again on every
   // re-focus/pull-to-refresh of the same data.
@@ -103,21 +194,41 @@ export default function AdminDashboardScreen() {
     setLoading(true);
     setError(null);
     try {
-      const [e, f, a] = await Promise.all([
+      const [e, a, s] = await Promise.all([
         api.get<EnrollmentData>("/dashboard/enrollment"),
-        api.get<FeesData>("/dashboard/fees"),
-        api.get<ActivityItem[]>("/dashboard/activity"),
+        api.get<ActivityFeed>("/dashboard/activity"),
+        api.get<SummaryData>("/dashboard/summary"),
       ]);
       setEnrollment(e);
-      setFees(f);
       setActivity(a);
+      setSummary(s);
 
-      const keys = a.map((item) => `${item.type}-${item.at}`);
+      const merged = [...a.recentStudents, ...a.recentPayments];
+      const keys = merged.map((item) => `${item.type}-${item.id}`);
       if (seenActivityKeys.current) {
-        const newItems = a.filter((item, i) => !seenActivityKeys.current!.has(keys[i]));
-        if (newItems.length > 0) notifyNewActivity(newItems);
+        const newItems = merged.filter((item, i) => !seenActivityKeys.current!.has(keys[i]));
+        if (newItems.length > 0) {
+          notifyNewActivity(newItems.map((item) => ({ ...item, by: item.by ?? "" })));
+        }
       }
       seenActivityKeys.current = new Set(keys);
+
+      // Term-dependent figures are fetched separately and on their own
+      // try/catch — a "no term yet" 404 here shouldn't blank out everything
+      // else on the dashboard, just switch this one section to the
+      // encouragement-to-start-a-term card.
+      try {
+        const f = await api.get<FeesData>("/dashboard/fees");
+        setFees(f);
+        setNoTerm(false);
+      } catch (feeErr) {
+        if (feeErr instanceof ApiClientError && feeErr.status === 404) {
+          setFees(null);
+          setNoTerm(true);
+        } else {
+          throw feeErr;
+        }
+      }
     } catch (err) {
       setError(err instanceof ApiClientError ? err.message : "Couldn't load dashboard. Check your connection.");
     } finally {
@@ -131,10 +242,23 @@ export default function AdminDashboardScreen() {
     }, [load]),
   );
 
-  if (loading && !fees && !enrollment && !error) {
+  if (loading && !enrollment && !summary && !error) {
     return (
       <View className="flex-1 bg-slate-50">
-        <LoadingState label="Loading dashboard…" />
+        <View className="w-full p-4 md:mx-auto md:max-w-3xl md:p-6 lg:max-w-4xl">
+          <Skeleton className="mb-5 h-40 w-full rounded-3xl" />
+          <View className="mb-4 flex-col gap-4 md:flex-row">
+            <SkeletonStatCard />
+            <SkeletonStatCard />
+          </View>
+          <View className="mb-4 flex-col gap-4 md:flex-row">
+            <SkeletonStatCard />
+            <SkeletonStatCard />
+          </View>
+          <View className="rounded-2xl border border-slate-100 bg-white p-4">
+            <SkeletonList rows={3} />
+          </View>
+        </View>
       </View>
     );
   }
@@ -148,21 +272,94 @@ export default function AdminDashboardScreen() {
       <View className="w-full p-4 md:mx-auto md:max-w-3xl md:p-6 lg:max-w-4xl">
         <MotiView from={{ opacity: 0, translateY: 10 }} animate={{ opacity: 1, translateY: 0 }} transition={{ type: "timing", duration: 260 }}>
           <DashboardHero
-            termNumber={fees?.term.number ?? 1}
+            termNumber={fees?.term.number}
             collected={fees?.collected ?? 0}
             expected={fees?.expected ?? 0}
+            noTerm={noTerm}
           />
         </MotiView>
 
         {error ? <ErrorState message={error} onRetry={load} className="mb-4" /> : null}
 
+        {/* Students + Payments headline counts — meaningful with or without
+            an active term, so they sit above the term-dependent cards. */}
+        <View className="mb-4 flex-col gap-4 md:flex-row">
+          <MotiView
+            from={{ opacity: 0, translateY: 10 }}
+            animate={{ opacity: 1, translateY: 0 }}
+            transition={{ type: "timing", duration: 260, delay: 40 }}
+            className="md:flex-1"
+          >
+            <Card className="overflow-hidden">
+              <CardContent className="flex-row items-center gap-3 py-5">
+                <View className="h-11 w-11 items-center justify-center rounded-full bg-success-100">
+                  <Users size={18} color="#16A34A" />
+                </View>
+                <View>
+                  <Text className="font-heading-semibold text-2xl text-slate-900">{summary?.studentsCount ?? 0}</Text>
+                  <Text variant="muted" className="text-xs">
+                    Active students
+                  </Text>
+                </View>
+              </CardContent>
+            </Card>
+          </MotiView>
+
+          <MotiView
+            from={{ opacity: 0, translateY: 10 }}
+            animate={{ opacity: 1, translateY: 0 }}
+            transition={{ type: "timing", duration: 260, delay: 80 }}
+            className="md:flex-1"
+          >
+            <Card className="overflow-hidden">
+              <CardContent className="flex-row items-center gap-3 py-5">
+                <View className="h-11 w-11 items-center justify-center rounded-full bg-gold-100">
+                  <Receipt size={18} color="#A37A1D" />
+                </View>
+                <View>
+                  <Text className="font-heading-semibold text-2xl text-slate-900">{summary?.paymentsCount ?? 0}</Text>
+                  <Text variant="muted" className="text-xs">
+                    Payments made
+                  </Text>
+                </View>
+              </CardContent>
+            </Card>
+          </MotiView>
+        </View>
+
         {/* Term fees + Enrollment sit side-by-side once there's room. */}
         <View className="mb-4 flex-col gap-4 md:flex-row">
-          {fees ? (
+          {noTerm ? (
             <MotiView
               from={{ opacity: 0, translateY: 10 }}
               animate={{ opacity: 1, translateY: 0 }}
-              transition={{ type: "timing", duration: 260, delay: 80 }}
+              transition={{ type: "timing", duration: 260, delay: 120 }}
+              className="md:flex-1"
+            >
+              <Card className="relative overflow-hidden">
+                <DecorativeShapes tone="gold" />
+                <CardHeader>
+                  <View className="flex-row items-center gap-2">
+                    <View className="h-8 w-8 items-center justify-center rounded-full bg-gold-100">
+                      <Calendar size={16} color="#A37A1D" />
+                    </View>
+                    <CardTitle>No active term</CardTitle>
+                  </View>
+                </CardHeader>
+                <CardContent>
+                  <Text variant="muted" className="mb-4">
+                    Start a term to begin tracking fees collected this period. Once a term is active, this card
+                    shows real collection figures.
+                  </Text>
+                  <StartNewTermButton onStarted={load} />
+                </CardContent>
+              </Card>
+            </MotiView>
+          ) : fees ? (
+            <MotiView
+              from={{ opacity: 0, translateY: 10 }}
+              animate={{ opacity: 1, translateY: 0 }}
+              transition={{ type: "timing", duration: 260, delay: 120 }}
               className="md:flex-1"
             >
               <Card className="relative overflow-hidden">
@@ -226,58 +423,45 @@ export default function AdminDashboardScreen() {
           ) : null}
         </View>
 
-        <MotiView
-          from={{ opacity: 0, translateY: 10 }}
-          animate={{ opacity: 1, translateY: 0 }}
-          transition={{ type: "timing", duration: 260, delay: 240 }}
-        >
-          <Card className="relative overflow-hidden">
-            <DecorativeShapes tone="violet" />
-            <CardHeader>
-              <View className="flex-row items-center gap-2">
-                <View className="h-8 w-8 items-center justify-center rounded-full bg-violet-100">
-                  <Activity size={16} color="#7C3AED" />
-                </View>
-                <CardTitle>Recent activity</CardTitle>
-              </View>
-            </CardHeader>
-            <CardContent>
-              {activity.length === 0 ? (
-                <Text variant="muted">No recent activity.</Text>
-              ) : (
-                activityPag.pageItems.map((item, i) => {
-                  const { Icon, badge, tint } = ACTIVITY_ICON[item.type];
-                  return (
-                    <View key={`${item.type}-${item.at}-${i}`}>
-                      {i > 0 ? <Separator className="my-2" /> : null}
-                      <View className="flex-row items-center gap-3">
-                        <View className={`h-9 w-9 items-center justify-center rounded-full ${badge}`}>
-                          <Icon size={15} color={tint} />
-                        </View>
-                        <View className="flex-1">
-                          <Text>{item.summary}</Text>
-                          <Text variant="muted">
-                            {item.by} · {new Date(item.at).toLocaleString()}
-                          </Text>
-                        </View>
-                      </View>
-                    </View>
-                  );
-                })
-              )}
-            </CardContent>
-            <Pagination
-              page={activityPag.page}
-              totalPages={activityPag.totalPages}
-              hasPrev={activityPag.hasPrev}
-              hasNext={activityPag.hasNext}
-              onPrev={activityPag.prev}
-              onNext={activityPag.next}
-              total={activityPag.total}
-              className="border-t-0"
+        {/* New students + Recent payments — split into two natural-language
+            feeds instead of one merged "recent activity" list. */}
+        <View className="flex-col gap-4 md:flex-row">
+          <MotiView
+            from={{ opacity: 0, translateY: 10 }}
+            animate={{ opacity: 1, translateY: 0 }}
+            transition={{ type: "timing", duration: 260, delay: 200 }}
+            className="md:flex-1"
+          >
+            <ActivityFeedCard
+              title="New students"
+              icon={<UserPlus size={16} color="#2563EB" />}
+              tone="info"
+              badgeClass="bg-info-100"
+              tint="#2563EB"
+              rows={activity.recentStudents}
+              loading={loading}
+              emptyLabel="No new students yet."
             />
-          </Card>
-        </MotiView>
+          </MotiView>
+
+          <MotiView
+            from={{ opacity: 0, translateY: 10 }}
+            animate={{ opacity: 1, translateY: 0 }}
+            transition={{ type: "timing", duration: 260, delay: 240 }}
+            className="md:flex-1"
+          >
+            <ActivityFeedCard
+              title="Recent payments"
+              icon={<Wallet size={16} color="#7C3AED" />}
+              tone="violet"
+              badgeClass="bg-violet-100"
+              tint="#7C3AED"
+              rows={activity.recentPayments}
+              loading={loading}
+              emptyLabel="No payments recorded yet."
+            />
+          </MotiView>
+        </View>
       </View>
     </ScrollView>
   );

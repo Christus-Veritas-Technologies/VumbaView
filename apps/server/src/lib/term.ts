@@ -10,7 +10,10 @@ export async function getCurrentTerm() {
   const term = await prisma.term.findFirst({ where: { isCurrent: true } });
 
   if (!term) {
-    throw new ApiError(500, "No current term set up yet — start one from Admin Settings");
+    // 404, not 500 — this is an expected "nothing set up yet" state, not a
+    // server fault. The dashboard relies on this exact status code to show
+    // its no-term empty state instead of a generic error.
+    throw new ApiError(404, "No current term set up yet — start one from Admin Settings");
   }
 
   return term;
