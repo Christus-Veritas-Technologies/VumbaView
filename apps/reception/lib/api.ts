@@ -53,10 +53,17 @@ async function request<T>(method: string, path: string, options: RequestOptions 
   const { body, query, auth = true } = options;
   const headers: Record<string, string> = { "Content-Type": "application/json" };
 
+  // Tracked separately from `auth` so a 401 can be told apart below: `auth`
+  // just means "this call wants a token if one exists" — it's still true for
+  // background calls (e.g. the sync engine's pre-login pull) that fire before
+  // anyone is signed in. Only a 401 on a request that actually carried a
+  // token means the session itself was rejected.
+  let tokenAttached = false;
   if (auth) {
     const token = await getToken();
     if (token) {
       headers.Authorization = `Bearer ${token}`;
+      tokenAttached = true;
     }
   }
 
@@ -86,7 +93,14 @@ async function request<T>(method: string, path: string, options: RequestOptions 
     // screen's reactive `if (!staff) <Redirect href="/login" />` guard
     // takes over, instead of leaving the raw "Invalid or expired token"
     // string on screen with no way forward.
-    if (res.status === 401 && auth) {
+    //
+    // Gated on `tokenAttached`, not just `auth`: a 401 with no token attached
+    // just means "not signed in yet" (e.g. the sync engine's background pull
+    // firing at app launch before any login). Treating that as a sign-out
+    // signal too is what let a slow, stale pre-login request resolve *after*
+    // a fresh login and immediately wipe the session it had just set —
+    // the "redirected back to sign-in after a second" bug.
+    if (res.status === 401 && tokenAttached) {
       unauthorizedHandler?.();
     }
 
