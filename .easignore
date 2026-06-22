@@ -107,6 +107,16 @@ lerna-debug.log*
 .DS_Store
 Thumbs.db
 
+# ============ WhatsApp (apps/server) — puppeteer's downloaded Chromium ============
+# ============ binary and the logged-in WhatsApp session. Not in the ============
+# ============ .gitignore-equivalent excludes above because they're not ============
+# ============ build outputs/caches, but they're local/environment-specific, ============
+# ============ irrelevant to an Android/iOS build, and chrome/ alone is ============
+# ============ hundreds of MB — almost certainly the bulk of any oversized ============
+# ============ EAS archive in this repo. ============
+apps/server/chrome/
+apps/server/.wwebjs_auth/
+
 # ============ Misc ============
 *.tgz
 tmp
