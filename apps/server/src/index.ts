@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { logger } from "hono/logger";
 import { env } from "@vva/env/server";
 import { errorHandler } from "./middleware/error-handler";
 import { initWhatsApp } from "./lib/whatsapp";
@@ -19,6 +20,10 @@ const app = new Hono();
 // (or fail if it's never been authenticated) and must never delay Bun from
 // serving HTTP traffic.
 void initWhatsApp();
+
+// One log line per request (method, path, status, duration) — makes prod
+// logs useful for diagnosing issues without per-route instrumentation.
+app.use("*", logger());
 
 app.use(
   "*",
