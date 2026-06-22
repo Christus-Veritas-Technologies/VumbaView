@@ -1,20 +1,16 @@
 import { Redirect, Tabs } from "expo-router";
 import { LayoutDashboard, Settings, Users } from "lucide-react-native";
 import { useAuthStore } from "@/store/auth-store";
-import { authLog } from "@/lib/debug-log";
 
 export default function AdminLayout() {
   const staff = useAuthStore((s) => s.staff);
 
   if (!staff) {
-    authLog("guard:admin/_layout", "staff=null -> redirect /login");
     return <Redirect href="/login" />;
   }
   if (staff.role !== "ADMIN") {
-    authLog("guard:admin/_layout", "staff=", staff.username, "role=", staff.role, "-> redirect /receptionist");
     return <Redirect href="/receptionist" />;
   }
-  authLog("guard:admin/_layout", "staff=", staff.username, "ADMIN ok, rendering tabs");
 
   return (
     <Tabs

@@ -1,19 +1,15 @@
 import { Redirect, Stack } from "expo-router";
 import { useAuthStore } from "@/store/auth-store";
-import { authLog } from "@/lib/debug-log";
 
 export default function ReceptionistLayout() {
   const staff = useAuthStore((s) => s.staff);
 
   if (!staff) {
-    authLog("guard:receptionist/_layout", "staff=null -> redirect /login");
     return <Redirect href="/login" />;
   }
   if (staff.role !== "RECEPTIONIST") {
-    authLog("guard:receptionist/_layout", "staff=", staff.username, "role=", staff.role, "-> redirect /admin");
     return <Redirect href="/admin" />;
   }
-  authLog("guard:receptionist/_layout", "staff=", staff.username, "RECEPTIONIST ok, rendering stack");
 
   return (
     <Stack

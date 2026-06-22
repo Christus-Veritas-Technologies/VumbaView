@@ -12,7 +12,6 @@ import {
 import { useAuthStore } from "@/store/auth-store";
 import { useSyncEngine, useSyncStore } from "@/store/sync-store";
 import { initDb } from "@/lib/storage/db";
-import { authLog } from "@/lib/debug-log";
 
 initDb();
 
@@ -32,18 +31,11 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    authLog("RootLayout:mount-effect:start");
     (async () => {
       await hydrate();
-      authLog("RootLayout:mount-effect:hydrate-done, staff=", useAuthStore.getState().staff?.username ?? "(none)");
       // Catch up on anything queued from a previous session, and pull a
-      // fresh snapshot, before the first screen renders. NOTE: this fires
-      // unconditionally, even with no token yet — watch the request:start
-      // log for "GET /students auth= true tokenAttached= false" right
-      // around a login to see if this is racing it.
-      authLog("RootLayout:mount-effect:runSync-start");
+      // fresh snapshot, before the first screen renders.
       await useSyncStore.getState().runSync();
-      authLog("RootLayout:mount-effect:runSync-done, staff=", useAuthStore.getState().staff?.username ?? "(none)");
     })();
   }, [hydrate]);
 

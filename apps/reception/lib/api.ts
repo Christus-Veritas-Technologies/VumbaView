@@ -1,5 +1,4 @@
 import { getToken } from "@/lib/storage/token";
-import { authLog, tokenFingerprint } from "@/lib/debug-log";
 
 // RN's URL class doesn't reliably support relative/query construction across
 // engines, so the base+path joining here is done with plain string ops.
@@ -60,17 +59,13 @@ async function request<T>(method: string, path: string, options: RequestOptions 
   // anyone is signed in. Only a 401 on a request that actually carried a
   // token means the session itself was rejected.
   let tokenAttached = false;
-  let tokenUsed: string | null = null;
   if (auth) {
-    tokenUsed = await getToken();
+    const tokenUsed = await getToken();
     if (tokenUsed) {
       headers.Authorization = `Bearer ${tokenUsed}`;
       tokenAttached = true;
     }
   }
-
-  const startedAt = Date.now();
-  authLog("request:start", method, path, "auth=", auth, "tokenAttached=", tokenAttached, tokenAttached ? tokenFingerprint(tokenUsed) : "");
 
   let res: Response;
   try {
@@ -79,23 +74,18 @@ async function request<T>(method: string, path: string, options: RequestOptions 
       headers,
       body: body !== undefined ? JSON.stringify(body) : undefined,
     });
-  } catch (err) {
-    authLog("request:network-error", method, path, "after", Date.now() - startedAt, "ms", err);
+  } catch {
     throw new ApiClientError(0, "Network request failed — check your connection");
   }
 
   const text = await res.text();
   const data = text ? JSON.parse(text) : null;
 
-  authLog("request:done", method, path, "status=", res.status, "after", Date.now() - startedAt, "ms");
-
   if (!res.ok) {
     const message =
       data && typeof data === "object" && "error" in data
         ? String((data as { error: unknown }).error)
         : `Request failed (${res.status})`;
-
-    authLog("request:error-body", method, path, "status=", res.status, "message=", message);
 
     // A real 401 from the server (bad/expired token, deactivated account) —
     // as opposed to a network failure, which never reaches this branch —
@@ -111,10 +101,7 @@ async function request<T>(method: string, path: string, options: RequestOptions 
     // a fresh login and immediately wipe the session it had just set —
     // the "redirected back to sign-in after a second" bug.
     if (res.status === 401 && tokenAttached) {
-      authLog("request:401-with-token -> firing unauthorizedHandler", method, path, tokenFingerprint(tokenUsed));
       unauthorizedHandler?.();
-    } else if (res.status === 401) {
-      authLog("request:401-no-token (ignored, not a sign-out signal)", method, path);
     }
 
     throw new ApiClientError(res.status, message);

@@ -9,7 +9,6 @@ import { Text } from "@/components/ui/text";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { AuthBackground } from "@/components/auth-background";
-import { authLog } from "@/lib/debug-log";
 
 export default function LoginScreen() {
   const staff = useAuthStore((s) => s.staff);
@@ -21,22 +20,13 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
 
   if (staff) {
-    authLog("guard:login", "staff already set (", staff.username, ") -> redirect away from login screen");
     return <Redirect href={staff.role === "ADMIN" ? "/admin" : "/receptionist"} />;
   }
 
-  authLog("guard:login", "rendering sign-in form (staff=null)");
-
   async function handleSubmit() {
-    authLog("login-screen:handleSubmit:start", username.trim());
     const ok = await login(username.trim(), password);
-    authLog("login-screen:handleSubmit:login() resolved", ok, "staff now=", useAuthStore.getState().staff?.username ?? "(none)");
     if (ok) {
-      // Fire-and-forget — NOT awaited. If this pull's response resolves
-      // late and races a later 401-handling branch, the timing shows up
-      // here as a request:start without a matching request:done before
-      // the redirect-to-login is observed.
-      authLog("login-screen:handleSubmit:firing background runSync()");
+      // Fire-and-forget — NOT awaited.
       useSyncStore.getState().runSync();
     }
   }
