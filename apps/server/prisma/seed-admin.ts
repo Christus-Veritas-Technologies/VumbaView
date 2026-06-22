@@ -2,6 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { env } from "@vva/env/server";
 import { hashPassword } from "../src/lib/password";
+import { ROOT_ADMIN_USERNAME } from "../src/lib/constants";
 
 // Ensures the real production admin account exists. Unlike prisma/seed.ts
 // (fictional demo data, meant for an empty/dev database and skipped once any
@@ -13,7 +14,7 @@ import { hashPassword } from "../src/lib/password";
 const adapter = new PrismaPg({ connectionString: env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
-const ADMIN_USERNAME = "stephen";
+const ADMIN_USERNAME = ROOT_ADMIN_USERNAME;
 const ADMIN_PASSWORD = "stepchikamhi";
 
 async function main() {

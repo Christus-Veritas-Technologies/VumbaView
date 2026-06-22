@@ -5,7 +5,7 @@ import { requireAuth } from "../middleware/auth";
 import { requireRole } from "../middleware/role";
 import { ApiError } from "../middleware/error-handler";
 import { hashPassword } from "../lib/password";
-import { STAFF_ROLES } from "../lib/constants";
+import { STAFF_ROLES, ROOT_ADMIN_USERNAME } from "../lib/constants";
 import type { AppEnv } from "../types";
 import type { StaffRole } from "@prisma/client";
 
@@ -63,6 +63,13 @@ staff.patch("/:id/deactivate", async (c) => {
 
   if (!target) {
     throw new ApiError(404, "Staff account not found");
+  }
+
+  // The root admin is the one account that can never be locked out —
+  // whether they're trying to deactivate themselves or another admin is
+  // trying to do it to them.
+  if (target.username === ROOT_ADMIN_USERNAME) {
+    throw new ApiError(403, "The root admin account can't be deactivated");
   }
 
   const updated = await prisma.staff.update({

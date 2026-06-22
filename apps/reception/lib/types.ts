@@ -1,5 +1,10 @@
 export type StaffRole = "ADMIN" | "RECEPTIONIST";
 
+// Mirrors apps/server/src/lib/constants.ts's ROOT_ADMIN_USERNAME — kept in
+// sync by hand. Used to hide/disable the Deactivate action for this account
+// in the UI (the server also refuses the request either way).
+export const ROOT_ADMIN_USERNAME = "stephen";
+
 export type AcademicLevel =
   | "ECD_A"
   | "ECD_B"
