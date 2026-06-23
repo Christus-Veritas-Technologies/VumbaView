@@ -3,7 +3,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { Alert, Modal, Pressable, ScrollView, View } from "react-native";
 import { useRouter } from "expo-router";
 import { MotiView } from "moti";
-import { Calendar, Check, UserPlus, Users, Wallet } from "lucide-react-native";
+import { Calendar, Check, LogOut, UserPlus, Users, Wallet } from "lucide-react-native";
 import { Text } from "@/components/ui/text";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -21,6 +21,7 @@ import { api, ApiClientError } from "@/lib/api";
 import { ACADEMIC_LEVELS, LEVEL_LABELS, ROOT_ADMIN_USERNAME, type AcademicLevel, type StaffRole } from "@/lib/types";
 import { usePagination } from "@/lib/use-pagination";
 import { optionalAmount } from "@/lib/validation";
+import { useAuthStore } from "@/store/auth-store";
 
 interface StaffRow {
   id: string;
@@ -37,6 +38,7 @@ interface LevelFeeRow {
 
 export default function AdminSettingsScreen() {
   const router = useRouter();
+  const logout = useAuthStore((s) => s.logout);
   const [staff, setStaff] = useState<StaffRow[]>([]);
   const [fees, setFees] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
@@ -94,6 +96,20 @@ export default function AdminSettingsScreen() {
           } catch (err) {
             Alert.alert("Error", err instanceof ApiClientError ? err.message : "Couldn't deactivate staff.");
           }
+        },
+      },
+    ]);
+  }
+
+  function handleLogout() {
+    Alert.alert("Log out", "Are you sure you want to log out?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Log out",
+        style: "destructive",
+        onPress: async () => {
+          await logout();
+          router.replace("/login");
         },
       },
     ]);
@@ -263,6 +279,26 @@ export default function AdminSettingsScreen() {
                   of each school term.
                 </Text>
                 <StartNewTermButton onStarted={load} />
+              </CardContent>
+            </Card>
+
+            <Card className="relative overflow-hidden">
+              <CardHeader>
+                <View className="flex-row items-center gap-2">
+                  <View className="h-8 w-8 items-center justify-center rounded-full bg-danger-100">
+                    <LogOut size={16} color="#DC2626" />
+                  </View>
+                  <CardTitle>Account</CardTitle>
+                </View>
+              </CardHeader>
+              <CardContent>
+                <Text variant="muted" className="mb-4">
+                  Signed in as an admin. Logging out will require signing back in to access this app.
+                </Text>
+                <Button variant="destructive" onPress={handleLogout}>
+                  <LogOut size={16} color="#fff" />
+                  <Text className="ml-2 font-body-semibold text-base text-white">Log out</Text>
+                </Button>
               </CardContent>
             </Card>
           </View>
