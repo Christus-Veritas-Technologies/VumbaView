@@ -229,7 +229,7 @@ export default function AdminPaymentsScreen() {
               <Receipt size={16} color="#A37A1D" />
             </View>
             <View>
-              <Text variant="heading">Payments</Text>
+              <Text variant="heading">Fees &amp; Payments</Text>
               <BrandMark size="xs" />
             </View>
           </View>
