@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { useFocusEffect } from "@react-navigation/native";
-import { FlatList, View } from "react-native";
+import { FlatList, Pressable, View } from "react-native";
 import { useRouter } from "expo-router";
 import { MotiView } from "moti";
-import { Search } from "lucide-react-native";
+import { Search, Settings } from "lucide-react-native";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Text } from "@/components/ui/text";
@@ -80,11 +80,20 @@ export default function StudentDirectoryScreen() {
             <Text variant="heading">Students</Text>
             <BrandMark className="mt-0.5" />
           </View>
-          {students.length > 0 ? (
-            <View className="rounded-full bg-gold-100 px-3 py-1">
-              <Text className="font-body-semibold text-xs text-gold-700">{students.length} active</Text>
-            </View>
-          ) : null}
+          <View className="flex-row items-center gap-2">
+            {students.length > 0 ? (
+              <View className="rounded-full bg-gold-100 px-3 py-1">
+                <Text className="font-body-semibold text-xs text-gold-700">{students.length} active</Text>
+              </View>
+            ) : null}
+            <Pressable
+              accessibilityLabel="Settings"
+              onPress={() => router.push("/receptionist/settings")}
+              className="h-9 w-9 items-center justify-center rounded-full bg-white active:bg-gold-100"
+            >
+              <Settings size={18} color="#A37A1D" />
+            </Pressable>
+          </View>
         </View>
         <View className="flex-col gap-3 md:flex-row md:items-center">
           <View className="relative md:flex-1">

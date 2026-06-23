@@ -26,6 +26,7 @@ export default function ReceptionistLayout() {
       <Stack.Screen name="students/[id]" options={{ title: "Student" }} />
       <Stack.Screen name="students/[id]/edit" options={{ title: "Edit Student", presentation: "modal" }} />
       <Stack.Screen name="students/[id]/pay" options={{ title: "Record Payment", presentation: "modal" }} />
+      <Stack.Screen name="settings" options={{ title: "Settings" }} />
     </Stack>
   );
 }
