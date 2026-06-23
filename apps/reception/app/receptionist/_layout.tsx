@@ -1,4 +1,5 @@
-import { Redirect, Stack } from "expo-router";
+import { Redirect, Tabs } from "expo-router";
+import { Settings, Users } from "lucide-react-native";
 import { useAuthStore } from "@/store/auth-store";
 
 export default function ReceptionistLayout() {
@@ -12,21 +13,29 @@ export default function ReceptionistLayout() {
   }
 
   return (
-    <Stack
+    <Tabs
       screenOptions={{
         headerShown: true,
         headerStyle: { backgroundColor: "#ffffff" },
         headerShadowVisible: false,
-        headerTintColor: "#A37A1D",
         headerTitleStyle: { fontFamily: "PlusJakartaSans_700Bold", fontSize: 17, color: "#0f172a" },
+        tabBarActiveTintColor: "#A37A1D",
+        tabBarInactiveTintColor: "#94a3b8",
+        tabBarStyle: { borderTopColor: "#f1f5f9" },
+        tabBarLabelStyle: { fontFamily: "Inter_600SemiBold", fontSize: 11 },
       }}
     >
-      <Stack.Screen name="index" options={{ title: "Students" }} />
-      <Stack.Screen name="students/new" options={{ title: "Add Student", presentation: "modal" }} />
-      <Stack.Screen name="students/[id]" options={{ title: "Student" }} />
-      <Stack.Screen name="students/[id]/edit" options={{ title: "Edit Student", presentation: "modal" }} />
-      <Stack.Screen name="students/[id]/pay" options={{ title: "Record Payment", presentation: "modal" }} />
-      <Stack.Screen name="settings" options={{ title: "Settings" }} />
-    </Stack>
+      {/* Hidden — exists only so bare /receptionist redirects somewhere
+          sensible. Never shown as a tab. */}
+      <Tabs.Screen name="index" options={{ href: null, headerShown: false }} />
+      <Tabs.Screen
+        name="students"
+        options={{ title: "Students", headerShown: false, tabBarIcon: ({ color, size }) => <Users color={color} size={size} /> }}
+      />
+      <Tabs.Screen
+        name="settings"
+        options={{ title: "Settings", tabBarIcon: ({ color, size }) => <Settings color={color} size={size} /> }}
+      />
+    </Tabs>
   );
 }
