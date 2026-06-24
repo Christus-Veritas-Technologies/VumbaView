@@ -413,7 +413,12 @@ export async function printReceipt(data: ReceiptPrintData): Promise<PrinterResul
       const verifyUrl = buildVerifyUrl(data.receiptId);
       console.log(`${LOG} printReceipt: printing verification QR for ${verifyUrl}`);
       await alignCenter();
-      await BluetoothEscposPrinter.printQRCode(verifyUrl, 200, BluetoothEscposPrinter.ERROR_CORRECTION.M);
+      // Sized as large as the 58mm printable width allows (384 dots). A
+      // literal 2.5x of the old 200 would be 500, but that overflows the
+      // printable width and gets clipped/unscannable on this app's target
+      // 58mm thermal printers — 360 is the largest 8-dot-aligned size that
+      // still fits, ~1.8x the old size.
+      await BluetoothEscposPrinter.printQRCode(verifyUrl, 360, BluetoothEscposPrinter.ERROR_CORRECTION.M);
     } catch (e) {
       // Best-effort/secondary — a printer that can't render a QR bitmap
       // shouldn't fail the whole receipt; every figure on it has already
