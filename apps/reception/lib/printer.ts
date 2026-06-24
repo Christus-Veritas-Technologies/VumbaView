@@ -18,6 +18,7 @@ import {
 export type PrinterErrorCode =
   | "UNSUPPORTED_PLATFORM"
   | "BLUETOOTH_DISABLED"
+  | "LOCATION_SERVICES_OFF"
   | "PERMISSION_DENIED"
   | "NO_DEVICE_SELECTED"
   | "CONNECTION_FAILED"
@@ -59,6 +60,44 @@ const BLUETOOTH_PERMISSIONS = [
 ] as unknown as RequestMultipleArg;
 
 const LOG = "[printer]";
+
+/**
+ * `BluetoothManager.scanDevices()`'s actual resolved shape doesn't match the
+ * package's own .d.ts (`Promise<{ paired: BluetoothDevice[]; found:
+ * BluetoothDevice[] }>`) — that type is a hand-written guess, while index.js
+ * forwards the raw native module untouched. The README's own usage example
+ * does `JSON.parse(s)` on the resolved value, confirming it's actually a
+ * JSON-encoded string. Upstream forks have also shown `.paired`/`.found`
+ * themselves arriving as JSON-encoded strings rather than arrays in some
+ * versions, so this parses defensively instead of trusting either shape.
+ */
+function parseDeviceList(value: unknown): BluetoothDevice[] {
+  if (Array.isArray(value)) return value as BluetoothDevice[];
+  if (typeof value === "string" && value.length > 0) {
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      console.error(`${LOG} parseDeviceList: failed to JSON.parse device list string:`, e);
+      return [];
+    }
+  }
+  return [];
+}
+
+function parseScanResult(raw: unknown): { paired: BluetoothDevice[]; found: BluetoothDevice[] } {
+  let obj: { paired?: unknown; found?: unknown } = {};
+  if (typeof raw === "string") {
+    try {
+      obj = JSON.parse(raw);
+    } catch (e) {
+      console.error(`${LOG} parseScanResult: failed to JSON.parse scan result string:`, e);
+    }
+  } else if (raw && typeof raw === "object") {
+    obj = raw as { paired?: unknown; found?: unknown };
+  }
+  return { paired: parseDeviceList(obj.paired), found: parseDeviceList(obj.found) };
+}
 
 /** Requests the runtime permissions classic Bluetooth scanning needs. */
 async function requestBluetoothPermissions(): Promise<boolean> {
@@ -123,7 +162,9 @@ export async function listPrinters(): Promise<PrinterResult<PrinterDevice[]>> {
 
   try {
     console.log(`${LOG} listPrinters: scanning for devices…`);
-    const { paired, found } = await BluetoothManager.scanDevices();
+    const raw = await BluetoothManager.scanDevices();
+    console.log(`${LOG} listPrinters: raw scan result (type=${typeof raw}):`, raw);
+    const { paired, found } = parseScanResult(raw);
     console.log(`${LOG} listPrinters: scan complete — paired=${paired.length}, found=${found.length}`);
     const byAddress = new Map<string, PrinterDevice>();
     for (const d of paired) byAddress.set(d.address, { ...d, paired: true });
@@ -138,6 +179,21 @@ export async function listPrinters(): Promise<PrinterResult<PrinterDevice[]>> {
     return ok(devices);
   } catch (e) {
     console.error(`${LOG} listPrinters: scan failed:`, e);
+    // The underlying native module throws { code: "DISCOVER", message: "NOT_STARTED" }
+    // almost exclusively when the device's system Location service is turned off —
+    // Android requires it for classic Bluetooth discovery on API 29+, even though
+    // the app already holds the BLUETOOTH_SCAN/ACCESS_FINE_LOCATION *permissions*.
+    // This is a well-documented quirk of this library, not a bug in this app:
+    // https://github.com/januslo/react-native-bluetooth-escpos-printer/issues/120
+    const code = (e as { code?: string } | null)?.code;
+    const message = (e as { message?: string } | null)?.message;
+    if (code === "DISCOVER" || message === "NOT_STARTED") {
+      console.error(`${LOG} listPrinters: scan failed with NOT_STARTED — Location services are very likely off`);
+      return err(
+        "LOCATION_SERVICES_OFF",
+        "Turn on Location (GPS) in this device's settings, then try again — Android requires it for Bluetooth scanning.",
+      );
+    }
     return err("UNKNOWN", "Couldn't scan for nearby Bluetooth printers.");
   }
 }
