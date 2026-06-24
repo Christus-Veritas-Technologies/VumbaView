@@ -95,12 +95,13 @@ const adminListQuerySchema = z.object({
   to: z.coerce.date().optional(),
 });
 
-// Admin-only browse view: every payment across the school, with the student
+// School-wide browse view: every payment across the school, with the student
 // and the receptionist who recorded it joined in, paginated and filterable.
-// Kept as its own route (rather than overloading GET /) so the plain
-// studentId-scoped list above — used by the offline sync engine — never has
-// to change shape.
-payments.get("/admin", requireRole("ADMIN"), async (c) => {
+// Open to receptionists too — they need to find and reprint any payment, not
+// just ones for locally-cached students. Kept as its own route (rather than
+// overloading GET /) so the plain studentId-scoped list above — used by the
+// offline sync engine — never has to change shape.
+payments.get("/admin", requireRole("ADMIN", "RECEPTIONIST"), async (c) => {
   const parsed = adminListQuerySchema.safeParse({
     page: c.req.query("page"),
     pageSize: c.req.query("pageSize"),
