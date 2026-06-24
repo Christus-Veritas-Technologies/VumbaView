@@ -11,6 +11,7 @@ import staff from "./routes/staff";
 import settings from "./routes/settings";
 import payments from "./routes/payments";
 import dashboard from "./routes/dashboard";
+import reports from "./routes/reports";
 import admissions from "./routes/admissions";
 import contact from "./routes/contact";
 
@@ -39,6 +40,7 @@ app.route("/staff", staff);
 app.route("/settings", settings);
 app.route("/payments", payments);
 app.route("/dashboard", dashboard);
+app.route("/reports", reports);
 app.route("/admissions", admissions);
 app.route("/contact", contact);
 
