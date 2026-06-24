@@ -27,6 +27,14 @@ export function setUnauthorizedHandler(fn: () => void): void {
   unauthorizedHandler = fn;
 }
 
+// Exported for lib/reports.ts: PDF downloads are binary, not JSON, so they
+// can't go through request<T>() above (which always does res.text() +
+// JSON.parse). That module builds its own authenticated fetch() and just
+// needs the same base-URL + query-string joining used everywhere else.
+export function apiUrl(path: string, query?: Record<string, string | undefined>): string {
+  return buildUrl(path, query);
+}
+
 function buildUrl(path: string, query?: Record<string, string | undefined>): string {
   const cleanPath = path.startsWith("/") ? path : `/${path}`;
   let url = `${BASE_URL}${cleanPath}`;
