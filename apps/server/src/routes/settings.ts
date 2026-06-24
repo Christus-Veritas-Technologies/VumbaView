@@ -38,15 +38,31 @@ settings.put("/fees", async (c) => {
     throw new ApiError(400, "Invalid fee payload");
   }
 
-  await prisma.$transaction(
-    body.data.fees.map((f) =>
+  // Editing the live fee schedule takes effect immediately for the term
+  // that's currently open — every active student in that level sees their
+  // outstanding balance change right away, not just on the next "Start New
+  // Term". Past/closed terms are untouched: their TermLevelFee rows belong
+  // to a different termId and this only ever updates the current one.
+  const currentTerm = await prisma.term.findFirst({ where: { isCurrent: true } });
+
+  await prisma.$transaction([
+    ...body.data.fees.map((f) =>
       prisma.levelFeeSetting.upsert({
         where: { level: f.level as AcademicLevel },
         update: { amount: f.amount },
         create: { level: f.level as AcademicLevel, amount: f.amount },
       }),
     ),
-  );
+    ...(currentTerm
+      ? body.data.fees.map((f) =>
+          prisma.termLevelFee.upsert({
+            where: { termId_level: { termId: currentTerm.id, level: f.level as AcademicLevel } },
+            update: { amount: f.amount },
+            create: { termId: currentTerm.id, level: f.level as AcademicLevel, amount: f.amount },
+          }),
+        )
+      : []),
+  ]);
 
   const rows = await prisma.levelFeeSetting.findMany();
   const byLevel = new Map(rows.map((r) => [r.level, Number(r.amount)]));

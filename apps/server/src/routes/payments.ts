@@ -14,13 +14,23 @@ const payments = new Hono<AppEnv>();
 
 payments.use("*", requireAuth);
 
-const recordPaymentSchema = z.object({
-  studentId: z.string().min(1),
-  category: z.enum(PAYMENT_CATEGORIES),
-  amount: z.number().positive(),
-  note: z.string().optional(),
-  occurredAt: z.coerce.date().optional(),
-});
+const recordPaymentSchema = z
+  .object({
+    studentId: z.string().min(1),
+    category: z.enum(PAYMENT_CATEGORIES),
+    amount: z.number().positive(),
+    // Optional cash discount, e.g. a $10 discount on a $120 fee payment. The
+    // student is still credited the full `amount` against their balance —
+    // only the cash actually collected (amount - discount) is reduced. See
+    // lib/term.ts, which already sums gross `amount` for balance math.
+    discount: z.number().min(0).optional(),
+    note: z.string().optional(),
+    occurredAt: z.coerce.date().optional(),
+  })
+  .refine((data) => (data.discount ?? 0) <= data.amount, {
+    message: "Discount can't be more than the payment amount",
+    path: ["discount"],
+  });
 
 payments.post("/", async (c) => {
   const json = await c.req.json().catch(() => null);
@@ -47,6 +57,7 @@ payments.post("/", async (c) => {
       studentId: student.id,
       category: body.data.category as PaymentCategory,
       amount: body.data.amount,
+      discount: body.data.discount ?? 0,
       note: body.data.note,
       occurredAt: body.data.occurredAt ?? new Date(),
       termId: term.id,
@@ -78,6 +89,10 @@ const adminListQuerySchema = z.object({
   pageSize: z.coerce.number().int().min(1).max(100).default(20),
   category: z.enum(PAYMENT_CATEGORIES).optional(),
   q: z.string().trim().min(1).optional(),
+  // Independent of term filtering — backs the Today/This Week/This Month
+  // quick-action period selector and the report date-range pickers.
+  from: z.coerce.date().optional(),
+  to: z.coerce.date().optional(),
 });
 
 // Admin-only browse view: every payment across the school, with the student
@@ -91,17 +106,22 @@ payments.get("/admin", requireRole("ADMIN"), async (c) => {
     pageSize: c.req.query("pageSize"),
     category: c.req.query("category") || undefined,
     q: c.req.query("q") || undefined,
+    from: c.req.query("from") || undefined,
+    to: c.req.query("to") || undefined,
   });
 
   if (!parsed.success) {
     throw new ApiError(400, "Invalid query parameters");
   }
 
-  const { page, pageSize, category, q } = parsed.data;
+  const { page, pageSize, category, q, from, to } = parsed.data;
 
   const where = {
     ...(category ? { category } : {}),
     ...(q ? { student: { fullName: { contains: q, mode: "insensitive" as const } } } : {}),
+    ...(from || to
+      ? { occurredAt: { ...(from ? { gte: from } : {}), ...(to ? { lte: to } : {}) } }
+      : {}),
   };
 
   const [rows, total] = await Promise.all([
@@ -119,18 +139,24 @@ payments.get("/admin", requireRole("ADMIN"), async (c) => {
   ]);
 
   return c.json({
-    items: rows.map((p) => ({
-      id: p.id,
-      category: p.category,
-      amount: Number(p.amount),
-      note: p.note,
-      occurredAt: p.occurredAt,
-      studentId: p.studentId,
-      studentName: p.student.fullName,
-      admissionNo: p.student.admissionNo,
-      level: p.student.level,
-      recordedBy: p.recordedBy.username,
-    })),
+    items: rows.map((p) => {
+      const amount = Number(p.amount);
+      const discount = Number(p.discount);
+      return {
+        id: p.id,
+        category: p.category,
+        amount,
+        discount,
+        netAmount: amount - discount,
+        note: p.note,
+        occurredAt: p.occurredAt,
+        studentId: p.studentId,
+        studentName: p.student.fullName,
+        admissionNo: p.student.admissionNo,
+        level: p.student.level,
+        recordedBy: p.recordedBy.username,
+      };
+    }),
     total,
     page,
     pageSize,
