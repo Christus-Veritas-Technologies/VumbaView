@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { ScrollView, View } from "react-native";
+import { Alert, ScrollView, View } from "react-native";
 import { Redirect, useLocalSearchParams, useRouter } from "expo-router";
 import { MotiView } from "moti";
 import { CheckCircle2, Printer as PrinterIcon, Receipt as ReceiptIcon } from "lucide-react-native";
@@ -17,7 +17,8 @@ import {
   type PaymentCacheRow,
   type StudentCacheRow,
 } from "@/lib/storage/db";
-import { getConnectedPrinter, isPrinterSupported, printReceipt, type PrinterDevice } from "@/lib/printer";
+import { connectPrinter, getConnectedPrinter, isPrinterSupported, printReceipt, type PrinterDevice } from "@/lib/printer";
+import { getLastPrinter, setLastPrinter } from "@/lib/storage/printer";
 import { useAuthStore } from "@/store/auth-store";
 import { LEVEL_LABELS } from "@/lib/types";
 
@@ -66,47 +67,74 @@ export default function ReceiptScreen() {
     });
   }, []);
 
-  const doPrint = useCallback(async () => {
-    if (!payment || !student) {
-      console.log("[receipt] doPrint: skipped — payment or student not loaded yet");
+  /** device is the device actually used for this print, passed explicitly so
+   * a just-connected device (not yet reflected in connectedDevice state) is
+   * still recorded as the last-used printer. */
+  const doPrint = useCallback(
+    async (device?: PrinterDevice | null) => {
+      if (!payment || !student) {
+        console.log("[receipt] doPrint: skipped — payment or student not loaded yet");
+        return;
+      }
+      console.log(`[receipt] doPrint: start for payment ${payment.id}, student "${student.fullName}"`);
+      setPrinting(true);
+      setPrintError(null);
+      try {
+        const result = await printReceipt({
+          schoolName: SCHOOL_NAME,
+          receiptId: payment.id,
+          occurredAt: payment.occurredAt ?? payment.createdAt ?? new Date().toISOString(),
+          studentName: student.fullName,
+          level: LEVEL_LABELS[student.level],
+          admissionNo: student.admissionNo,
+          category: payment.category,
+          amount: payment.amount,
+          discount: payment.discount ?? 0,
+          netAmount: payment.amount - (payment.discount ?? 0),
+          note: payment.note,
+          balanceAfter: payment.category === "FEES" ? student.feeBalance : null,
+          recordedBy: staff && staff.id === payment.recordedById ? staff.username : null,
+        });
+        if (result.ok) {
+          console.log(`[receipt] doPrint: success for payment ${payment.id}`);
+          setPrinted(true);
+          const printedVia = device ?? connectedDevice;
+          if (printedVia) {
+            console.log(`[receipt] doPrint: saving "${printedVia.name || printedVia.address}" as last-used printer`);
+            void setLastPrinter({ address: printedVia.address, name: printedVia.name ?? "" });
+          }
+        } else {
+          console.error(`[receipt] doPrint: printReceipt failed for payment ${payment.id} —`, result.error);
+          setPrintError(result.error.message);
+          if (result.error.code === "NO_DEVICE_SELECTED" || result.error.code === "CONNECTION_FAILED") {
+            console.log(`[receipt] doPrint: clearing connectedDevice after ${result.error.code}`);
+            setConnectedDevice(null);
+          }
+        }
+      } finally {
+        setPrinting(false);
+      }
+    },
+    [payment, student, staff, connectedDevice],
+  );
+
+  /** Tries to silently reconnect to a previously-saved printer; falls back to the picker on failure. */
+  async function reconnectSaved(saved: { address: string; name: string }) {
+    console.log(`[receipt] reconnectSaved: trying "${saved.name || saved.address}" (${saved.address})`);
+    const result = await connectPrinter(saved.address, saved.name);
+    if (!result.ok) {
+      console.error("[receipt] reconnectSaved: failed —", result.error);
+      setPrintError(`Couldn't reconnect to "${saved.name || saved.address}". Choose a printer below.`);
+      setPickerVisible(true);
       return;
     }
-    console.log(`[receipt] doPrint: start for payment ${payment.id}, student "${student.fullName}"`);
-    setPrinting(true);
-    setPrintError(null);
-    try {
-      const result = await printReceipt({
-        schoolName: SCHOOL_NAME,
-        receiptId: payment.id,
-        occurredAt: payment.occurredAt ?? payment.createdAt ?? new Date().toISOString(),
-        studentName: student.fullName,
-        level: LEVEL_LABELS[student.level],
-        admissionNo: student.admissionNo,
-        category: payment.category,
-        amount: payment.amount,
-        discount: payment.discount ?? 0,
-        netAmount: payment.amount - (payment.discount ?? 0),
-        note: payment.note,
-        balanceAfter: payment.category === "FEES" ? student.feeBalance : null,
-        recordedBy: staff && staff.id === payment.recordedById ? staff.username : null,
-      });
-      if (result.ok) {
-        console.log(`[receipt] doPrint: success for payment ${payment.id}`);
-        setPrinted(true);
-      } else {
-        console.error(`[receipt] doPrint: printReceipt failed for payment ${payment.id} —`, result.error);
-        setPrintError(result.error.message);
-        if (result.error.code === "NO_DEVICE_SELECTED" || result.error.code === "CONNECTION_FAILED") {
-          console.log(`[receipt] doPrint: clearing connectedDevice after ${result.error.code}`);
-          setConnectedDevice(null);
-        }
-      }
-    } finally {
-      setPrinting(false);
-    }
-  }, [payment, student, staff]);
+    const device: PrinterDevice = { address: saved.address, name: saved.name, paired: true };
+    console.log("[receipt] reconnectSaved: reconnected, printing");
+    setConnectedDevice(device);
+    void doPrint(device);
+  }
 
-  function handlePrintPress() {
+  async function handlePrintPress() {
     console.log("[receipt] handlePrintPress: tapped, connectedDevice =", connectedDevice?.address ?? "none");
     setPrintError(null);
     if (!isPrinterSupported()) {
@@ -114,19 +142,35 @@ export default function ReceiptScreen() {
       setPrintError("Bluetooth printing is only available on Android devices.");
       return;
     }
-    if (!connectedDevice) {
-      console.log("[receipt] handlePrintPress: no device connected, opening picker");
+    if (connectedDevice) {
+      void doPrint(connectedDevice);
+      return;
+    }
+    const saved = await getLastPrinter();
+    if (!saved) {
+      console.log("[receipt] handlePrintPress: no device connected and no saved printer, opening picker");
       setPickerVisible(true);
       return;
     }
-    doPrint();
+    console.log(`[receipt] handlePrintPress: found saved printer "${saved.name || saved.address}", asking`);
+    Alert.alert("Use last printer?", `Print using "${saved.name || saved.address}" again?`, [
+      {
+        text: "Choose a different printer",
+        style: "cancel",
+        onPress: () => setPickerVisible(true),
+      },
+      {
+        text: "Use this printer",
+        onPress: () => void reconnectSaved(saved),
+      },
+    ]);
   }
 
   function handleDeviceConnected(device: PrinterDevice) {
     console.log(`[receipt] handleDeviceConnected: connected to ${device.name || "unnamed"} (${device.address})`);
     setConnectedDevice(device);
     setPickerVisible(false);
-    doPrint();
+    void doPrint(device);
   }
 
   if (!staff) {
@@ -224,7 +268,11 @@ export default function ReceiptScreen() {
         </Card>
 
         {printError ? (
-          <ErrorState message={printError} onRetry={connectedDevice ? doPrint : handlePrintPress} className="mb-4" />
+          <ErrorState
+            message={printError}
+            onRetry={connectedDevice ? () => void doPrint(connectedDevice) : handlePrintPress}
+            className="mb-4"
+          />
         ) : null}
         {printed ? (
           <Card className="mb-4 border-success-200 bg-success-50">

@@ -53,7 +53,7 @@ export function PrinterDevicePicker({ visible, onClose, onConnected }: PrinterDe
     console.log(`[printer-picker] handleSelect: connecting to ${device.name || "unnamed"} (${device.address})`);
     setConnectingAddress(device.address);
     setError(null);
-    const result = await connectPrinter(device.address);
+    const result = await connectPrinter(device.address, device.name);
     setConnectingAddress(null);
     if (result.ok) {
       console.log(`[printer-picker] handleSelect: connected to ${device.address}`);
