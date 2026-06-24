@@ -1,5 +1,5 @@
 import { Redirect, Tabs } from "expo-router";
-import { Settings, Users } from "lucide-react-native";
+import { CreditCard, Settings, Users } from "lucide-react-native";
 import { useAuthStore } from "@/store/auth-store";
 
 export default function ReceptionistLayout() {
@@ -29,12 +29,20 @@ export default function ReceptionistLayout() {
           sensible. Never shown as a tab. */}
       <Tabs.Screen name="index" options={{ href: null, headerShown: false }} />
       <Tabs.Screen
+        name="payments"
+        options={{
+          title: "Payments",
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => <CreditCard color={color} size={size} />,
+        }}
+      />
+      <Tabs.Screen
         name="students"
         options={{ title: "Students", headerShown: false, tabBarIcon: ({ color, size }) => <Users color={color} size={size} /> }}
       />
       <Tabs.Screen
         name="settings"
-        options={{ title: "Settings", tabBarIcon: ({ color, size }) => <Settings color={color} size={size} /> }}
+        options={{ title: "Settings", headerShown: false, tabBarIcon: ({ color, size }) => <Settings color={color} size={size} /> }}
       />
     </Tabs>
   );
