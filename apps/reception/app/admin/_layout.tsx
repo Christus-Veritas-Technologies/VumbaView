@@ -1,5 +1,5 @@
 import { Redirect, Tabs } from "expo-router";
-import { CreditCard, LayoutDashboard, Settings, Users } from "lucide-react-native";
+import { CreditCard, FileBarChart2, LayoutDashboard, Settings, Users } from "lucide-react-native";
 import { useAuthStore } from "@/store/auth-store";
 
 export default function AdminLayout() {
@@ -40,6 +40,14 @@ export default function AdminLayout() {
       <Tabs.Screen
         name="students"
         options={{ title: "Students", headerShown: false, tabBarIcon: ({ color, size }) => <Users color={color} size={size} /> }}
+      />
+      <Tabs.Screen
+        name="reports"
+        options={{
+          title: "Reports",
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => <FileBarChart2 color={color} size={size} />,
+        }}
       />
       <Tabs.Screen
         name="settings"

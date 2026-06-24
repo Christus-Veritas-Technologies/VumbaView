@@ -3,7 +3,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { RefreshControl, ScrollView, View } from "react-native";
 import { MotiView } from "moti";
 import Svg, { Circle, Defs, LinearGradient as SvgGradient, Rect, Stop } from "react-native-svg";
-import { Calendar, GraduationCap, Receipt, UserPlus, Users, Wallet } from "lucide-react-native";
+import { Calendar, Clock, GraduationCap, Receipt, UserPlus, Users, Wallet } from "lucide-react-native";
 import { Text } from "@/components/ui/text";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -11,9 +11,18 @@ import { ErrorState } from "@/components/ui/error-state";
 import { Skeleton, SkeletonList, SkeletonStatCard } from "@/components/ui/skeleton";
 import { DecorativeShapes } from "@/components/decorative-shapes";
 import { StartNewTermButton } from "@/components/start-new-term-button";
+import { ReportButton } from "@/components/report-button";
+import { PeriodSelector, periodRange, type PeriodKey } from "@/components/period-selector";
 import { api, ApiClientError } from "@/lib/api";
 import { notifyNewActivity } from "@/lib/notifications";
 import { LEVEL_LABELS, type AcademicLevel } from "@/lib/types";
+
+interface PeriodData {
+  from: string;
+  to: string;
+  newStudents: number;
+  payments: { count: number; gross: number; discount: number; net: number };
+}
 
 interface EnrollmentData {
   total: number;
@@ -190,6 +199,36 @@ export default function AdminDashboardScreen() {
   // re-focus/pull-to-refresh of the same data.
   const seenActivityKeys = useRef<Set<string> | null>(null);
 
+  // Today/This Week/This Month quick filter — a rolling-window view backed
+  // by GET /dashboard/period, deliberately separate from the term-scoped
+  // `fees` figures above. "all" just hides this card again.
+  const [period, setPeriod] = useState<PeriodKey>("all");
+  const [periodData, setPeriodData] = useState<PeriodData | null>(null);
+  const [periodLoading, setPeriodLoading] = useState(false);
+  const [periodError, setPeriodError] = useState<string | null>(null);
+
+  const loadPeriod = useCallback((key: PeriodKey) => {
+    if (key === "all") {
+      setPeriodData(null);
+      setPeriodError(null);
+      return;
+    }
+    const { from, to } = periodRange(key);
+    if (!from || !to) return;
+    setPeriodLoading(true);
+    setPeriodError(null);
+    api
+      .get<PeriodData>("/dashboard/period", { from: from.toISOString(), to: to.toISOString() })
+      .then(setPeriodData)
+      .catch((err) => setPeriodError(err instanceof ApiClientError ? err.message : "Couldn't load this period."))
+      .finally(() => setPeriodLoading(false));
+  }, []);
+
+  function handlePeriodChange(key: PeriodKey) {
+    setPeriod(key);
+    loadPeriod(key);
+  }
+
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -278,6 +317,61 @@ export default function AdminDashboardScreen() {
             noTerm={noTerm}
           />
         </MotiView>
+
+        <View className="mb-4 flex-row items-center justify-between">
+          <PeriodSelector value={period} onChange={handlePeriodChange} />
+          <ReportButton scope="dashboard" path="/reports/dashboard" filenamePrefix="dashboard-snapshot" label="Report" />
+        </View>
+
+        {period !== "all" ? (
+          <MotiView from={{ opacity: 0, translateY: 10 }} animate={{ opacity: 1, translateY: 0 }} transition={{ type: "timing", duration: 220 }}>
+            <Card className="relative mb-4 overflow-hidden">
+              <DecorativeShapes tone="violet" />
+              <CardHeader>
+                <View className="flex-row items-center gap-2">
+                  <View className="h-8 w-8 items-center justify-center rounded-full bg-violet-100">
+                    <Clock size={16} color="#7C3AED" />
+                  </View>
+                  <CardTitle>{period === "today" ? "Last 24 hours" : period === "week" ? "This week" : "This month"}</CardTitle>
+                </View>
+              </CardHeader>
+              <CardContent>
+                {periodLoading ? (
+                  <SkeletonList rows={2} />
+                ) : periodError ? (
+                  <ErrorState message={periodError} onRetry={() => loadPeriod(period)} />
+                ) : periodData ? (
+                  <>
+                    <View className="mb-2 flex-row items-center justify-between">
+                      <Text variant="muted">New students</Text>
+                      <Text className="font-body-semibold">{periodData.newStudents}</Text>
+                    </View>
+                    <View className="mb-2 flex-row items-center justify-between">
+                      <Text variant="muted">Payments made</Text>
+                      <Text className="font-body-semibold">{periodData.payments.count}</Text>
+                    </View>
+                    <View className="mb-2 flex-row items-center justify-between">
+                      <Text variant="muted">Gross collected</Text>
+                      <Text className="font-body-semibold">${periodData.payments.gross.toFixed(2)}</Text>
+                    </View>
+                    {periodData.payments.discount > 0 ? (
+                      <View className="mb-2 flex-row items-center justify-between">
+                        <Text variant="muted">Discounts given</Text>
+                        <Text className="font-body-semibold text-warning-700">
+                          -${periodData.payments.discount.toFixed(2)}
+                        </Text>
+                      </View>
+                    ) : null}
+                    <View className="flex-row items-center justify-between">
+                      <Text variant="muted">Net cash collected</Text>
+                      <Text className="font-body-semibold text-success-700">${periodData.payments.net.toFixed(2)}</Text>
+                    </View>
+                  </>
+                ) : null}
+              </CardContent>
+            </Card>
+          </MotiView>
+        ) : null}
 
         {error ? <ErrorState message={error} onRetry={load} className="mb-4" /> : null}
 

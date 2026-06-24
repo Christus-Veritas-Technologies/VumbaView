@@ -11,6 +11,8 @@ import { StudentListItem } from "@/components/student-list-item";
 import { ErrorState } from "@/components/ui/error-state";
 import { Pagination } from "@/components/ui/pagination";
 import { BrandMark } from "@/components/brand-mark";
+import { ReportButton } from "@/components/report-button";
+import { PeriodSelector, periodRange, type PeriodKey } from "@/components/period-selector";
 import { listStudentsCache, type StudentCacheRow } from "@/lib/storage/db";
 import { syncNow } from "@/lib/sync";
 import { ACADEMIC_LEVELS, LEVEL_LABELS } from "@/lib/types";
@@ -30,16 +32,27 @@ export default function AdminStudentDirectoryScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const columns = useGridColumns(2);
-  const pag = usePagination(students, { resetKey: `${query}|${level}` });
+  // Today/This Week/This Month — separate from the existing per-level
+  // filter above. Filters the local cache by `createdAt` (see lib/storage/db.ts).
+  const [period, setPeriod] = useState<PeriodKey>("all");
+  const pag = usePagination(students, { resetKey: `${query}|${level}|${period}` });
 
   const load = useCallback(() => {
     try {
-      setStudents(listStudentsCache({ q: query || undefined, level: level || undefined }));
+      const { from, to } = periodRange(period);
+      setStudents(
+        listStudentsCache({
+          q: query || undefined,
+          level: level || undefined,
+          from: from?.toISOString(),
+          to: to?.toISOString(),
+        }),
+      );
       setError(null);
     } catch {
       setError("Couldn't load students from the local cache.");
     }
-  }, [query, level]);
+  }, [query, level, period]);
 
   useEffect(() => {
     load();
@@ -72,6 +85,10 @@ export default function AdminStudentDirectoryScreen() {
         <View className="mb-3 flex-row items-center justify-between">
           <Text variant="heading">Students</Text>
           <BrandMark />
+        </View>
+        <View className="mb-3 flex-row items-center justify-between">
+          <PeriodSelector value={period} onChange={setPeriod} />
+          <ReportButton scope="students" path="/reports/students" filenamePrefix="all-students" label="Report" />
         </View>
         <View className="flex-col gap-3 md:flex-row md:items-center">
           <View className="relative md:flex-1">
