@@ -21,15 +21,18 @@ export function PrinterDevicePicker({ visible, onClose, onConnected }: PrinterDe
   const [error, setError] = useState<string | null>(null);
 
   const scan = useCallback(async () => {
+    console.log("[printer-picker] scan: start");
     setScanning(true);
     setError(null);
     const result = await listPrinters();
     if (result.ok) {
+      console.log(`[printer-picker] scan: found ${result.data.length} device(s)`);
       setDevices(result.data);
       if (result.data.length === 0) {
         setError("No Bluetooth printers found nearby. Make sure it's powered on, paired, and in range.");
       }
     } else {
+      console.error("[printer-picker] scan: failed —", result.error);
       setError(result.error.message);
     }
     setScanning(false);
@@ -37,6 +40,7 @@ export function PrinterDevicePicker({ visible, onClose, onConnected }: PrinterDe
 
   useEffect(() => {
     if (visible) {
+      console.log("[printer-picker] became visible, triggering scan");
       scan();
     } else {
       setDevices([]);
@@ -46,13 +50,16 @@ export function PrinterDevicePicker({ visible, onClose, onConnected }: PrinterDe
   }, [visible, scan]);
 
   async function handleSelect(device: PrinterDevice) {
+    console.log(`[printer-picker] handleSelect: connecting to ${device.name || "unnamed"} (${device.address})`);
     setConnectingAddress(device.address);
     setError(null);
     const result = await connectPrinter(device.address);
     setConnectingAddress(null);
     if (result.ok) {
+      console.log(`[printer-picker] handleSelect: connected to ${device.address}`);
       onConnected(device);
     } else {
+      console.error(`[printer-picker] handleSelect: failed to connect to ${device.address} —`, result.error);
       setError(result.error.message);
     }
   }

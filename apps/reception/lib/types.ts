@@ -106,6 +106,10 @@ export interface Payment {
   studentId: string;
   category: PaymentCategory;
   amount: number | string;
+  // Net cash, full credit: the student's balance is always credited the
+  // full `amount`; `discount` (default 0) is only ever subtracted when
+  // tallying cash actually collected (dashboard/report totals).
+  discount: number | string;
   note: string | null;
   occurredAt: string;
   termId: string;

@@ -59,6 +59,7 @@ function paymentCacheRowFromServer(payment: Payment, opts: { localOnly: boolean;
     studentId: payment.studentId,
     category: payment.category,
     amount: Number(payment.amount),
+    discount: Number(payment.discount ?? 0),
     note: payment.note,
     occurredAt: payment.occurredAt,
     termId: payment.termId,
@@ -282,6 +283,10 @@ export interface NewPaymentInput {
   studentId: string;
   category: PaymentCategory;
   amount: number;
+  /** Net cash, full credit — optional, defaults to 0. Subtracted only from
+   * cash-collected totals; the balance update below always uses the full
+   * gross `amount`. */
+  discount?: number;
   note?: string;
   occurredAt?: string;
 }
@@ -295,6 +300,7 @@ export function queueRecordPayment(input: NewPaymentInput, recordedById: string 
     studentId: input.studentId,
     category: input.category,
     amount: input.amount,
+    discount: input.discount ?? 0,
     note: input.note ?? null,
     occurredAt: input.occurredAt ?? now,
     termId: null,

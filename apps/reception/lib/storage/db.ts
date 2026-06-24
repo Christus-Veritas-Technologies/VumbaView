@@ -32,6 +32,7 @@ export function initDb() {
       studentId TEXT NOT NULL,
       category TEXT NOT NULL,
       amount REAL NOT NULL,
+      discount REAL NOT NULL DEFAULT 0,
       note TEXT,
       occurredAt TEXT,
       termId TEXT,
@@ -57,6 +58,17 @@ export function initDb() {
       value TEXT
     );
   `);
+
+  // `CREATE TABLE IF NOT EXISTS` above is a no-op on a database that already
+  // exists from before the `discount` column was added — this defensively
+  // adds it for already-installed apps. SQLite throws "duplicate column
+  // name" if it's already there, which is exactly the steady-state case
+  // after the first launch post-update, so it's swallowed on purpose.
+  try {
+    db.execSync(`ALTER TABLE payments_cache ADD COLUMN discount REAL NOT NULL DEFAULT 0`);
+  } catch {
+    // Already migrated — nothing to do.
+  }
 }
 
 // ---- Students ----
@@ -133,7 +145,7 @@ export function replaceStudentId(localId: string, serverId: string): void {
 }
 
 export function listStudentsCache(
-  filters: { q?: string; level?: string; status?: string } = {},
+  filters: { q?: string; level?: string; status?: string; from?: string; to?: string } = {},
 ): StudentCacheRow[] {
   const clauses: string[] = [];
   const params: string[] = [];
@@ -149,6 +161,18 @@ export function listStudentsCache(
   if (filters.status) {
     clauses.push("status = ?");
     params.push(filters.status);
+  }
+  // The local cache has no `enrolledAt` column (only `createdAt`, which both
+  // default to the same moment at creation with no UI path that diverges
+  // them) — used here as the practical proxy for the Period selector, same
+  // as the server uses `enrolledAt` for its own bounds/report queries.
+  if (filters.from) {
+    clauses.push("createdAt >= ?");
+    params.push(filters.from);
+  }
+  if (filters.to) {
+    clauses.push("createdAt <= ?");
+    params.push(filters.to);
   }
 
   const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
@@ -174,6 +198,9 @@ export interface PaymentCacheRow {
   studentId: string;
   category: PaymentCategory;
   amount: number;
+  /** Net cash, full credit: balance is credited the full `amount`; only
+   * `amount - discount` counts as cash collected in dashboard/report totals. */
+  discount: number;
   note: string | null;
   occurredAt: string | null;
   termId: string | null;
@@ -186,17 +213,18 @@ export interface PaymentCacheRow {
 export function upsertPaymentCache(row: PaymentCacheRow): void {
   db.runSync(
     `INSERT INTO payments_cache (
-      id, studentId, category, amount, note, occurredAt, termId, recordedById, createdAt, localOnly, pendingSync
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      id, studentId, category, amount, discount, note, occurredAt, termId, recordedById, createdAt, localOnly, pendingSync
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ON CONFLICT(id) DO UPDATE SET
-      studentId=excluded.studentId, category=excluded.category, amount=excluded.amount, note=excluded.note,
-      occurredAt=excluded.occurredAt, termId=excluded.termId, recordedById=excluded.recordedById,
+      studentId=excluded.studentId, category=excluded.category, amount=excluded.amount, discount=excluded.discount,
+      note=excluded.note, occurredAt=excluded.occurredAt, termId=excluded.termId, recordedById=excluded.recordedById,
       createdAt=excluded.createdAt, localOnly=excluded.localOnly, pendingSync=excluded.pendingSync`,
     [
       row.id,
       row.studentId,
       row.category,
       row.amount,
+      row.discount,
       row.note,
       row.occurredAt,
       row.termId,

@@ -28,6 +28,7 @@ export default function RecordPaymentScreen() {
   const student = id ? getStudentCache(id) : null;
   const [category, setCategory] = useState<PaymentCategory>("FEES");
   const [amount, setAmount] = useState("");
+  const [discount, setDiscount] = useState("");
   const [note, setNote] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -49,7 +50,21 @@ export default function RecordPaymentScreen() {
   // negative amount needs its own message since "0" parses fine but isn't
   // a valid payment.
   const amountError = requiredAmount(amount, "Amount") ?? (parsedAmount <= 0 ? "Amount must be greater than $0." : undefined);
-  const isValid = !amountError;
+
+  // Discount is optional — blank means $0. Net cash, full credit: the
+  // balance is still credited the full amount; only (amount - discount)
+  // counts as cash collected, so discount can never exceed the amount.
+  const parsedDiscount = isBlank(discount) ? 0 : Number(discount);
+  const discountError = isBlank(discount)
+    ? undefined
+    : Number.isNaN(parsedDiscount) || parsedDiscount < 0
+      ? "Enter a valid discount amount."
+      : !amountError && parsedDiscount > parsedAmount
+        ? "Discount can't exceed the payment amount."
+        : undefined;
+
+  const isValid = !amountError && !discountError;
+  const netAmount = Math.max(0, parsedAmount - (Number.isNaN(parsedDiscount) ? 0 : parsedDiscount));
 
   function handleSubmit() {
     setSubmitAttempted(true);
@@ -61,7 +76,13 @@ export default function RecordPaymentScreen() {
       // it returns the local id immediately so the receipt can be shown
       // before (or entirely without) a server round-trip.
       const localId = queueRecordPayment(
-        { studentId: student.id, category, amount: parsedAmount, note: note.trim() || undefined },
+        {
+          studentId: student.id,
+          category,
+          amount: parsedAmount,
+          discount: parsedDiscount > 0 ? parsedDiscount : undefined,
+          note: note.trim() || undefined,
+        },
         staff?.id ?? null,
       );
       useSyncStore.getState().runSync();
@@ -134,6 +155,19 @@ export default function RecordPaymentScreen() {
               <Input value={amount} onChangeText={setAmount} placeholder="0.00" keyboardType="decimal-pad" />
               {(submitAttempted || !isBlank(amount)) && amountError ? (
                 <Text className="mt-1 text-xs font-body-medium text-danger-600">{amountError}</Text>
+              ) : null}
+            </View>
+
+            <View className="mb-4">
+              <Label>Discount (optional)</Label>
+              <Input value={discount} onChangeText={setDiscount} placeholder="0.00" keyboardType="decimal-pad" />
+              {(submitAttempted || !isBlank(discount)) && discountError ? (
+                <Text className="mt-1 text-xs font-body-medium text-danger-600">{discountError}</Text>
+              ) : !isBlank(discount) && !discountError ? (
+                <Text variant="muted" className="mt-1 text-xs">
+                  Balance is still credited ${(Number.isNaN(parsedAmount) ? 0 : parsedAmount).toFixed(2)} — only $
+                  {netAmount.toFixed(2)} counts as cash collected.
+                </Text>
               ) : null}
             </View>
 

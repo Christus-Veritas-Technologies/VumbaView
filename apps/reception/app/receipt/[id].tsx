@@ -61,12 +61,17 @@ export default function ReceiptScreen() {
   useEffect(() => {
     if (!isPrinterSupported()) return;
     getConnectedPrinter().then((d) => {
+      console.log("[receipt] checked for already-connected printer on mount:", d ? `${d.name || "unnamed"} (${d.address})` : "none");
       if (d) setConnectedDevice({ ...d, paired: true });
     });
   }, []);
 
   const doPrint = useCallback(async () => {
-    if (!payment || !student) return;
+    if (!payment || !student) {
+      console.log("[receipt] doPrint: skipped — payment or student not loaded yet");
+      return;
+    }
+    console.log(`[receipt] doPrint: start for payment ${payment.id}, student "${student.fullName}"`);
     setPrinting(true);
     setPrintError(null);
     try {
@@ -79,15 +84,20 @@ export default function ReceiptScreen() {
         admissionNo: student.admissionNo,
         category: payment.category,
         amount: payment.amount,
+        discount: payment.discount ?? 0,
+        netAmount: payment.amount - (payment.discount ?? 0),
         note: payment.note,
         balanceAfter: payment.category === "FEES" ? student.feeBalance : null,
         recordedBy: staff && staff.id === payment.recordedById ? staff.username : null,
       });
       if (result.ok) {
+        console.log(`[receipt] doPrint: success for payment ${payment.id}`);
         setPrinted(true);
       } else {
+        console.error(`[receipt] doPrint: printReceipt failed for payment ${payment.id} —`, result.error);
         setPrintError(result.error.message);
         if (result.error.code === "NO_DEVICE_SELECTED" || result.error.code === "CONNECTION_FAILED") {
+          console.log(`[receipt] doPrint: clearing connectedDevice after ${result.error.code}`);
           setConnectedDevice(null);
         }
       }
@@ -97,12 +107,15 @@ export default function ReceiptScreen() {
   }, [payment, student, staff]);
 
   function handlePrintPress() {
+    console.log("[receipt] handlePrintPress: tapped, connectedDevice =", connectedDevice?.address ?? "none");
     setPrintError(null);
     if (!isPrinterSupported()) {
+      console.log("[receipt] handlePrintPress: unsupported platform, aborting");
       setPrintError("Bluetooth printing is only available on Android devices.");
       return;
     }
     if (!connectedDevice) {
+      console.log("[receipt] handlePrintPress: no device connected, opening picker");
       setPickerVisible(true);
       return;
     }
@@ -110,6 +123,7 @@ export default function ReceiptScreen() {
   }
 
   function handleDeviceConnected(device: PrinterDevice) {
+    console.log(`[receipt] handleDeviceConnected: connected to ${device.name || "unnamed"} (${device.address})`);
     setConnectedDevice(device);
     setPickerVisible(false);
     doPrint();
@@ -175,6 +189,18 @@ export default function ReceiptScreen() {
               <Text variant="muted">Amount</Text>
               <Text className="font-body-semibold">${payment.amount.toFixed(2)}</Text>
             </View>
+            {payment.discount > 0 ? (
+              <>
+                <View className="mb-2 flex-row items-center justify-between">
+                  <Text variant="muted">Discount</Text>
+                  <Text className="font-body-semibold text-gold-700">-${payment.discount.toFixed(2)}</Text>
+                </View>
+                <View className="mb-2 flex-row items-center justify-between">
+                  <Text variant="muted">Net cash collected</Text>
+                  <Text className="font-body-semibold">${(payment.amount - payment.discount).toFixed(2)}</Text>
+                </View>
+              </>
+            ) : null}
             <View className="mb-2 flex-row items-center justify-between">
               <Text variant="muted">Date</Text>
               <Text>{payment.occurredAt ? new Date(payment.occurredAt).toLocaleString() : "—"}</Text>
