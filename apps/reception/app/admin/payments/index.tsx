@@ -12,6 +12,8 @@ import { SkeletonList } from "@/components/ui/skeleton";
 import { PrinterDevicePicker } from "@/components/printer-device-picker";
 import { BrandMark } from "@/components/brand-mark";
 import { DecorativeShapes } from "@/components/decorative-shapes";
+import { ReportButton } from "@/components/report-button";
+import { PeriodSelector, periodRange, type PeriodKey } from "@/components/period-selector";
 import { api } from "@/lib/api";
 import { usePrinterFlow } from "@/lib/use-printer-flow";
 import { useBreakpoint } from "@/lib/use-breakpoint";
@@ -25,6 +27,11 @@ interface AdminPaymentRow {
   id: string;
   category: PaymentCategory;
   amount: number;
+  /** Net cash, full credit: this row's `amount` is always the gross amount
+   * credited to the student's balance; `discount` (if any) is only ever
+   * subtracted from cash-collected totals, never from the balance credit. */
+  discount: number;
+  netAmount: number;
   note: string | null;
   occurredAt: string;
   studentId: string;
@@ -72,6 +79,8 @@ function buildReceiptData(row: AdminPaymentRow): ReceiptPrintData {
     admissionNo: row.admissionNo,
     category: row.category,
     amount: row.amount,
+    discount: row.discount,
+    netAmount: row.netAmount,
     note: row.note,
     recordedBy: row.recordedBy,
   };
@@ -104,6 +113,11 @@ function PaymentRowTablet({ row, printing, onPrint }: RowProps) {
       </View>
       <View className="w-20 items-end">
         <Text className="font-body-semibold text-sm text-slate-900">${row.amount.toFixed(2)}</Text>
+        {row.discount > 0 ? (
+          <Text variant="muted" className="text-[10px] text-warning-700">
+            -${row.discount.toFixed(2)} disc.
+          </Text>
+        ) : null}
       </View>
       <View className="w-28">
         <Text className="text-sm text-slate-600">{row.recordedBy}</Text>
@@ -130,6 +144,7 @@ function PaymentRowPhone({ row, printing, onPrint }: RowProps) {
         </View>
         <Text variant="muted" className="mt-0.5 text-xs">
           {formatShortDate(row.occurredAt)} · {row.recordedBy}
+          {row.discount > 0 ? ` · -$${row.discount.toFixed(2)} disc.` : ""}
         </Text>
       </View>
       <Pressable
@@ -158,6 +173,8 @@ export default function AdminPaymentsScreen() {
   const [searchText, setSearchText] = useState("");
   const [query, setQuery] = useState("");
   const [printingRowId, setPrintingRowId] = useState<string | null>(null);
+  // Today/This Week/This Month — separate from the category filter above.
+  const [period, setPeriod] = useState<PeriodKey>("all");
 
   // Debounce the free-text search so every keystroke doesn't fire a request.
   useEffect(() => {
@@ -170,11 +187,14 @@ export default function AdminPaymentsScreen() {
       if (!opts.silent) setLoading(true);
       setError(null);
       try {
+        const { from, to } = periodRange(period);
         const res = await api.get<AdminPaymentsResponse>("/payments/admin", {
           page: String(targetPage),
           pageSize: String(PAGE_SIZE),
           category: category || undefined,
           q: query || undefined,
+          from: from?.toISOString(),
+          to: to?.toISOString(),
         });
         setItems(res.items);
         setTotal(res.total);
@@ -187,7 +207,7 @@ export default function AdminPaymentsScreen() {
         setRefreshing(false);
       }
     },
-    [category, query],
+    [category, query, period],
   );
 
   // Re-runs (and resets to page 1) whenever the filters change — including
@@ -240,6 +260,11 @@ export default function AdminPaymentsScreen() {
               </Text>
             </View>
           ) : null}
+        </View>
+
+        <View className="mb-3 flex-row items-center justify-between">
+          <PeriodSelector value={period} onChange={setPeriod} />
+          <ReportButton scope="payments" path="/reports/payments" filenamePrefix="all-payments" label="Report" />
         </View>
 
         <View className="flex-col gap-3 md:flex-row md:items-center">
