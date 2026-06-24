@@ -14,6 +14,7 @@ import dashboard from "./routes/dashboard";
 import reports from "./routes/reports";
 import admissions from "./routes/admissions";
 import contact from "./routes/contact";
+import verify from "./routes/verify";
 
 const app = new Hono();
 
@@ -43,6 +44,7 @@ app.route("/dashboard", dashboard);
 app.route("/reports", reports);
 app.route("/admissions", admissions);
 app.route("/contact", contact);
+app.route("/verify", verify);
 
 app.notFound((c) => c.json({ error: "Not found" }, 404));
 app.onError(errorHandler);
