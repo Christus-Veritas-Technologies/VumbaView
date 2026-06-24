@@ -1,7 +1,9 @@
 import { Hono } from "hono";
+import { z } from "zod";
 import { prisma } from "../db";
 import { requireAuth } from "../middleware/auth";
 import { requireRole } from "../middleware/role";
+import { ApiError } from "../middleware/error-handler";
 import { ACADEMIC_LEVELS } from "../lib/levels";
 import { getCurrentTerm } from "../lib/term";
 import { studentJoinedMessage, paymentMadeMessage } from "../lib/event-templates";
@@ -45,7 +47,7 @@ dashboard.get("/fees", async (c) => {
     prisma.student.groupBy({ by: ["level"], where: { status: "ACTIVE" }, _count: { _all: true } }),
     prisma.payment.aggregate({
       where: { termId: term.id, category: "FEES" },
-      _sum: { amount: true },
+      _sum: { amount: true, discount: true },
     }),
   ]);
 
@@ -56,13 +58,58 @@ dashboard.get("/fees", async (c) => {
     (sum, level) => sum + (feeByLevel.get(level) ?? 0) * (countByLevel.get(level) ?? 0),
     0,
   );
-  const collected = Number(paidAgg._sum.amount ?? 0);
+  // "Collected" is net cash actually taken in — a discount still fully
+  // credits the student's balance (that's what `outstanding` below is based
+  // on via gross `amount` in lib/term.ts) but shouldn't inflate how much
+  // cash the school reports as collected.
+  const grossPaid = Number(paidAgg._sum.amount ?? 0);
+  const totalDiscount = Number(paidAgg._sum.discount ?? 0);
+  const collected = grossPaid - totalDiscount;
 
   return c.json({
     term: { id: term.id, number: term.number },
     expected,
     collected,
-    outstanding: Math.max(expected - collected, 0),
+    outstanding: Math.max(expected - grossPaid, 0),
+  });
+});
+
+const periodQuerySchema = z.object({
+  from: z.coerce.date(),
+  to: z.coerce.date(),
+});
+
+// Backs the Dashboard's Today/This Week/This Month quick-action card. This
+// is a rolling-window view, deliberately separate from the term-scoped
+// /fees figures above — it answers "how much came in during this window"
+// rather than "how are we doing against this term's fee schedule".
+dashboard.get("/period", async (c) => {
+  const parsed = periodQuerySchema.safeParse({ from: c.req.query("from"), to: c.req.query("to") });
+
+  if (!parsed.success) {
+    throw new ApiError(400, "from and to query parameters are required");
+  }
+
+  const { from, to } = parsed.data;
+  const occurredAt = { gte: from, lte: to };
+
+  const [newStudents, paymentsAgg, paymentsCount] = await Promise.all([
+    prisma.student.count({ where: { enrolledAt: occurredAt } }),
+    prisma.payment.aggregate({
+      where: { occurredAt },
+      _sum: { amount: true, discount: true },
+    }),
+    prisma.payment.count({ where: { occurredAt } }),
+  ]);
+
+  const gross = Number(paymentsAgg._sum.amount ?? 0);
+  const discount = Number(paymentsAgg._sum.discount ?? 0);
+
+  return c.json({
+    from,
+    to,
+    newStudents,
+    payments: { count: paymentsCount, gross, discount, net: gross - discount },
   });
 });
 
