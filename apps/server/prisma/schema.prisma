@@ -139,6 +139,11 @@ model Payment {
   id         String          @id @default(cuid())
   category   PaymentCategory
   amount     Decimal         @db.Decimal(10, 2)
+  /// Optional cash discount applied at the time of payment. The student's
+  /// balance is still credited the full `amount` (see lib/term.ts) — this
+  /// only reduces how much of `amount` counts as cash actually collected,
+  /// e.g. for the dashboard's "collected" total and payment reports.
+  discount   Decimal         @default(0) @db.Decimal(10, 2)
   note       String?
   occurredAt DateTime        @default(now())
 
