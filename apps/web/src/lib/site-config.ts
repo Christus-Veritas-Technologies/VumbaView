@@ -15,7 +15,7 @@ export const schoolFacts = {
   campusSize: "18 hectares",
   curriculum: "ZIMSEC O-Level and A-Level, with Cambridge-aligned enrichment in the senior forms",
   headOfSchool: {
-    name: "Mrs. Tendai Chikwava",
+    name: "Mr. Chimahi",
     title: "Head of School",
   },
 } as const;
@@ -26,7 +26,7 @@ export const contactInfo = {
   mobile: "+263 77 234 5678",
   email: "info@vumbaview.ac.zw",
   admissionsEmail: "admissions@vumbaview.ac.zw",
-  officeHours: "Monday – Friday, 7:30 – 16:00",
+  officeHours: "Monday â€“ Friday, 7:30 â€“ 16:00",
   mapEmbedSrc:
     "https://www.openstreetmap.org/export/embed.html?bbox=32.6209%2C-19.0007%2C32.7209%2C-18.9407&layer=mapnik&marker=-18.9707%2C32.6709",
 } as const;
@@ -46,14 +46,14 @@ export const navLinks: NavLink[] = [
 
 export const academicLevels = [
   {
-    stage: "Lower Secondary — Form 1 to 4",
-    ageRange: "Ages 13 – 16",
+    stage: "Lower Secondary â€” Form 1 to 4",
+    ageRange: "Ages 13 â€“ 16",
     description:
       "A ZIMSEC O-Level pathway across the sciences, humanities, and languages, with weekly assessment so no learner falls behind unnoticed.",
   },
   {
-    stage: "Upper Secondary — Form 5 to 6",
-    ageRange: "Ages 17 – 18",
+    stage: "Upper Secondary â€” Form 5 to 6",
+    ageRange: "Ages 17 â€“ 18",
     description:
       "A-Level specialisation in three to five subjects, built around the ZIMSEC \"A\" Level Examinations and direct preparation for university and career placement.",
   },

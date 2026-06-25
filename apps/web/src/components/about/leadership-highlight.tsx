@@ -4,7 +4,7 @@ import { Reveal } from "@/components/motion/reveal";
 import { StaggerGroup, StaggerItem } from "@/components/motion/stagger";
 
 const leaders = [
-  { name: "Mrs. Tendai Chikwava", title: "Head of School" },
+  { name: "Mr. Chimahi", title: "Head of School" },
   { name: "Mr. Farai Mutasa", title: "Deputy Head — Academics" },
   { name: "Mrs. Ruvimbo Sithole", title: "Head of Sixth Form" },
   { name: "Mr. Blessing Nyathi", title: "Head of Pastoral Care" },
