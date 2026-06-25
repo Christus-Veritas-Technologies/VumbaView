@@ -21,7 +21,7 @@ export const schoolFacts = {
 } as const;
 
 export const contactInfo = {
-  addressLines: ["14 Vumba Road", "Mutare, Manicaland", "Zimbabwe"],
+  addressLines: ["Stand Number 3, Chishakwe", "Mutare, Manicaland", "Zimbabwe"],
   phone: "+263 77 302 1456",
   email: "admin@vumbaviewacademy.co.zw",
   admissionsEmail: "admissions@vumbaviewacademy.co.zw",
