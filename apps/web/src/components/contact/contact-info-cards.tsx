@@ -13,7 +13,7 @@ export function ContactInfoCards() {
     {
       icon: Phone,
       title: "Call Us",
-      lines: [contactInfo.phone, contactInfo.mobile],
+      lines: [contactInfo.phone],
     },
     {
       icon: Mail,

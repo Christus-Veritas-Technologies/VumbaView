@@ -22,8 +22,7 @@ export const schoolFacts = {
 
 export const contactInfo = {
   addressLines: ["14 Vumba Road", "Mutare, Manicaland", "Zimbabwe"],
-  phone: "+263 20 123 4567",
-  mobile: "+263 77 234 5678",
+  phone: "+263 77 302 1456",
   email: "info@vumbaview.ac.zw",
   admissionsEmail: "admissions@vumbaview.ac.zw",
   officeHours: "Monday â€“ Friday, 7:30 â€“ 16:00",
