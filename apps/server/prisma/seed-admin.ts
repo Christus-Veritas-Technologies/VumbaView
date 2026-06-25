@@ -15,7 +15,7 @@ const adapter = new PrismaPg({ connectionString: env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
 const ADMIN_USERNAME = ROOT_ADMIN_USERNAME;
-const ADMIN_PASSWORD = "stepchikamhi";
+const ADMIN_PASSWORD = "VumbaView123";
 
 async function main() {
   const existing = await prisma.staff.findUnique({ where: { username: ADMIN_USERNAME } });
