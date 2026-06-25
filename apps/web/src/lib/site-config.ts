@@ -23,8 +23,8 @@ export const schoolFacts = {
 export const contactInfo = {
   addressLines: ["14 Vumba Road", "Mutare, Manicaland", "Zimbabwe"],
   phone: "+263 77 302 1456",
-  email: "info@vumbaview.ac.zw",
-  admissionsEmail: "admissions@vumbaview.ac.zw",
+  email: "admin@vumbaviewacademy.co.zw",
+  admissionsEmail: "admissions@vumbaviewacademy.co.zw",
   officeHours: "Monday â€“ Friday, 7:30 â€“ 16:00",
   mapEmbedSrc:
     "https://www.openstreetmap.org/export/embed.html?bbox=32.6209%2C-19.0007%2C32.7209%2C-18.9407&layer=mapnik&marker=-18.9707%2C32.6709",
