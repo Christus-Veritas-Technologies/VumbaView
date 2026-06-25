@@ -15,13 +15,23 @@ export function LocationMap() {
             accent="Mutare, Manicaland"
           />
         </Reveal>
-        <Reveal delay={0.15} className="overflow-hidden rounded-3xl border border-border">
-          <iframe
-            src={contactInfo.mapEmbedSrc}
-            title="Map showing VumbaView Academy location in Mutare"
-            className="h-96 w-full"
-            loading="lazy"
-          />
+        <Reveal delay={0.15} className="flex flex-col gap-3">
+          <div className="overflow-hidden rounded-3xl border border-border">
+            <iframe
+              src={contactInfo.mapEmbedSrc}
+              title="Map showing VumbaView Academy location in Mutare"
+              className="h-96 w-full"
+              loading="lazy"
+            />
+          </div>
+          <a
+            href={contactInfo.mapLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="self-center text-sm font-medium text-primary hover:underline"
+          >
+            Open in Google Maps
+          </a>
         </Reveal>
       </Container>
     </section>
