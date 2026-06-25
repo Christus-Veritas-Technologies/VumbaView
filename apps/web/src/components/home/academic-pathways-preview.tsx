@@ -21,7 +21,7 @@ export function AcademicPathwaysPreview() {
             accent="one ZIMSEC result"
           />
         </Reveal>
-        <StaggerGroup className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <StaggerGroup className="mx-auto grid max-w-3xl gap-6 sm:grid-cols-2">
           {academicLevels.map((level, index) => {
             const Icon = icons[index];
             return (
