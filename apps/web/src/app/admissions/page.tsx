@@ -17,7 +17,7 @@ export default function AdmissionsPage() {
       <PageHero
         eyebrow="Admissions"
         title="Join the VumbaView community"
-        description="We welcome applications from families across Mutare and Manicaland for ECD through A-Level."
+        description="We welcome applications from families across Mutare and Manicaland for Form 1 through Form 6."
         image={images.graduationGroup}
       />
       <ProcessSteps />

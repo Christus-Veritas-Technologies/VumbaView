@@ -3,7 +3,7 @@
 import { InquiryDialog } from "@/components/admissions/inquiry-dialog";
 import { Eyebrow } from "@/components/marketing/eyebrow";
 import { schoolFacts, siteConfig } from "@/lib/site-config";
-import { images } from "@/lib/images";
+import { studentPhotos } from "@/lib/images";
 import { Button } from "@vva/ui/components/button";
 import { motion, type Variants } from "framer-motion";
 import Image from "next/image";
@@ -23,8 +23,8 @@ export function Hero() {
   return (
     <section className="relative overflow-hidden">
       <Image
-        src={images.mountainValley.src}
-        alt={images.mountainValley.alt}
+        src={studentPhotos[9]!.src}
+        alt={studentPhotos[9]!.alt}
         fill
         priority
         sizes="100vw"
@@ -48,9 +48,9 @@ export function Hero() {
           {siteConfig.name}: <span className="text-accent">{siteConfig.motto}</span>
         </motion.h1>
         <motion.p variants={item} className="max-w-xl text-base leading-relaxed text-white/90 sm:text-lg">
-          An ECD-to-A-Level day school set on the slopes above Mutare, overlooking the misty
-          Bvumba Mountains — where {schoolFacts.enrollment} learners grow into confident,
-          capable young people.
+          A Form 1 to Form 6 ZIMSEC day school in Mutare, where {schoolFacts.enrollment}{" "}
+          students are held to a single standard: results that open doors to university and
+          beyond.
         </motion.p>
         <motion.div variants={item} className="flex flex-wrap gap-3">
           <InquiryDialog
@@ -61,11 +61,11 @@ export function Hero() {
             }
           />
           <Button
-            render={<Link href="/about" />}
+            render={<Link href="/academics" />}
             variant="outline"
             className="h-12 rounded-full border-white/40 bg-white/10 px-6 text-base text-white hover:bg-white/20"
           >
-            Discover Our Story
+            See Our Results
           </Button>
         </motion.div>
 

@@ -1,7 +1,10 @@
 /**
- * Sourced photography for VumbaView Academy, hotlinked from Unsplash's CDN
- * under the Unsplash License (free for commercial use, attribution
- * appreciated but not required). Credits are kept here for reference.
+ * Sourced photography for VumbaView Academy. Scenic/landscape shots are
+ * hotlinked from Unsplash's CDN under the Unsplash License (free for
+ * commercial use, attribution appreciated but not required) and are used
+ * purely as decorative backdrops. Every photo that depicts people is a real
+ * photo of VumbaView students on campus (apps/web/public/images/students/),
+ * not stock photography — see studentPhotos below.
  */
 
 type SiteImage = {
@@ -16,13 +19,77 @@ function unsplash(id: string, params = "w=1800&q=80&auto=format&fit=crop") {
 
 /**
  * Lorem Picsum placeholder photo, seeded so a given slot always gets the
- * same "random" stock photo instead of reshuffling on every render. Used for
- * home-page body imagery where a real campus/people photo doesn't exist yet
- * - see the placeholder-content note in PLAN.md.
+ * same "random" stock photo instead of reshuffling on every render. Kept
+ * only as a fallback helper — real student photos (studentPhotos below)
+ * should be used in preference to this wherever a people/campus photo is
+ * needed.
  */
 export function placeholderPhoto(seed: string, width = 1200, height = 900) {
   return `https://picsum.photos/seed/${seed}/${width}/${height}`;
 }
+
+/**
+ * Real candid photos of VumbaView students on campus, taken in school
+ * uniform (track tops and blazers) between classroom blocks. Generic by
+ * design — group/campus shots rather than posed individual portraits — so
+ * they're intentionally reused across many sections of the site (hero
+ * banners, page headers, gallery cards) rather than tied to one slot each.
+ * Deliberately NOT used as a stand-in for a specific named staff member's
+ * headshot (see leadership-highlight.tsx and head-quote.tsx, which use an
+ * initials badge instead for that reason).
+ */
+export const studentPhotos: SiteImage[] = [
+  {
+    src: "/images/students/IMG-20260623-WA0191.jpg",
+    alt: "VumbaView Academy students gathered outside the classroom block",
+    credit: "VumbaView Academy",
+  },
+  {
+    src: "/images/students/IMG-20260623-WA0193.jpg",
+    alt: "VumbaView Academy students in school uniform on campus",
+    credit: "VumbaView Academy",
+  },
+  {
+    src: "/images/students/IMG-20260623-WA0205.jpg",
+    alt: "VumbaView Academy students standing together on campus",
+    credit: "VumbaView Academy",
+  },
+  {
+    src: "/images/students/IMG-20260623-WA0194.jpg",
+    alt: "VumbaView Academy students in winter uniform on campus",
+    credit: "VumbaView Academy",
+  },
+  {
+    src: "/images/students/IMG-20260623-WA0178.jpg",
+    alt: "VumbaView Academy students lined up on campus",
+    credit: "VumbaView Academy",
+  },
+  {
+    src: "/images/students/IMG-20260623-WA0253.jpg",
+    alt: "VumbaView Academy students gathered on campus",
+    credit: "VumbaView Academy",
+  },
+  {
+    src: "/images/students/IMG-20260623-WA0174.jpg",
+    alt: "A VumbaView Academy teacher with students on campus",
+    credit: "VumbaView Academy",
+  },
+  {
+    src: "/images/students/IMG-20260623-WA0224.jpg",
+    alt: "VumbaView Academy students standing together outside the classroom block",
+    credit: "VumbaView Academy",
+  },
+  {
+    src: "/images/students/IMG-20260623-WA0192.jpg",
+    alt: "VumbaView Academy students gathered on campus",
+    credit: "VumbaView Academy",
+  },
+  {
+    src: "/images/students/IMG-20260623-WA0258.jpg",
+    alt: "VumbaView Academy students on campus, with the surrounding hills behind",
+    credit: "VumbaView Academy",
+  },
+];
 
 export const images = {
   heroMountains: {
@@ -50,44 +117,26 @@ export const images = {
     alt: "Misty green forest during daytime",
     credit: "Unsplash",
   },
-  teacherLecturing: {
-    src: unsplash("photo-1758270704925-fa59d93119c1"),
-    alt: "Teacher lecturing a classroom of students",
-    credit: "Unsplash",
-  },
+  // Real student photo (was Unsplash stock) — see studentPhotos above.
+  teacherLecturing: studentPhotos[6]!,
   emptyClassroom: {
     src: unsplash("photo-1740635341299-3b8e3490f546"),
     alt: "Bright classroom filled with empty desks and chairs",
     credit: "Unsplash",
   },
-  studentAtDesk: {
-    src: unsplash("photo-1497375638960-ca368c7231e4"),
-    alt: "Student sitting at a desk in a classroom",
-    credit: "Unsplash",
-  },
+  // Real student photo (was Unsplash stock) — see studentPhotos above.
+  studentAtDesk: studentPhotos[3]!,
   libraryCircular: {
     src: unsplash("photo-1567562227343-a72d22e187c8"),
     alt: "Library with circular seating area surrounded by bookshelves",
     credit: "Unsplash",
   },
-  graduationToss: {
-    src: unsplash("photo-1775623606576-3e049f72b8e7"),
-    alt: "Graduates tossing their caps in the air",
-    credit: "Unsplash",
-  },
-  graduationGroup: {
-    src: unsplash("photo-1661693758705-4fa65572bced"),
-    alt: "Group of graduates wearing gowns",
-    credit: "Unsplash",
-  },
-  soccerKidsOne: {
-    src: unsplash("photo-1526232761682-d26e03ac148e"),
-    alt: "Children playing soccer outdoors",
-    credit: "Unsplash",
-  },
-  soccerKidsTwo: {
-    src: unsplash("photo-1701872324421-f537bc8f61de"),
-    alt: "A couple of kids playing a game of soccer",
-    credit: "Unsplash",
-  },
+  // Real student photo (was Unsplash stock) — see studentPhotos above.
+  graduationToss: studentPhotos[1]!,
+  // Real student photo (was Unsplash stock) — see studentPhotos above.
+  graduationGroup: studentPhotos[7]!,
+  // Real student photo (was Unsplash stock) — see studentPhotos above.
+  soccerKidsOne: studentPhotos[4]!,
+  // Real student photo (was Unsplash stock) — see studentPhotos above.
+  soccerKidsTwo: studentPhotos[5]!,
 } satisfies Record<string, SiteImage>;

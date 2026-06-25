@@ -2,26 +2,14 @@ import { Container } from "@/components/marketing/container";
 import { SectionHeading } from "@/components/marketing/section-heading";
 import { Reveal } from "@/components/motion/reveal";
 import { StaggerGroup, StaggerItem } from "@/components/motion/stagger";
-import { placeholderPhoto } from "@/lib/images";
+import { studentPhotos } from "@/lib/images";
 import Image from "next/image";
 
 const gallery = [
-  {
-    image: { src: placeholderPhoto("gallery-classrooms"), alt: "Modern classroom interior" },
-    label: "Modern Classrooms",
-  },
-  {
-    image: { src: placeholderPhoto("gallery-library"), alt: "School library reading area" },
-    label: "Resource Library",
-  },
-  {
-    image: { src: placeholderPhoto("gallery-sport"), alt: "Students playing sport outdoors" },
-    label: "Sport & Recreation",
-  },
-  {
-    image: { src: placeholderPhoto("gallery-study"), alt: "Student focused on schoolwork" },
-    label: "Focused Learning",
-  },
+  { image: studentPhotos[5]!, label: "Modern Classrooms" },
+  { image: studentPhotos[6]!, label: "Resource Library" },
+  { image: studentPhotos[4]!, label: "Sport & Recreation" },
+  { image: studentPhotos[3]!, label: "Focused Learning" },
 ] as const;
 
 export function FacilitiesGalleryPreview() {
@@ -34,7 +22,7 @@ export function FacilitiesGalleryPreview() {
             eyebrow="Our Campus"
             title="Built for"
             accent="focus, play & growth"
-            description="An 18-hectare campus on the road toward the Bvumba Mountains, with science and computer labs, a full library, and sports fields for every season."
+            description="An 18-hectare campus in Mutare, with science and computer labs, a full library, and sports fields for every season."
           />
         </Reveal>
         <StaggerGroup className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

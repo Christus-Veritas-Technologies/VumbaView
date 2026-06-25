@@ -1,9 +1,9 @@
 export const siteConfig = {
   name: "VumbaView Academy",
   shortName: "VumbaView",
-  motto: "Through the Mist, Into the Light",
+  motto: "Discipline In, Distinction Out",
   description:
-    "VumbaView Academy is an ECD-to-A-Level day school on the slopes above Mutare, Zimbabwe, overlooking the Bvumba Mountains.",
+    "VumbaView Academy is a ZIMSEC day school in Mutare, Zimbabwe, taking students from Form 1 to Form 6 and measuring itself by one thing above all: the results they walk away with.",
   founded: 2022,
   url: "https://www.vumbaview.ac.zw",
 } as const;
@@ -13,7 +13,7 @@ export const schoolFacts = {
   staffToStudentRatio: "1:14",
   founded: 2022,
   campusSize: "18 hectares",
-  curriculum: "ZIMSEC, with Cambridge-aligned enrichment in the senior forms",
+  curriculum: "ZIMSEC O-Level and A-Level, with Cambridge-aligned enrichment in the senior forms",
   headOfSchool: {
     name: "Mrs. Tendai Chikwava",
     title: "Head of School",
@@ -46,27 +46,15 @@ export const navLinks: NavLink[] = [
 
 export const academicLevels = [
   {
-    stage: "ECD A & B",
-    ageRange: "Ages 3 – 5",
-    description:
-      "Play-based early childhood development classes building first language, number, and social skills.",
-  },
-  {
-    stage: "Primary — Grade 1 to 7",
-    ageRange: "Ages 6 – 12",
-    description:
-      "A full primary curriculum leading to the ZIMSEC Grade 7 Examination, with daily reading, mathematics, and environmental science.",
-  },
-  {
     stage: "Lower Secondary — Form 1 to 4",
     ageRange: "Ages 13 – 16",
     description:
-      "O-Level pathway across the sciences, humanities, and languages, culminating in the ZIMSEC \"O\" Level Examinations.",
+      "A ZIMSEC O-Level pathway across the sciences, humanities, and languages, with weekly assessment so no learner falls behind unnoticed.",
   },
   {
     stage: "Upper Secondary — Form 5 to 6",
     ageRange: "Ages 17 – 18",
     description:
-      "A-Level specialisation in three to five subjects, culminating in the ZIMSEC \"A\" Level Examinations and university placement.",
+      "A-Level specialisation in three to five subjects, built around the ZIMSEC \"A\" Level Examinations and direct preparation for university and career placement.",
   },
 ] as const;

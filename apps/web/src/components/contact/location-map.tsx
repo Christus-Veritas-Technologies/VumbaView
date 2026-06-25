@@ -11,8 +11,8 @@ export function LocationMap() {
           <SectionHeading
             align="center"
             eyebrow="Find Us"
-            title="On the road toward"
-            accent="the Bvumba Mountains"
+            title="Find us in"
+            accent="Mutare, Manicaland"
           />
         </Reveal>
         <Reveal delay={0.15} className="overflow-hidden rounded-3xl border border-border">

@@ -3,9 +3,9 @@ import { SectionHeading } from "@/components/marketing/section-heading";
 import { Reveal } from "@/components/motion/reveal";
 import { StaggerGroup, StaggerItem } from "@/components/motion/stagger";
 import { academicLevels } from "@/lib/site-config";
-import { BookOpen, GraduationCap, Pencil, Sprout } from "lucide-react";
+import { BookOpen, GraduationCap } from "lucide-react";
 
-const icons = [Sprout, BookOpen, Pencil, GraduationCap];
+const icons = [BookOpen, GraduationCap];
 
 export function PathwayCards() {
   return (
@@ -14,9 +14,9 @@ export function PathwayCards() {
         <Reveal>
           <SectionHeading
             eyebrow="Curriculum Pathway"
-            title="ECD to A-Level,"
-            accent="under one roof"
-            description="Every stage builds directly on the last, so families rarely need to look elsewhere as their child grows."
+            title="Form 1 to Form 6,"
+            accent="one continuous standard"
+            description="O-Level builds the foundation, A-Level sharpens it — one ZIMSEC pathway, with weekly assessment so no learner drifts off track."
           />
         </Reveal>
         <StaggerGroup className="grid gap-6 sm:grid-cols-2">

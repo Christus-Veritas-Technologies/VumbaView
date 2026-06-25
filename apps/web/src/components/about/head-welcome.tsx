@@ -12,7 +12,7 @@ export function HeadWelcome() {
         <Reveal className="relative mx-auto aspect-square w-full max-w-sm overflow-hidden rounded-3xl">
           <Image
             src={images.teacherLecturing.src}
-            alt={`${schoolFacts.headOfSchool.name} with students at VumbaView Academy`}
+            alt={images.teacherLecturing.alt}
             fill
             sizes="(min-width: 1024px) 33vw, 100vw"
             className="object-cover"

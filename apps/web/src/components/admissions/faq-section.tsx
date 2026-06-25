@@ -5,9 +5,9 @@ import { StaggerGroup, StaggerItem } from "@/components/motion/stagger";
 
 const faqs = [
   {
-    question: "What age does my child need to be to start ECD A?",
+    question: "What age does my child need to be to start Form 1?",
     answer:
-      "Children must be 3 years old by the 1st of January of the intake year to start ECD A. We also accept direct entry into Primary, Lower Secondary, and Upper Secondary, subject to assessment.",
+      "Most learners begin Form 1 at age 13, having completed Grade 7 elsewhere. We also accept direct entry into Form 2 through Form 6, subject to a placement assessment.",
   },
   {
     question: "Do you accept transfer students mid-year?",
@@ -22,7 +22,7 @@ const faqs = [
   {
     question: "What language is instruction given in?",
     answer:
-      "English is the medium of instruction from Grade 1 onward, in line with the ZIMSEC curriculum. Shona and Ndebele are offered as examinable subjects.",
+      "English is the medium of instruction throughout, in line with the ZIMSEC curriculum. Shona and Ndebele are offered as examinable subjects.",
   },
 ] as const;
 

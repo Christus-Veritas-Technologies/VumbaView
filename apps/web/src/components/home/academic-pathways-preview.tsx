@@ -4,10 +4,10 @@ import { Reveal } from "@/components/motion/reveal";
 import { StaggerGroup, StaggerItem } from "@/components/motion/stagger";
 import { academicLevels } from "@/lib/site-config";
 import { Button } from "@vva/ui/components/button";
-import { BookOpen, GraduationCap, Pencil, Sprout } from "lucide-react";
+import { BookOpen, GraduationCap } from "lucide-react";
 import Link from "next/link";
 
-const icons = [Sprout, BookOpen, Pencil, GraduationCap];
+const icons = [BookOpen, GraduationCap];
 
 export function AcademicPathwaysPreview() {
   return (
@@ -17,8 +17,8 @@ export function AcademicPathwaysPreview() {
           <SectionHeading
             align="center"
             eyebrow="Academic Pathways"
-            title="One school,"
-            accent="every stage of growing up"
+            title="Six years,"
+            accent="one ZIMSEC result"
           />
         </Reveal>
         <StaggerGroup className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">

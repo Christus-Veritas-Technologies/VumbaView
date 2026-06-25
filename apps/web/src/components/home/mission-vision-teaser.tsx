@@ -8,11 +8,11 @@ import Link from "next/link";
 const pillars = [
   {
     title: "Our Mission",
-    body: "To provide a rigorous, ZIMSEC-grounded education in a caring environment where every learner — from ECD to A-Level — is equipped to think clearly, act with integrity, and lead in their community.",
+    body: "To provide a rigorous, ZIMSEC-grounded education in a caring environment where every learner, from Form 1 to Form 6, is equipped to think clearly, act with integrity, and lead in their community.",
   },
   {
     title: "Our Vision",
-    body: "To be Manicaland's most trusted school for academic excellence and character, sending confident graduates from the Bvumba foothills into universities and workplaces across Zimbabwe and beyond.",
+    body: "To be Manicaland's most trusted school for academic results and character, sending confident graduates from Mutare into universities and workplaces across Zimbabwe and beyond.",
   },
 ] as const;
 

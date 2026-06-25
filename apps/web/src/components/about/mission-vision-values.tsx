@@ -8,7 +8,7 @@ const values = [
   {
     icon: Target,
     title: "Academic Excellence",
-    body: "We set high expectations in every subject and support each learner with the attention to reach them, from ECD through A-Level.",
+    body: "We set high expectations in every subject and support each learner with the attention to reach them, in every form from Form 1 to Form 6.",
   },
   {
     icon: ShieldCheck,
@@ -23,7 +23,7 @@ const values = [
   {
     icon: Compass,
     title: "Resilience",
-    body: "Like the Bvumba mist that gives way to clear views, we teach our students to work patiently through setbacks toward their goals.",
+    body: "Setbacks are part of every ZIMSEC journey. We teach our students to absorb a poor result, diagnose what went wrong, and come back stronger the next term.",
   },
 ] as const;
 

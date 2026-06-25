@@ -3,7 +3,7 @@ import { SectionHeading } from "@/components/marketing/section-heading";
 import { MotionLink } from "@/components/motion/motion-link";
 import { Reveal } from "@/components/motion/reveal";
 import { StaggerGroup, StaggerItem } from "@/components/motion/stagger";
-import { placeholderPhoto } from "@/lib/images";
+import { studentPhotos } from "@/lib/images";
 import { siteConfig } from "@/lib/site-config";
 import { Button } from "@vva/ui/components/button";
 import Image from "next/image";
@@ -13,25 +13,25 @@ const quickLinks = [
   {
     href: "/about",
     label: "About Us",
-    image: { src: placeholderPhoto("welcome-about"), alt: "VumbaView Academy campus" },
+    image: studentPhotos[0]!,
     caption: `Our story since ${siteConfig.founded}`,
   },
   {
     href: "/academics",
     label: "Academics",
-    image: { src: placeholderPhoto("welcome-academics"), alt: "Teacher leading a classroom lesson" },
-    caption: "ECD to A-Level",
+    image: studentPhotos[2]!,
+    caption: "Form 1 to Form 6",
   },
   {
     href: "/academics",
     label: "Facilities",
-    image: { src: placeholderPhoto("welcome-facilities"), alt: "School library and resource center" },
+    image: studentPhotos[4]!,
     caption: "Labs, library & sport",
   },
   {
     href: "/admissions",
     label: "Admissions",
-    image: { src: placeholderPhoto("welcome-admissions"), alt: "Graduates celebrating at commencement" },
+    image: studentPhotos[8]!,
     caption: "Join our community",
   },
 ] as const;
@@ -45,7 +45,7 @@ export function WelcomeIntro() {
             eyebrow="Welcome"
             title="Discover life at"
             accent="VumbaView Academy"
-            description="From our first ECD classroom to our A-Level science labs, every learner at VumbaView is known by name and pushed toward their best work."
+            description="From Form 1 orientation to A-Level science labs, every learner at VumbaView is known by name and pushed toward measurable results."
           />
           <Button
             render={<Link href="/about" />}

@@ -12,7 +12,7 @@ const adapter = new PrismaPg({ connectionString: env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
 // Fictional demo data only — consistent with the marketing site's setting
-// (VumbaView, near Mutare / the Vumba mountains, Zimbabwe).
+// (VumbaView Academy, a Form 1 to Form 6 ZIMSEC day school in Mutare, Zimbabwe).
 const FIRST_NAMES = [
   "Tendai", "Rutendo", "Tatenda", "Farai", "Chiedza", "Kudakwashe", "Tinotenda", "Rumbidzai",
   "Munyaradzi", "Chenai", "Tafadzwa", "Nyasha", "Vimbai", "Anesu", "Tariro", "Simbarashe",
@@ -40,8 +40,6 @@ const SUBURBS = [
 const CUSTOM_NOTES = ["Stationery", "Exam fee", "Trip contribution", "Sports kit", "Textbook deposit"];
 
 const BASE_AGE: Record<AcademicLevel, number> = {
-  ECD_A: 3, ECD_B: 4,
-  GRADE_1: 6, GRADE_2: 7, GRADE_3: 8, GRADE_4: 9, GRADE_5: 10, GRADE_6: 11, GRADE_7: 12,
   FORM_1: 13, FORM_2: 14, FORM_3: 15, FORM_4: 16, FORM_5: 17, FORM_6: 18,
 };
 

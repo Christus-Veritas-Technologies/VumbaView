@@ -4,7 +4,7 @@ import { LeadershipHighlight } from "@/components/about/leadership-highlight";
 import { MissionVisionValues } from "@/components/about/mission-vision-values";
 import { PageCta } from "@/components/marketing/page-cta";
 import { PageHero } from "@/components/marketing/page-hero";
-import { images } from "@/lib/images";
+import { studentPhotos } from "@/lib/images";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -17,9 +17,9 @@ export default function AboutPage() {
     <>
       <PageHero
         eyebrow="About VumbaView"
-        title="A school built on the slopes above Mutare"
-        description="Founded in 2022, VumbaView Academy has grown quickly into a full ECD-to-A-Level community — without losing sight of why it was founded."
-        image={images.mountainValley}
+        title="A Mutare school built on discipline and results"
+        description="Founded in 2022, VumbaView Academy has grown quickly into a full Form 1 to Form 6 community — without losing sight of why it was founded: results, discipline, and a teacher who knows every learner's name."
+        image={studentPhotos[2]!}
       />
       <HistoryStory />
       <MissionVisionValues />
