@@ -5,7 +5,7 @@ export const siteConfig = {
   description:
     "VumbaView Academy is a ZIMSEC day school in Mutare, Zimbabwe, taking students from Form 1 to Form 6 and measuring itself by one thing above all: the results they walk away with.",
   founded: 2022,
-  url: "https://www.vumbaview.ac.zw",
+  url: "https://www.vumbaviewacademy.co.zw",
 } as const;
 
 export const schoolFacts = {
