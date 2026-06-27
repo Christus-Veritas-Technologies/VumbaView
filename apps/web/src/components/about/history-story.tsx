@@ -23,7 +23,7 @@ export function HistoryStory() {
           </div>
           <p className="text-sm leading-relaxed text-muted-foreground">
             In just a few short years, the campus has grown to {schoolFacts.campusSize} and{" "}
-            {schoolFacts.enrollment} students across Form 1 to Form 6, but the founders&apos;
+            {schoolFacts.enrollment} students from ECD to A-Level, but the founders&apos;
             original promise still holds: a teacher who knows your child&apos;s name, and a
             curriculum that prepares them for ZIMSEC and beyond.
           </p>
