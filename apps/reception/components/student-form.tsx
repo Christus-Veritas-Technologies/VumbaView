@@ -39,7 +39,7 @@ const STATUS_OPTIONS = ENROLLMENT_STATUSES.map((status) => ({ label: status, val
 
 export function StudentForm({ initial, submitLabel, submitting, showStatus, onSubmit }: StudentFormProps) {
   const [fullName, setFullName] = useState(initial?.fullName ?? "");
-  const [level, setLevel] = useState<AcademicLevel>(initial?.level ?? "FORM_1");
+  const [level, setLevel] = useState<AcademicLevel>(initial?.level ?? "ECD_A");
   const [status, setStatus] = useState<EnrollmentStatus>(initial?.status ?? "ACTIVE");
   const [guardianName, setGuardianName] = useState(initial?.guardianName ?? "");
   const [guardianPhone, setGuardianPhone] = useState(initial?.guardianPhone ?? "");
