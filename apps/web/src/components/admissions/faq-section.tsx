@@ -5,9 +5,9 @@ import { StaggerGroup, StaggerItem } from "@/components/motion/stagger";
 
 const faqs = [
   {
-    question: "What age does my child need to be to start Form 1?",
+    question: "What age can my child start at VumbaView?",
     answer:
-      "Most learners begin Form 1 at age 13, having completed Grade 7 elsewhere. We also accept direct entry into Form 2 through Form 6, subject to a placement assessment.",
+      "We accept learners from ECD A (age 3) right through to Form 6. Most families enrol at ECD or Grade 1, but we also accept direct entry at any level, subject to a placement assessment.",
   },
   {
     question: "Do you accept transfer students mid-year?",
