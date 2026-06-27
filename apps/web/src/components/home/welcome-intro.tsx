@@ -20,7 +20,7 @@ const quickLinks = [
     href: "/academics",
     label: "Academics",
     image: studentPhotos[2]!,
-    caption: "Form 1 to Form 6",
+    caption: "ECD to A-Level",
   },
   {
     href: "/academics",
@@ -45,7 +45,7 @@ export function WelcomeIntro() {
             eyebrow="Welcome"
             title="Discover life at"
             accent="VumbaView Academy"
-            description="From Form 1 orientation to A-Level science labs, every learner at VumbaView is known by name and pushed toward measurable results."
+            description="From ECD playgroups to A-Level science labs, every learner at VumbaView is known by name and pushed toward measurable results."
           />
           <Button
             render={<Link href="/about" />}
