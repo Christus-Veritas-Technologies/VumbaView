@@ -4,10 +4,10 @@ import { Reveal } from "@/components/motion/reveal";
 import { StaggerGroup, StaggerItem } from "@/components/motion/stagger";
 import { academicLevels } from "@/lib/site-config";
 import { Button } from "@vva/ui/components/button";
-import { BookOpen, GraduationCap } from "lucide-react";
+import { Baby, BookOpen, GraduationCap, Pencil } from "lucide-react";
 import Link from "next/link";
 
-const icons = [BookOpen, GraduationCap];
+const icons = [Baby, Pencil, BookOpen, GraduationCap];
 
 export function AcademicPathwaysPreview() {
   return (
@@ -17,11 +17,11 @@ export function AcademicPathwaysPreview() {
           <SectionHeading
             align="center"
             eyebrow="Academic Pathways"
-            title="Six years,"
+            title="ECD to A-Level,"
             accent="one ZIMSEC result"
           />
         </Reveal>
-        <StaggerGroup className="mx-auto grid max-w-3xl gap-6 sm:grid-cols-2">
+        <StaggerGroup className="mx-auto grid max-w-5xl gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {academicLevels.map((level, index) => {
             const Icon = icons[index];
             return (
