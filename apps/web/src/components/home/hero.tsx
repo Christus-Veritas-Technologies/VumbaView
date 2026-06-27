@@ -48,7 +48,7 @@ export function Hero() {
           {siteConfig.name}: <span className="text-accent">{siteConfig.motto}</span>
         </motion.h1>
         <motion.p variants={item} className="max-w-xl text-base leading-relaxed text-white/90 sm:text-lg">
-          A Form 1 to Form 6 ZIMSEC day school in Mutare, where {schoolFacts.enrollment}{" "}
+          An ECD-to-A-Level ZIMSEC day school in Mutare, where {schoolFacts.enrollment}{" "}
           students are held to a single standard: results that open doors to university and
           beyond.
         </motion.p>
