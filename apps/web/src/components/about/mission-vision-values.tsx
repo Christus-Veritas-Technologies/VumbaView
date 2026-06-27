@@ -8,7 +8,7 @@ const values = [
   {
     icon: Target,
     title: "Academic Excellence",
-    body: "We set high expectations in every subject and support each learner with the attention to reach them, in every form from Form 1 to Form 6.",
+    body: "We set high expectations in every subject and support each learner with the attention to reach them, at every stage from ECD to A-Level.",
   },
   {
     icon: ShieldCheck,
