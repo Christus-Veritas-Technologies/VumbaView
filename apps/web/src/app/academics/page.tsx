@@ -9,7 +9,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Academics",
-  description: "ZIMSEC-aligned academics from Form 1 to Form 6 at VumbaView Academy, Mutare.",
+  description: "ZIMSEC-aligned academics from ECD to A-Level at VumbaView Academy, Mutare.",
 };
 
 export default function AcademicsPage() {
@@ -18,7 +18,7 @@ export default function AcademicsPage() {
       <PageHero
         eyebrow="Academics"
         title="A ZIMSEC curriculum built around results"
-        description="From Form 1 orientation through A-Level specialisation, our curriculum is designed to be rigorous, well-resourced, and personal."
+        description="From ECD orientation through A-Level specialisation, our curriculum is designed to be rigorous, well-resourced, and personal."
         image={studentPhotos[1]!}
       />
       <PathwayCards />
