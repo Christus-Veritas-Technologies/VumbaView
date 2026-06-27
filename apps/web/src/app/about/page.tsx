@@ -18,7 +18,7 @@ export default function AboutPage() {
       <PageHero
         eyebrow="About VumbaView"
         title="A Mutare school built on discipline and results"
-        description="Founded in 2022, VumbaView Academy has grown quickly into a full Form 1 to Form 6 community — without losing sight of why it was founded: results, discipline, and a teacher who knows every learner's name."
+        description="Founded in 2022, VumbaView Academy has grown quickly into a full ECD-to-A-Level community — without losing sight of why it was founded: results, discipline, and a teacher who knows every learner's name."
         image={studentPhotos[2]!}
       />
       <HistoryStory />
