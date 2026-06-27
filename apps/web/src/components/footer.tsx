@@ -16,7 +16,7 @@ export default function Footer() {
           </Link>
           <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
             {siteConfig.description} Our motto, &ldquo;{siteConfig.motto},&rdquo; guides every
-            learner from Form 1 to Form 6.
+            learner from ECD to A-Level.
           </p>
         </div>
 
