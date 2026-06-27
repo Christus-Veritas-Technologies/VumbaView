@@ -8,7 +8,7 @@ import Link from "next/link";
 const pillars = [
   {
     title: "Our Mission",
-    body: "To provide a rigorous, ZIMSEC-grounded education in a caring environment where every learner, from Form 1 to Form 6, is equipped to think clearly, act with integrity, and lead in their community.",
+    body: "To provide a rigorous, ZIMSEC-grounded education in a caring environment where every learner, from ECD to A-Level, is equipped to think clearly, act with integrity, and lead in their community.",
   },
   {
     title: "Our Vision",
