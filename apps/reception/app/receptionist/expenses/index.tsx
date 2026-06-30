@@ -30,7 +30,7 @@ function ExpenseItem({ row }: { row: ExpenseRow }) {
     <View className="border-b border-slate-100 px-4 py-3">
       <View className="flex-row items-center justify-between">
         <View className="flex-row items-center gap-2">
-          <Text className="font-body-semibold text-sm text-slate-900">${row.amount.toFixed(2)}</Text>
+          <Text className="font-body-semibold text-sm text-slate-900">${Number(row.amount).toFixed(2)}</Text>
           <Badge variant="default">{row.category}</Badge>
         </View>
         <Text variant="muted" className="text-xs">{formatShortDate(row.occurredAt)}</Text>

@@ -58,8 +58,18 @@ expenses.get("/", requireRole("ADMIN", "RECEPTIONIST"), async (c) => {
   const list = await prisma.expense.findMany({
     orderBy: { occurredAt: "desc" },
     take: 100,
+    include: { recordedBy: { select: { username: true } } },
   });
-  return c.json(list);
+  return c.json(
+    list.map((e) => ({
+      id: e.id,
+      category: e.category,
+      amount: Number(e.amount),
+      note: e.note,
+      occurredAt: e.occurredAt,
+      recordedBy: e.recordedBy.username,
+    })),
+  );
 });
 
 // All expense category labels: built-ins first, then any custom ones from DB.
