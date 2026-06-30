@@ -13,6 +13,7 @@ export default function AdminSettingsLayout() {
     >
       <Stack.Screen name="index" options={{ title: "Settings" }} />
       <Stack.Screen name="new-staff" options={{ title: "Add Staff", presentation: "modal" }} />
+      <Stack.Screen name="staff/[id]" options={{ title: "Edit Account" }} />
     </Stack>
   );
 }

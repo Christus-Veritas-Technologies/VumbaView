@@ -58,6 +58,49 @@ staff.get("/", async (c) => {
   return c.json(list);
 });
 
+const updateStaffSchema = z.object({
+  username: z.string().min(3, "Username must be at least 3 characters").optional(),
+  password: z.string().min(8, "Password must be at least 8 characters").optional(),
+});
+
+// Update a staff account's username and/or password.
+// The root admin can be edited (the deactivate guard is separate).
+staff.patch("/:id", async (c) => {
+  const json = await c.req.json().catch(() => null);
+  const body = updateStaffSchema.safeParse(json);
+
+  if (!body.success) {
+    throw new ApiError(400, body.error.issues[0]?.message ?? "Invalid payload");
+  }
+
+  if (!body.data.username && !body.data.password) {
+    throw new ApiError(400, "Provide at least one of username or password to update");
+  }
+
+  const id = c.req.param("id");
+  const target = await prisma.staff.findUnique({ where: { id } });
+  if (!target) throw new ApiError(404, "Staff account not found");
+
+  const updateData: { username?: string; passwordHash?: string } = {};
+
+  if (body.data.username) {
+    // Reject if another account already has this username.
+    const conflict = await prisma.staff.findFirst({
+      where: { username: body.data.username, NOT: { id } },
+    });
+    if (conflict) throw new ApiError(409, "Username already taken");
+    updateData.username = body.data.username;
+  }
+
+  if (body.data.password) {
+    updateData.passwordHash = await hashPassword(body.data.password);
+  }
+
+  const updated = await prisma.staff.update({ where: { id }, data: updateData });
+
+  return c.json({ id: updated.id, username: updated.username, role: updated.role, active: updated.active });
+});
+
 staff.patch("/:id/deactivate", async (c) => {
   const target = await prisma.staff.findUnique({ where: { id: c.req.param("id") } });
 

@@ -178,25 +178,41 @@ export default function AdminSettingsScreen() {
                   return (
                     <View key={row.id}>
                       {i > 0 ? <Separator className="my-2" /> : null}
-                      <View className="flex-row items-center justify-between">
-                        <View>
-                          <View className="flex-row items-center gap-1.5">
-                            <Text className="font-body-medium">{row.username}</Text>
-                            {isRoot ? <Badge variant="warning">Root</Badge> : null}
+                      <Pressable
+                        onPress={() =>
+                          router.push(
+                            `/admin/settings/staff/${row.id}?username=${encodeURIComponent(row.username)}&role=${row.role}`,
+                          )
+                        }
+                        className="active:opacity-60"
+                      >
+                        <View className="flex-row items-center justify-between">
+                          <View>
+                            <View className="flex-row items-center gap-1.5">
+                              <Text className="font-body-medium">{row.username}</Text>
+                              {isRoot ? <Badge variant="warning">Root</Badge> : null}
+                            </View>
+                            <Text variant="muted">{row.role}</Text>
                           </View>
-                          <Text variant="muted">{row.role}</Text>
+                          <View className="flex-row items-center gap-2">
+                            <Badge variant={row.active ? "success" : "default"}>
+                              {row.active ? "Active" : "Inactive"}
+                            </Badge>
+                            {row.active && !isRoot ? (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onPress={(e) => {
+                                  e.stopPropagation?.();
+                                  handleDeactivate(row);
+                                }}
+                              >
+                                Deactivate
+                              </Button>
+                            ) : null}
+                          </View>
                         </View>
-                        <View className="flex-row items-center gap-2">
-                          <Badge variant={row.active ? "success" : "default"}>
-                            {row.active ? "Active" : "Inactive"}
-                          </Badge>
-                          {row.active && !isRoot ? (
-                            <Button size="sm" variant="ghost" onPress={() => handleDeactivate(row)}>
-                              Deactivate
-                            </Button>
-                          ) : null}
-                        </View>
-                      </View>
+                      </Pressable>
                     </View>
                   );
                 })
