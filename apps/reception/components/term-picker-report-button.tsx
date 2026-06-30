@@ -6,9 +6,7 @@ import { Text } from "@/components/ui/text";
 import { Button } from "@/components/ui/button";
 import { ErrorState } from "@/components/ui/error-state";
 import { api, ApiClientError } from "@/lib/api";
-import { ReportError } from "@/lib/reports";
 import { useReportDownload } from "@/lib/use-report-download";
-import { cn } from "@/lib/utils";
 
 interface TermOption {
   id: string;
@@ -27,7 +25,6 @@ export interface TermPickerReportButtonProps {
   /** Used to build a unique local filename, e.g. "income-statement". */
   filenamePrefix: string;
   label?: string;
-  className?: string;
 }
 
 /**
@@ -39,7 +36,6 @@ export function TermPickerReportButton({
   path,
   filenamePrefix,
   label = "Download PDF",
-  className,
 }: TermPickerReportButtonProps) {
   const [visible, setVisible] = useState(false);
   const [termsLoading, setTermsLoading] = useState(false);
@@ -79,13 +75,7 @@ export function TermPickerReportButton({
 
   return (
     <>
-      <Pressable
-        onPress={open}
-        className={cn("flex-row items-center gap-1.5 rounded-full bg-gold-100 px-3 py-1.5 active:bg-gold-200", className)}
-      >
-        <FileDown size={14} color="#A37A1D" />
-        <Text className="font-body-semibold text-xs text-gold-700">{label}</Text>
-      </Pressable>
+      <Button onPress={open}>{label}</Button>
 
       <Modal visible={visible} animationType="slide" transparent onRequestClose={() => setVisible(false)}>
         <View className="flex-1 justify-end bg-black/40">

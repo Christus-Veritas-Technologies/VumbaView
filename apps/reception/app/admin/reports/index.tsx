@@ -124,7 +124,6 @@ export default function AdminReportsScreen() {
             <TermPickerReportButton
               path="/reports/profit-loss"
               filenamePrefix="income-statement"
-              label="Download PDF"
             />
           </CardContent>
         </Card>
