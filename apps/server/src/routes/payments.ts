@@ -18,6 +18,9 @@ const recordPaymentSchema = z
   .object({
     studentId: z.string().min(1),
     category: z.enum(PAYMENT_CATEGORIES),
+    /// Free-text label for CUSTOM payments — shown alongside the payment and
+    /// upserted into PaymentCustomCategory for future quick-pick chips.
+    customLabel: z.string().trim().optional(),
     amount: z.number().positive(),
     // Optional cash discount, e.g. a $10 discount on a $120 fee payment. The
     // student is still credited the full `amount` against their balance —
@@ -56,6 +59,7 @@ payments.post("/", async (c) => {
     data: {
       studentId: student.id,
       category: body.data.category as PaymentCategory,
+      customLabel: body.data.category === "CUSTOM" ? (body.data.customLabel ?? null) : null,
       amount: body.data.amount,
       discount: body.data.discount ?? 0,
       note: body.data.note,
@@ -64,6 +68,15 @@ payments.post("/", async (c) => {
       recordedById: staff.id,
     },
   });
+
+  // Upsert the custom label so it reappears as a chip next time.
+  if (body.data.category === "CUSTOM" && body.data.customLabel?.trim()) {
+    await prisma.paymentCustomCategory.upsert({
+      where: { label: body.data.customLabel.trim() },
+      create: { label: body.data.customLabel.trim() },
+      update: {},
+    });
+  }
 
   // Fire-and-forget — the payment is already recorded; a WhatsApp hiccup
   // shouldn't turn a successful write into a failed request.
@@ -149,6 +162,7 @@ payments.get("/admin", requireRole("ADMIN", "RECEPTIONIST"), async (c) => {
         amount,
         discount,
         netAmount: amount - discount,
+        customLabel: p.customLabel,
         note: p.note,
         occurredAt: p.occurredAt,
         studentId: p.studentId,
@@ -163,6 +177,12 @@ payments.get("/admin", requireRole("ADMIN", "RECEPTIONIST"), async (c) => {
     pageSize,
     totalPages: Math.max(1, Math.ceil(total / pageSize)),
   });
+});
+
+// Previously-used CUSTOM payment labels — for the quick-pick chip list.
+payments.get("/custom-categories", requireRole("ADMIN", "RECEPTIONIST"), async (c) => {
+  const rows = await prisma.paymentCustomCategory.findMany({ orderBy: { label: "asc" } });
+  return c.json(rows.map((r) => r.label));
 });
 
 export default payments;

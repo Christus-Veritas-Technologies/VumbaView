@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { ScrollView, View } from "react-native";
+import { useEffect, useState } from "react";
+import { Pressable, ScrollView, View } from "react-native";
+import { MotiView } from "moti";
 import { CreditCard, Receipt, Wallet } from "lucide-react-native";
 import { Text } from "@/components/ui/text";
 import { Input } from "@/components/ui/input";
@@ -7,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { ErrorState } from "@/components/ui/error-state";
+import { api } from "@/lib/api";
 import { LEVEL_LABELS, PAYMENT_CATEGORIES, type PaymentCategory } from "@/lib/types";
 import { isBlank, requiredAmount } from "@/lib/validation";
 import type { StudentCacheRow } from "@/lib/storage/db";
@@ -18,6 +20,8 @@ const CATEGORY_OPTIONS = PAYMENT_CATEGORIES.map((c) => ({
 
 export interface PaymentFormValues {
   category: PaymentCategory;
+  /** Only set when category = "CUSTOM" — the specific label for this payment. */
+  customLabel?: string;
   amount: number;
   discount?: number;
   note?: string;
@@ -33,31 +37,31 @@ export interface PaymentFormProps {
 
 /**
  * The actual "record a payment" form — category, amount, discount, note,
- * plus the balance summary card. Factored out of students/[id]/pay.tsx so
- * the *same* validated form can be reached two ways: from a known student's
- * detail page (students/[id]/pay.tsx), and from the standalone Payments-tab
- * "new payment" flow (payments/new/[studentId].tsx), which picks the student
- * first via a dedicated picker screen. Each call site owns its own submit
- * handling (queueRecordPayment + navigation) and decides whether to wrap
- * this in <SheetScreen> — see the two route files for why that differs.
+ * plus the balance summary card. When category = CUSTOM, an additional
+ * "Payment type" field appears, showing previously-used custom labels as
+ * quick-pick chips plus a free-text input for new ones.
  */
 export function PaymentForm({ student, submitting = false, error, submitLabel = "Record payment", onSubmit }: PaymentFormProps) {
   const [category, setCategory] = useState<PaymentCategory>("FEES");
+  const [customLabel, setCustomLabel] = useState("");
+  const [savedCustomLabels, setSavedCustomLabels] = useState<string[]>([]);
   const [amount, setAmount] = useState("");
   const [discount, setDiscount] = useState("");
   const [note, setNote] = useState("");
   const [submitAttempted, setSubmitAttempted] = useState(false);
 
+  // Fetch previously-used CUSTOM payment labels so they appear as chips.
+  useEffect(() => {
+    api
+      .get<string[]>("/payments/custom-categories")
+      .then(setSavedCustomLabels)
+      .catch(() => {/* offline — no chips, free-text only */});
+  }, []);
+
   const balance = student.feeBalance ?? 0;
   const parsedAmount = Number(amount);
-  // requiredAmount catches empty/non-numeric text; a numeric-but-zero-or-
-  // negative amount needs its own message since "0" parses fine but isn't
-  // a valid payment.
   const amountError = requiredAmount(amount, "Amount") ?? (parsedAmount <= 0 ? "Amount must be greater than $0." : undefined);
 
-  // Discount is optional — blank means $0. Net cash, full credit: the
-  // balance is still credited the full amount; only (amount - discount)
-  // counts as cash collected, so discount can never exceed the amount.
   const parsedDiscount = isBlank(discount) ? 0 : Number(discount);
   const discountError = isBlank(discount)
     ? undefined
@@ -67,7 +71,11 @@ export function PaymentForm({ student, submitting = false, error, submitLabel = 
         ? "Discount can't exceed the payment amount."
         : undefined;
 
-  const isValid = !amountError && !discountError;
+  const customLabelError = category === "CUSTOM" && isBlank(customLabel)
+    ? "Enter what type of payment this is."
+    : undefined;
+
+  const isValid = !amountError && !discountError && !customLabelError;
   const netAmount = Math.max(0, parsedAmount - (Number.isNaN(parsedDiscount) ? 0 : parsedDiscount));
 
   function handleSubmit() {
@@ -75,6 +83,7 @@ export function PaymentForm({ student, submitting = false, error, submitLabel = 
     if (!isValid) return;
     onSubmit({
       category,
+      customLabel: category === "CUSTOM" ? customLabel.trim() : undefined,
       amount: parsedAmount,
       discount: parsedDiscount > 0 ? parsedDiscount : undefined,
       note: note.trim() || undefined,
@@ -83,9 +92,6 @@ export function PaymentForm({ student, submitting = false, error, submitLabel = 
 
   return (
     <ScrollView className="flex-1" keyboardShouldPersistTaps="handled">
-      {/* Phone: summary stacked above the form. Tablet/desktop: the
-          summary becomes a left-hand column so the sheet actually uses
-          the extra width instead of just centering a narrow form on it. */}
       <View className="w-full flex-col gap-6 p-4 md:mx-auto md:max-w-3xl md:flex-row md:items-start md:p-8 lg:max-w-4xl">
         <View className="gap-4 md:w-72">
           <View className="flex-row items-center gap-3 rounded-2xl border border-gold-100 bg-gold-50 p-4">
@@ -137,10 +143,58 @@ export function PaymentForm({ student, submitting = false, error, submitLabel = 
             <Select
               options={CATEGORY_OPTIONS}
               value={category}
-              onValueChange={(v) => setCategory(v as PaymentCategory)}
+              onValueChange={(v) => {
+                setCategory(v as PaymentCategory);
+                setCustomLabel("");
+              }}
               placeholder="Select category"
             />
           </View>
+
+          {/* Custom payment type — only shown when CUSTOM is selected */}
+          {category === "CUSTOM" ? (
+            <MotiView
+              from={{ opacity: 0, translateY: -6 }}
+              animate={{ opacity: 1, translateY: 0 }}
+              transition={{ type: "timing", duration: 200 }}
+              className="mb-4"
+            >
+              <Label className="mb-2">Payment type</Label>
+
+              {/* Previously-used custom labels as chips */}
+              {savedCustomLabels.length > 0 ? (
+                <View className="mb-2 flex-row flex-wrap gap-2">
+                  {savedCustomLabels.map((label) => (
+                    <Pressable
+                      key={label}
+                      onPress={() => setCustomLabel(label)}
+                      className={`rounded-full border px-3 py-1.5 ${
+                        customLabel === label
+                          ? "border-gold-500 bg-gold-100"
+                          : "border-slate-200 bg-slate-50 active:bg-slate-100"
+                      }`}
+                    >
+                      <Text
+                        className={`text-xs ${customLabel === label ? "font-body-semibold text-gold-800" : "font-body text-slate-600"}`}
+                      >
+                        {label}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </View>
+              ) : null}
+
+              <Input
+                value={customLabel}
+                onChangeText={setCustomLabel}
+                placeholder="e.g. Stationery fee, Sport kit..."
+                autoFocus={savedCustomLabels.length === 0}
+              />
+              {(submitAttempted && customLabelError) ? (
+                <Text className="mt-1 text-xs font-body-medium text-danger-600">{customLabelError}</Text>
+              ) : null}
+            </MotiView>
+          ) : null}
 
           <View className="mb-4">
             <Label>Amount (USD)</Label>

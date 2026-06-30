@@ -59,8 +59,9 @@ model Staff {
   active       Boolean   @default(true)
   createdAt    DateTime  @default(now())
 
-  studentsCreated  Student[] @relation("StudentCreatedBy")
-  paymentsRecorded Payment[] @relation("PaymentRecordedBy")
+  studentsCreated  Student[]  @relation("StudentCreatedBy")
+  paymentsRecorded Payment[]  @relation("PaymentRecordedBy")
+  expensesRecorded Expense[]  @relation("ExpenseRecordedBy")
 
   @@map("staff")
 }
@@ -138,6 +139,10 @@ model Student {
 model Payment {
   id         String          @id @default(cuid())
   category   PaymentCategory
+  /// Free-text label for CUSTOM payments (e.g. "Stationery fee", "Sport kit").
+  /// Upserted into PaymentCustomCategory on write so it reappears as a
+  /// quick-pick chip next time. Only set when category = CUSTOM.
+  customLabel String?
   amount     Decimal         @db.Decimal(10, 2)
   /// Optional cash discount applied at the time of payment. The student's
   /// balance is still credited the full `amount` (see lib/term.ts) — this
@@ -159,6 +164,46 @@ model Payment {
   createdAt DateTime @default(now())
 
   @@map("payments")
+}
+
+/// A school-level expense (not student-tied) — e.g. staff payroll, fuel,
+/// utilities. category is a free-text label seeded from BUILTIN_EXPENSE_CATEGORIES
+/// or previously-typed custom labels (see ExpenseCategory).
+model Expense {
+  id          String   @id @default(cuid())
+  /// The expense category label (e.g. "Payroll", "Fuel", "Custom label").
+  category    String
+  amount      Decimal  @db.Decimal(10, 2)
+  note        String?
+  occurredAt  DateTime @default(now())
+
+  recordedBy   Staff  @relation("ExpenseRecordedBy", fields: [recordedById], references: [id])
+  recordedById String
+
+  createdAt DateTime @default(now())
+
+  @@map("expenses")
+}
+
+/// Reusable expense category labels — built-ins are seeded once; custom ones
+/// are upserted here whenever a receptionist types a new category, so they
+/// reappear as quick-pick chips on the next expense entry.
+model ExpenseCategory {
+  id        String   @id @default(cuid())
+  label     String   @unique
+  createdAt DateTime @default(now())
+
+  @@map("expense_categories")
+}
+
+/// Reusable CUSTOM payment-type labels — upserted when a receptionist types a
+/// custom label on a CUSTOM-category payment, so it reappears as a chip next time.
+model PaymentCustomCategory {
+  id        String   @id @default(cuid())
+  label     String   @unique
+  createdAt DateTime @default(now())
+
+  @@map("payment_custom_categories")
 }
 
 /// A public admissions inquiry submitted from the marketing site's form (page

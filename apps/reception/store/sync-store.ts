@@ -9,10 +9,15 @@ interface SyncState {
   isSyncing: boolean;
   pendingCount: number;
   lastSyncedAt: string | null;
+  /** Result of the most recent manual sync (null = never manually synced). */
+  syncResult: { processed: number; failed: number } | null;
+  /** Error message from the most recent manual sync, if it threw. */
+  syncError: string | null;
   setOnline: (online: boolean) => void;
   refreshPendingCount: () => void;
   runSync: () => Promise<void>;
   runRetryAllNow: () => Promise<void>;
+  clearSyncFeedback: () => void;
 }
 
 export const useSyncStore = create<SyncState>((set, get) => ({
@@ -20,12 +25,16 @@ export const useSyncStore = create<SyncState>((set, get) => ({
   isSyncing: false,
   pendingCount: 0,
   lastSyncedAt: null,
+  syncResult: null,
+  syncError: null,
 
   setOnline: (online) => set({ isOnline: online }),
 
   refreshPendingCount: () => {
     set({ pendingCount: getOutboxCount(), lastSyncedAt: getMeta("lastSyncedAt") });
   },
+
+  clearSyncFeedback: () => set({ syncResult: null, syncError: null }),
 
   runSync: async () => {
     if (get().isSyncing) return;

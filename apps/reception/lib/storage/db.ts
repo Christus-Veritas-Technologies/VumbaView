@@ -1,6 +1,8 @@
 import * as SQLite from "expo-sqlite";
 import type { AcademicLevel, EnrollmentStatus, FeeStatus, PaymentCategory } from "@/lib/types";
 
+// ---- Types ----
+
 const db = SQLite.openDatabaseSync("vva_reception.db");
 
 export function initDb() {
@@ -68,6 +70,13 @@ export function initDb() {
     db.execSync(`ALTER TABLE payments_cache ADD COLUMN discount REAL NOT NULL DEFAULT 0`);
   } catch {
     // Already migrated — nothing to do.
+  }
+
+  // Add customLabel to payments_cache (added when payment custom-category UX launched).
+  try {
+    db.execSync(`ALTER TABLE payments_cache ADD COLUMN customLabel TEXT`);
+  } catch {
+    // Already present — nothing to do.
   }
 }
 
@@ -197,6 +206,8 @@ export interface PaymentCacheRow {
   id: string;
   studentId: string;
   category: PaymentCategory;
+  /** Free-text label for CUSTOM payments — only set when category = CUSTOM. */
+  customLabel: string | null;
   amount: number;
   /** Net cash, full credit: balance is credited the full `amount`; only
    * `amount - discount` counts as cash collected in dashboard/report totals. */
@@ -213,16 +224,18 @@ export interface PaymentCacheRow {
 export function upsertPaymentCache(row: PaymentCacheRow): void {
   db.runSync(
     `INSERT INTO payments_cache (
-      id, studentId, category, amount, discount, note, occurredAt, termId, recordedById, createdAt, localOnly, pendingSync
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      id, studentId, category, customLabel, amount, discount, note, occurredAt, termId, recordedById, createdAt, localOnly, pendingSync
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ON CONFLICT(id) DO UPDATE SET
-      studentId=excluded.studentId, category=excluded.category, amount=excluded.amount, discount=excluded.discount,
+      studentId=excluded.studentId, category=excluded.category, customLabel=excluded.customLabel,
+      amount=excluded.amount, discount=excluded.discount,
       note=excluded.note, occurredAt=excluded.occurredAt, termId=excluded.termId, recordedById=excluded.recordedById,
       createdAt=excluded.createdAt, localOnly=excluded.localOnly, pendingSync=excluded.pendingSync`,
     [
       row.id,
       row.studentId,
       row.category,
+      row.customLabel,
       row.amount,
       row.discount,
       row.note,

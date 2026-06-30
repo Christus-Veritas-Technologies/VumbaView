@@ -31,12 +31,19 @@ dashboard.get("/enrollment", async (c) => {
 // Term-independent headline counts — meaningful even before any term has
 // been started, so this must never call getCurrentTerm().
 dashboard.get("/summary", async (c) => {
-  const [studentsCount, paymentsCount] = await Promise.all([
+  const [studentsCount, paymentsCount, expensesCount, expensesAgg] = await Promise.all([
     prisma.student.count({ where: { status: "ACTIVE" } }),
     prisma.payment.count(),
+    prisma.expense.count(),
+    prisma.expense.aggregate({ _sum: { amount: true } }),
   ]);
 
-  return c.json({ studentsCount, paymentsCount });
+  return c.json({
+    studentsCount,
+    paymentsCount,
+    expensesCount,
+    expensesTotal: Number(expensesAgg._sum.amount ?? 0),
+  });
 });
 
 dashboard.get("/fees", async (c) => {

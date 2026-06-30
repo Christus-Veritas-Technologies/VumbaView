@@ -3,7 +3,7 @@ import * as Sharing from "expo-sharing";
 import { apiUrl } from "@/lib/api";
 import { getToken } from "@/lib/storage/token";
 
-export type ReportScope = "students" | "payments" | "dashboard";
+export type ReportScope = "students" | "payments" | "dashboard" | "expenses";
 
 export interface ReportBounds {
   earliest: string | null;

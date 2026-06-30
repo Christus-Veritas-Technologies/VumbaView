@@ -3,7 +3,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { RefreshControl, ScrollView, View } from "react-native";
 import { MotiView } from "moti";
 import Svg, { Circle, Defs, LinearGradient as SvgGradient, Rect, Stop } from "react-native-svg";
-import { Calendar, Clock, GraduationCap, Receipt, UserPlus, Users, Wallet } from "lucide-react-native";
+import { Calendar, Clock, GraduationCap, Receipt, TrendingDown, UserPlus, Users, Wallet } from "lucide-react-native";
 import { Text } from "@/components/ui/text";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -39,6 +39,8 @@ interface FeesData {
 interface SummaryData {
   studentsCount: number;
   paymentsCount: number;
+  expensesCount: number;
+  expensesTotal: number;
 }
 
 interface ActivityRow {
@@ -414,6 +416,31 @@ export default function AdminDashboardScreen() {
                   <Text className="font-heading-semibold text-2xl text-slate-900">{summary?.paymentsCount ?? 0}</Text>
                   <Text variant="muted" className="text-xs">
                     Payments made
+                  </Text>
+                </View>
+              </CardContent>
+            </Card>
+          </MotiView>
+        </View>
+
+        {/* Expenses summary card — total count + total spend. */}
+        <View className="mb-4">
+          <MotiView
+            from={{ opacity: 0, translateY: 10 }}
+            animate={{ opacity: 1, translateY: 0 }}
+            transition={{ type: "timing", duration: 260, delay: 100 }}
+          >
+            <Card className="overflow-hidden">
+              <CardContent className="flex-row items-center gap-3 py-5">
+                <View className="h-11 w-11 items-center justify-center rounded-full bg-danger-100">
+                  <TrendingDown size={18} color="#DC2626" />
+                </View>
+                <View className="flex-1">
+                  <Text className="font-heading-semibold text-2xl text-slate-900">
+                    ${(summary?.expensesTotal ?? 0).toFixed(2)}
+                  </Text>
+                  <Text variant="muted" className="text-xs">
+                    Total expenses · {summary?.expensesCount ?? 0} record{(summary?.expensesCount ?? 0) === 1 ? "" : "s"}
                   </Text>
                 </View>
               </CardContent>

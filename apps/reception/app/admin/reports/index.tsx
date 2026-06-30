@@ -1,5 +1,5 @@
 import { ScrollView, View } from "react-native";
-import { FileBarChart2, FileSpreadsheet, FileWarning } from "lucide-react-native";
+import { FileBarChart2, FileSpreadsheet, FileWarning, TrendingDown } from "lucide-react-native";
 import { Text } from "@/components/ui/text";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -48,6 +48,16 @@ const TEMPLATES: TemplateConfig[] = [
     icon: <FileBarChart2 size={18} color="#7C3AED" />,
     tone: "violet",
     badgeClass: "bg-violet-100",
+  },
+  {
+    key: "all-expenses",
+    title: "All expenses",
+    description: "Every expense recorded — category, amount, who recorded it, and any notes.",
+    path: "/reports/expenses",
+    filenamePrefix: "all-expenses",
+    icon: <TrendingDown size={18} color="#DC2626" />,
+    tone: "gold",
+    badgeClass: "bg-danger-100",
   },
 ];
 

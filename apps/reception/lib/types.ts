@@ -66,6 +66,19 @@ export const ENROLLMENT_STATUSES: EnrollmentStatus[] = ["ACTIVE", "WITHDRAWN", "
 export type PaymentCategory = "FEES" | "UNIFORMS" | "CUSTOM";
 export const PAYMENT_CATEGORIES: PaymentCategory[] = ["FEES", "UNIFORMS", "CUSTOM"];
 
+/** Built-in expense categories always available without a custom entry.
+ *  Mirrors apps/server/src/lib/constants.ts — kept in sync by hand. */
+export const BUILTIN_EXPENSE_CATEGORIES = [
+  "Payroll",
+  "Fuel",
+  "Utilities",
+  "Maintenance",
+  "Supplies",
+  "Rent",
+  "Other",
+] as const;
+export type BuiltinExpenseCategory = (typeof BUILTIN_EXPENSE_CATEGORIES)[number];
+
 export type FeeStatus = "PAID" | "PARTIAL" | "UNPAID";
 
 export interface Staff {
@@ -105,6 +118,7 @@ export interface Payment {
   id: string;
   studentId: string;
   category: PaymentCategory;
+  customLabel: string | null;
   amount: number | string;
   // Net cash, full credit: the student's balance is always credited the
   // full `amount`; `discount` (default 0) is only ever subtracted when
@@ -113,6 +127,16 @@ export interface Payment {
   note: string | null;
   occurredAt: string;
   termId: string;
+  recordedById: string;
+  createdAt: string;
+}
+
+export interface Expense {
+  id: string;
+  category: string;
+  amount: number | string;
+  note: string | null;
+  occurredAt: string;
   recordedById: string;
   createdAt: string;
 }

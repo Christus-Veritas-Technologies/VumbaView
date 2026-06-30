@@ -9,6 +9,7 @@ import { getCurrentTerm, attachFeeStatus, type FeeStatus } from "../lib/term";
 import { ACADEMIC_LEVELS } from "../lib/levels";
 import { buildAllStudentsReportHtml, buildStudentsWithBalancesReportHtml } from "../lib/reports/students";
 import { buildAllPaymentsReportHtml, type PaymentReportRow } from "../lib/reports/payments";
+import { buildAllExpensesReportHtml, type ExpenseReportRow } from "../lib/reports/expenses";
 import { buildDashboardReportHtml, type DashboardReportData } from "../lib/reports/dashboard";
 import { formatDate, reportFooterTemplate } from "../lib/reports/template";
 import type { AppEnv } from "../types";
@@ -47,7 +48,7 @@ const rangeQuerySchema = z.object({
 });
 
 const boundsQuerySchema = z.object({
-  scope: z.enum(["students", "payments", "dashboard"]),
+  scope: z.enum(["students", "payments", "dashboard", "expenses"]),
 });
 
 // Drives the date-range picker's selectable bounds on every report trigger
@@ -63,6 +64,11 @@ reports.get("/bounds", async (c) => {
   if (parsed.data.scope === "students") {
     const agg = await prisma.student.aggregate({ _min: { enrolledAt: true }, _max: { enrolledAt: true } });
     return c.json({ earliest: agg._min.enrolledAt, latest: agg._max.enrolledAt });
+  }
+
+  if (parsed.data.scope === "expenses") {
+    const agg = await prisma.expense.aggregate({ _min: { occurredAt: true }, _max: { occurredAt: true } });
+    return c.json({ earliest: agg._min.occurredAt, latest: agg._max.occurredAt });
   }
 
   // "payments" and "dashboard" both key off when payments happened.
@@ -139,6 +145,34 @@ reports.get("/payments", async (c) => {
   const html = buildAllPaymentsReportHtml(reportRows, rangeLabel(from, to));
   const pdf = await renderHtmlToPdf(html, { footerTemplate: footer() });
   return pdfResponse(c, pdf, "all-payments.pdf");
+});
+
+reports.get("/expenses", async (c) => {
+  const parsed = rangeQuerySchema.safeParse({ from: c.req.query("from"), to: c.req.query("to") });
+
+  if (!parsed.success) {
+    throw new ApiError(400, "Invalid date range");
+  }
+
+  const { from, to } = parsed.data;
+
+  const rows = await prisma.expense.findMany({
+    where: from || to ? { occurredAt: { ...(from ? { gte: from } : {}), ...(to ? { lte: to } : {}) } } : {},
+    orderBy: { occurredAt: "desc" },
+    include: { recordedBy: { select: { username: true } } },
+  });
+
+  const reportRows: ExpenseReportRow[] = rows.map((e) => ({
+    occurredAt: e.occurredAt,
+    category: e.category,
+    amount: Number(e.amount),
+    note: e.note,
+    recordedBy: e.recordedBy.username,
+  }));
+
+  const html = buildAllExpensesReportHtml(reportRows, rangeLabel(from, to));
+  const pdf = await renderHtmlToPdf(html, { footerTemplate: footer() });
+  return pdfResponse(c, pdf, "all-expenses.pdf");
 });
 
 const dashboardRangeQuerySchema = z.object({

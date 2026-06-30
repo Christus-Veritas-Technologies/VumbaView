@@ -14,7 +14,7 @@ import {
   upsertPaymentCache,
   upsertStudentCache,
 } from "@/lib/storage/db";
-import type { AcademicLevel, EnrollmentStatus, PaymentCategory, Payment, Student } from "@/lib/types";
+import type { AcademicLevel, EnrollmentStatus, PaymentCategory, Payment, Student, Expense } from "@/lib/types";
 
 const BASE_DELAY_MS = 5_000;
 const MAX_DELAY_MS = 5 * 60_000;
@@ -58,6 +58,7 @@ function paymentCacheRowFromServer(payment: Payment, opts: { localOnly: boolean;
     id: payment.id,
     studentId: payment.studentId,
     category: payment.category,
+    customLabel: payment.customLabel,
     amount: Number(payment.amount),
     discount: Number(payment.discount ?? 0),
     note: payment.note,
@@ -137,6 +138,10 @@ export async function processOutbox(): Promise<{ processed: number; failed: numb
             // best-effort — the next pull() reconciles this regardless
           }
         }
+      } else if (item.entity === "expense" && item.method === "POST") {
+        // Expenses have no local cache to update — just confirm the server
+        // accepted the record and remove the outbox item.
+        await api.post<Expense>(path, body);
       }
 
       removeOutboxItem(item.id);
@@ -282,6 +287,8 @@ export function queueUpdateStudent(id: string, patch: StudentUpdateInput): void 
 export interface NewPaymentInput {
   studentId: string;
   category: PaymentCategory;
+  /** Free-text label for CUSTOM payments — only set when category = CUSTOM. */
+  customLabel?: string;
   amount: number;
   /** Net cash, full credit — optional, defaults to 0. Subtracted only from
    * cash-collected totals; the balance update below always uses the full
@@ -299,6 +306,7 @@ export function queueRecordPayment(input: NewPaymentInput, recordedById: string 
     id: localId,
     studentId: input.studentId,
     category: input.category,
+    customLabel: input.customLabel ?? null,
     amount: input.amount,
     discount: input.discount ?? 0,
     note: input.note ?? null,
@@ -331,4 +339,39 @@ export function queueRecordPayment(input: NewPaymentInput, recordedById: string 
   // create the moment it lands, within the same pass.
   enqueueOutbox({ entity: "payment", localId, method: "POST", path: "/payments", body: input });
   return localId;
+}
+
+export interface NewExpenseInput {
+  category: string;
+  amount: number;
+  note?: string;
+  occurredAt?: string;
+}
+
+/**
+ * Queue an expense for sync. Unlike payments, expenses have no local read cache
+ * — they're fetched from the server on list screens. This just adds the entry
+ * to the outbox so the next sync push delivers it.
+ */
+export function queueRecordExpense(input: NewExpenseInput): void {
+  const localId = generateLocalId();
+  enqueueOutbox({ entity: "expense", localId, method: "POST", path: "/expenses", body: input });
+}
+
+/**
+ * Sync now and return an explicit result — used by the manual "Sync now"
+ * button in settings. Unlike syncNow() (which swallows errors for the
+ * automatic background path), this surfaces both the result and any error
+ * so the UI can show a clear success or failure state.
+ */
+export async function syncNowAndReport(): Promise<{ processed: number; failed: number }> {
+  const result = await processOutbox();
+  try {
+    await pull();
+  } catch {
+    // Pull failure doesn't affect the outbox result — the pending-sync
+    // count is still accurate, and a failed pull is retried automatically.
+  }
+  setMeta("lastSyncedAt", new Date().toISOString());
+  return result;
 }
