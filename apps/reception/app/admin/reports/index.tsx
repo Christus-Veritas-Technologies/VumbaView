@@ -1,10 +1,11 @@
 import { ScrollView, View } from "react-native";
-import { FileBarChart2, FileSpreadsheet, FileWarning, TrendingDown } from "lucide-react-native";
+import { FileBarChart2, FileSpreadsheet, FileWarning, LayoutList, TrendingDown } from "lucide-react-native";
 import { Text } from "@/components/ui/text";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ErrorState } from "@/components/ui/error-state";
 import { DecorativeShapes } from "@/components/decorative-shapes";
+import { TermPickerReportButton } from "@/components/term-picker-report-button";
 import { useReportDownload } from "@/lib/use-report-download";
 
 interface TemplateConfig {
@@ -100,9 +101,34 @@ export default function AdminReportsScreen() {
     <ScrollView className="flex-1 bg-slate-50">
       <View className="w-full p-4 md:mx-auto md:max-w-2xl md:p-6">
         <Text variant="muted" className="mb-4">
-          Generate a polished PDF for any of the three standard reports below — each pulls the latest data and
-          opens your device's share/save sheet once it's ready.
+          Generate a polished PDF for any of the reports below — each pulls the latest data and opens your
+          device's share/save sheet once it's ready.
         </Text>
+
+        {/* Income Statement — has its own term-picker UX instead of a date range */}
+        <Card className="relative mb-4 overflow-hidden">
+          <DecorativeShapes tone="violet" />
+          <CardHeader>
+            <View className="flex-row items-center gap-2">
+              <View className="h-9 w-9 items-center justify-center rounded-full bg-violet-100">
+                <LayoutList size={18} color="#7C3AED" />
+              </View>
+              <CardTitle>Income Statement (P&amp;L)</CardTitle>
+            </View>
+          </CardHeader>
+          <CardContent>
+            <Text variant="muted" className="mb-3">
+              Profit &amp; Loss for a single term — revenue by category, expenditure by category, and net
+              profit or loss at the bottom. Choose which term to generate it for.
+            </Text>
+            <TermPickerReportButton
+              path="/reports/profit-loss"
+              filenamePrefix="income-statement"
+              label="Download PDF"
+            />
+          </CardContent>
+        </Card>
+
         {TEMPLATES.map((t) => (
           <TemplateCard key={t.key} template={t} />
         ))}

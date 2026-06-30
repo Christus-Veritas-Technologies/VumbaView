@@ -38,6 +38,9 @@ export interface ReportShellOptions {
   rangeLabel?: string;
   /** The report's own content — usually a summary row + a <table>. */
   bodyHtml: string;
+  /** Additional CSS injected after the shared styles — for report-specific
+   * overrides like the Income Statement's double-rule and section headers. */
+  extraCss?: string;
 }
 
 /** Plain-text, generic-sans footer rendered by Chromium's own header/footer
@@ -166,6 +169,7 @@ export function renderReportShell(options: ReportShellOptions): string {
   .badge-paid { background: #ecfdf5; color: #047857; }
   .badge-partial { background: #fff7ed; color: #c2410c; }
   .badge-unpaid { background: #fef2f2; color: #b91c1c; }
+  ${options.extraCss ?? ""}
 </style>
 </head>
 <body>

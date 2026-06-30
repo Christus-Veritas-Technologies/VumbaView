@@ -10,6 +10,7 @@ import { ACADEMIC_LEVELS } from "../lib/levels";
 import { buildAllStudentsReportHtml, buildStudentsWithBalancesReportHtml } from "../lib/reports/students";
 import { buildAllPaymentsReportHtml, type PaymentReportRow } from "../lib/reports/payments";
 import { buildAllExpensesReportHtml, type ExpenseReportRow } from "../lib/reports/expenses";
+import { buildProfitLossReportHtml } from "../lib/reports/profit-loss";
 import { buildDashboardReportHtml, type DashboardReportData } from "../lib/reports/dashboard";
 import { formatDate, reportFooterTemplate } from "../lib/reports/template";
 import type { AppEnv } from "../types";
@@ -173,6 +174,73 @@ reports.get("/expenses", async (c) => {
   const html = buildAllExpensesReportHtml(reportRows, rangeLabel(from, to));
   const pdf = await renderHtmlToPdf(html, { footerTemplate: footer() });
   return pdfResponse(c, pdf, "all-expenses.pdf");
+});
+
+// Income Statement (P&L) — scoped to a single term.
+// Revenue = net payments (amount - discount) for the term, grouped by category/customLabel.
+// Expenditure = expenses whose occurredAt falls within the term's date range.
+reports.get("/profit-loss", async (c) => {
+  const termId = c.req.query("termId");
+  if (!termId) throw new ApiError(400, "termId query parameter is required");
+
+  const term = await prisma.term.findUnique({
+    where: { id: termId },
+    select: { id: true, number: true, isCurrent: true, startedAt: true },
+  });
+  if (!term) throw new ApiError(404, "Term not found");
+
+  // Expense range: this term's start → next term's start (or now for current).
+  const nextTerm = await prisma.term.findFirst({
+    where: { number: { gt: term.number } },
+    orderBy: { number: "asc" },
+    select: { startedAt: true },
+  });
+  const expenseEnd = nextTerm ? nextTerm.startedAt : new Date();
+
+  const [payments, expenses] = await Promise.all([
+    prisma.payment.findMany({
+      where: { termId },
+      select: { category: true, customLabel: true, amount: true, discount: true },
+    }),
+    prisma.expense.findMany({
+      where: { occurredAt: { gte: term.startedAt, lt: expenseEnd } },
+      select: { category: true, amount: true },
+    }),
+  ]);
+
+  // Aggregate revenue by display label.
+  const CATEGORY_LABELS: Record<string, string> = {
+    FEES: "Tuition Fees",
+    UNIFORMS: "Uniform Sales",
+    CUSTOM: "Other Income",
+  };
+  const revenueMap = new Map<string, number>();
+  for (const p of payments) {
+    const label =
+      p.category === "CUSTOM" && p.customLabel
+        ? p.customLabel
+        : (CATEGORY_LABELS[p.category] ?? p.category);
+    const net = Number(p.amount) - Number(p.discount);
+    revenueMap.set(label, (revenueMap.get(label) ?? 0) + net);
+  }
+
+  // Aggregate expenditure by category.
+  const expenseMap = new Map<string, number>();
+  for (const e of expenses) {
+    expenseMap.set(e.category, (expenseMap.get(e.category) ?? 0) + Number(e.amount));
+  }
+
+  const html = buildProfitLossReportHtml({
+    termNumber: term.number,
+    termStartedAt: term.startedAt,
+    termEndedAt: expenseEnd,
+    isCurrent: term.isCurrent,
+    revenueLines: [...revenueMap.entries()].map(([label, amount]) => ({ label, amount })),
+    expenseLines: [...expenseMap.entries()].map(([label, amount]) => ({ label, amount })),
+  });
+
+  const pdf = await renderHtmlToPdf(html, { footerTemplate: footer() });
+  return pdfResponse(c, pdf, `income-statement-term${term.number}.pdf`);
 });
 
 const dashboardRangeQuerySchema = z.object({
